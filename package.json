@@ -1,0 +1,26 @@
+{
+  "name": "loopy-oss",
+  "version": "0.0.1",
+  "private": true,
+  "description": "The open-source core of Loopy Thinking — agent work signals, loops, and productivity metrics",
+  "license": "AGPL-3.0",
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "test": "turbo test",
+    "lint": "turbo lint",
+    "format": "prettier --write \"**/*.{ts,tsx,js,json,md}\""
+  },
+  "devDependencies": {
+    "prettier": "^3.3.0",
+    "turbo": "^2.0.0",
+    "typescript": "^5.5.0"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

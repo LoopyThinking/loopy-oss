@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loopy-thinking.github.io/loopy-oss/schema/loop.json",
+  "title": "Loop",
+  "description": "An operational container that organizes work signals over time toward a decision or goal.",
+  "type": "object",
+  "required": ["id", "title", "status", "scope", "confidence_index", "created_at", "updated_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 255
+    },
+    "hypothesis": {
+      "type": ["string", "null"],
+      "description": "The working hypothesis or goal this loop is testing."
+    },
+    "status": {
+      "type": "string",
+      "enum": ["open", "closed", "blocked"]
+    },
+    "scope": {
+      "type": "string",
+      "enum": ["personal", "team", "organizational"],
+      "default": "personal"
+    },
+    "confidence_index": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100,
+      "description": "Evidence-based score (0–100) indicating how grounded this loop is."
+    },
+    "resolution": {
+      "type": ["string", "null"],
+      "description": "Closing statement explaining the decision or outcome."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "updated_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "closed_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}

@@ -1,0 +1,10 @@
+{
+  "name": "@loopy/protocol",
+  "version": "0.1.0-beta",
+  "description": "Loopy Thinking protocol — JSON Schema definitions and OpenAPI spec",
+  "license": "AGPL-3.0",
+  "files": [
+    "schema",
+    "openapi.yaml"
+  ]
+}

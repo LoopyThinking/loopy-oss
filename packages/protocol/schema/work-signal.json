@@ -1,0 +1,47 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://loopy-thinking.github.io/loopy-oss/schema/work-signal.json",
+  "title": "WorkSignal",
+  "description": "A discrete unit of work activity emitted by a human or agent into a loop.",
+  "type": "object",
+  "required": ["id", "loop_id", "type", "content", "source", "created_at"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "loop_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "user_id": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["perception", "interpretation", "decision", "action", "reflection"],
+      "description": "The cognitive layer this signal maps to."
+    },
+    "content": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Human-readable description of the work activity."
+    },
+    "source": {
+      "type": "string",
+      "enum": ["human", "agent"],
+      "default": "human"
+    },
+    "metadata": {
+      "type": "object",
+      "description": "Arbitrary key-value pairs for additional context.",
+      "additionalProperties": true
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    }
+  },
+  "additionalProperties": false
+}
