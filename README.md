@@ -129,7 +129,7 @@ Loopy OSS is licensed under the [GNU Affero General Public License v3.0](./LICEN
 
 This means you can use, modify, and distribute this software freely — including for commercial purposes — as long as you make your changes available under the same license. If you run a modified version as a network service, you must provide access to the source code.
 
-For a commercial license that removes the AGPL requirements (e.g., for embedding Loopy in a proprietary product), contact [dev@loopy-thinking.com](mailto:dev@loopy-thinking.com).
+For a commercial license that removes the AGPL requirements (e.g., for embedding Loopy in a proprietary product), contact [loopy@apprecio.com](mailto:loopy@apprecio.com).
 
 ---
 
@@ -137,4 +137,4 @@ For a commercial license that removes the AGPL requirements (e.g., for embedding
 
 - **GitHub Discussions:** [github.com/loopy-thinking/loopy-oss/discussions](https://github.com/loopy-thinking/loopy-oss/discussions)
 - **Discord:** Coming in Phase 3 (June 2026)
-- **Email:** [jaimevillatoro@gmail.com](mailto:jaimevillatoro@gmail.com)
+- **Email:** [loopy@apprecio.com](mailto:loopy@apprecio.com)
