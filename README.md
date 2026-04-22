@@ -137,4 +137,4 @@ For a commercial license that removes the AGPL requirements (e.g., for embedding
 
 - **GitHub Discussions:** [github.com/loopy-thinking/loopy-oss/discussions](https://github.com/loopy-thinking/loopy-oss/discussions)
 - **Discord:** Coming in Phase 3 (June 2026)
-- **Email:** [dev@loopy-thinking.com](mailto:dev@loopy-thinking.com)
+- **Email:** [jaimevillatoro@gmail.com](mailto:jaimevillatoro@gmail.com)
