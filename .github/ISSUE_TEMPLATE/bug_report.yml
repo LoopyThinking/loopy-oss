@@ -1,0 +1,82 @@
+name: Bug report
+description: Something is broken or behaving unexpectedly
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks for taking the time to report a bug. The more detail you provide, the faster we can fix it.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      description: Which part of the project is affected?
+      options:
+        - "@loopy/sdk"
+        - "@loopy/skills"
+        - "apps/api"
+        - "apps/web"
+        - "packages/db (migrations)"
+        - "docker / self-hosting"
+        - "documentation"
+        - "other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: A clear description of the bug.
+      placeholder: "When I call `LoopySignals.emit(...)` with source: 'agent', the confidence index doesn't update."
+    validations:
+      required: true
+
+  - type: textarea
+    id: repro
+    attributes:
+      label: Steps to reproduce
+      description: Minimal steps to reproduce the issue.
+      placeholder: |
+        1. npm install @loopy/sdk
+        2. Call createLoop(...)
+        3. Call LoopySignals.emit({ source: 'agent', ... })
+        4. GET /loops/:id — confidence_index is still 0
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behaviour
+      placeholder: Confidence index should increase after an agent signal.
+    validations:
+      required: true
+
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      description: "@loopy/sdk version, or git SHA if running from source"
+      placeholder: "0.2.1"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: deployment
+    attributes:
+      label: Deployment type
+      options:
+        - "Cloud (loopythinking.ai)"
+        - "Self-hosted (docker compose)"
+        - "Self-hosted (custom)"
+        - "Local development"
+    validations:
+      required: true
+
+  - type: textarea
+    id: extra
+    attributes:
+      label: Additional context
+      description: Logs, stack traces, screenshots — anything that might help.

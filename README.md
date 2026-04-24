@@ -1,83 +1,73 @@
-# Loopy Thinking — Open Source
+# Loopy OSS
 
-> The open-source core of Loopy Thinking: agent work signals, loops, and productivity metrics.
+> **The open-source protocol for structured work with AI agents.**
+> Track what your agents did, why, and how much of the work they actually carried.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![npm version](https://img.shields.io/npm/v/@loopy/sdk)](https://www.npmjs.com/package/@loopy/sdk)
-[![GitHub stars](https://img.shields.io/github/stars/loopy-thinking/loopy-oss)](https://github.com/loopy-thinking/loopy-oss/stargazers)
+[![npm](https://img.shields.io/npm/v/@loopy/sdk?label=%40loopy%2Fsdk)](https://www.npmjs.com/package/@loopy/sdk)
+[![CI](https://github.com/loopy-thinking/loopy-oss/actions/workflows/ci.yml/badge.svg)](https://github.com/loopy-thinking/loopy-oss/actions/workflows/ci.yml)
 
 ---
 
-## What is Loopy?
+## The problem
 
-Loopy Thinking is a framework for **structured work in the age of AI agents**. It gives humans and agents a shared language to track what is being done, why, and how much of it was done by the machine.
+AI agents are doing real work now. But when you look at your task manager, your git log, or your company dashboard, that work is invisible. You can't tell what the agent decided, why it decided it, or how much human judgment was actually involved.
 
-At its core, Loopy is built around three primitives:
-
-**Work Signals** capture any meaningful unit of activity — a decision made, a task completed, a pattern observed. Both humans and AI agents emit signals. Signals are the raw material from which Loopy builds a picture of how work actually flows.
-
-**Loops** are the operational containers that organize signals over time. A loop holds a hypothesis, tracks evidence, accumulates signals, and closes when a decision is reached or a goal is met. Loops map directly to how cognitive work unfolds: perceive → interpret → decide → act → reflect.
-
-**The Confidence Index** is Loopy's way of measuring whether a loop is grounded in enough evidence to act on. It is not a vanity score — it is a governance tool. High-stakes decisions require high confidence. Low-confidence loops surface as blockers, not as invisible risks.
-
-Together, these three primitives let organizations answer a question that most AI tooling ignores: *how much of this work did the agent actually do, and how do we know it was the right work?*
+Loopy gives agents and humans a **shared ledger** for cognitive work.
 
 ---
 
-## Why Open Source?
+## Three primitives
 
-AI agents are becoming infrastructure. When your team's decisions — its loops — run through a closed system, you are trusting a vendor with the operating system of your organization's cognition. That is too important a dependency to leave opaque.
+**Work Signals** — the atomic unit. Every time something meaningful happens in a workflow — a decision taken, a file written, a pattern observed — someone (human or agent) emits a signal. Signals have a type (`perception`, `interpretation`, `decision`, `action`, `reflection`) and a source (`human` or `agent`).
 
-We are opening the core of Loopy so that:
+**Loops** — the operational container. A loop holds a hypothesis, accumulates signals as evidence, and closes when the hypothesis is resolved. Loops map to how actual thinking unfolds, not to how tasks are assigned.
 
-- Teams can self-host their loop data and never lose it to a platform change
-- Developers can build integrations without waiting for us to ship them
-- The community can audit how confidence is calculated and propose improvements
-- Enterprises can satisfy data residency requirements without a custom contract
-
-The commercial Loopy cloud product will continue to exist. But the protocol, the SDK, and the schema will be open forever under AGPL v3.
+**Confidence Index** — governance, not vanity. A 0–100 score that rises as signals accumulate. High-stakes loops require high confidence before they close. Loops with low confidence surface as blockers, not silent risks.
 
 ---
 
-## What's in This Repository
+## Architecture
 
 ```
-loopy-oss/
-├── packages/
-│   ├── sdk/          — @loopy/sdk: TypeScript SDK for emitting signals and managing loops
-│   ├── skills/       — Prebuilt agent skills (loopy-bridge, loop-mapper, signal-emit)
-│   ├── db/           — PostgreSQL schema and migrations
-│   └── docs/         — Mintlify documentation source
-├── apps/
-│   ├── web/          — React frontend (self-hostable dashboard)
-│   └── api/          — Edge API (Node.js)
-├── docker/           — docker-compose.yml for local and self-hosted deployments
-├── .github/
-│   └── workflows/    — CI/CD: tests, npm publish, Docker build
-├── turbo.json
-├── package.json
-├── LICENSE
-└── README.md
+  Your agent / skill                  Loopy OSS instance
+  ─────────────────────               ──────────────────────────────────────
+                                       ┌─────────────────────────────────┐
+  ┌──────────────────┐   REST / SDK    │  apps/api  (Hono, Node 20)      │
+  │  @loopy/sdk      │ ──────────────► │  /loops  /signals  /agents      │
+  │  LoopyBridge     │                 │  /admin  /orgs  /agents/:id/    │
+  │  LoopySignals    │                 │          skills + tools          │
+  │  LoopyMapper     │                 └──────────────┬──────────────────┘
+  └──────────────────┘                                │
+                                                      │ SQL
+  ┌──────────────────┐   auto-register               ▼
+  │  @loopy/skills   │ ──────────────► ┌─────────────────────────────────┐
+  │  registerCap()   │   skills+tools  │  PostgreSQL                     │
+  └──────────────────┘                 │  loops · work_signals           │
+                                       │  agent_registry · capabilities  │
+  ┌──────────────────┐   browser       │  users · organizations          │
+  │  apps/web        │ ──────────────► └─────────────────────────────────┘
+  │  React dashboard │
+  │  /dashboard      │   routes:       Docker Compose bundles all three.
+  │  /admin (KPIs)   │   /loops/:id    Self-host in < 10 minutes.
+  │  /framework      │   /admin
+  └──────────────────┘   /framework
 ```
 
 ---
 
-## Getting Started
+## Quick start
 
-### Cloud (Fastest)
-
-Create a free account at [loopythinking.ai](https://loopythinking.ai). No setup required.
-
-### Self-Hosted
+### Self-hosted (< 10 minutes)
 
 ```bash
 git clone https://github.com/loopy-thinking/loopy-oss.git
 cd loopy-oss
-cp .env.example .env   # fill in your database credentials
-docker-compose up
+cp .env.example .env        # fill in POSTGRES_PASSWORD and JWT_SECRET
+docker compose up
 ```
 
-Open `http://localhost:3000`.
+Open `http://localhost:3000`. The API runs at `http://localhost:3001`.
 
 ### SDK
 
@@ -86,40 +76,137 @@ npm install @loopy/sdk
 ```
 
 ```typescript
-import { LoopyBridge, LoopySignals } from '@loopy/sdk'
+import { LoopyBridge, LoopySignals, LoopyMapper } from '@loopy/sdk'
 
-const loopy = new LoopyBridge({ token: process.env.LOOPY_AGENT_REGISTRY_TOKEN })
+const loopy = new LoopyBridge({
+  token:   process.env.LOOPY_AGENT_REGISTRY_TOKEN!,
+  baseUrl: process.env.LOOPY_BASE_URL, // default: https://loopythinking.ai
+})
 
+// 1. Create a loop with a hypothesis
+const loop = await loopy.createLoop({
+  title:      'Investigate drop in skill activation rate',
+  hypothesis: 'Likely a regex change in last Tuesday deploy',
+  scope:      'team',
+})
+
+// 2. Emit signals as the agent works
 await LoopySignals.emit({
-  loopId: 'your-loop-id',
-  type: 'action',
-  content: 'Draft sent to stakeholders',
-  source: 'agent'
+  loopId:  loop.id,
+  type:    'perception',
+  content: 'Activation rate dropped 30% starting Tuesday 22 Apr',
+  source:  'agent',
+}, { token: process.env.LOOPY_AGENT_REGISTRY_TOKEN! })
+
+// 3. Let LoopyMapper classify activity automatically
+await LoopyMapper.map(loop.id, {
+  description: 'Reviewed 47 commits, found breaking change in matcher.ts',
+  source:      'agent',
+  metadata:    { estimatedHumanMinutes: 25 },
+}, { token: process.env.LOOPY_AGENT_REGISTRY_TOKEN! })
+
+// 4. Close when resolved
+await loopy.closeLoop(loop.id, 'Regex fix deployed. Hypothesis confirmed.')
+```
+
+### Auto-register agent capabilities
+
+Call this once at session start. It discovers your `SKILL.md` files and MCP servers, then registers everything with Loopy in one idempotent batch:
+
+```bash
+npm install @loopy/skills
+```
+
+```typescript
+import { LoopyBridge } from '@loopy/sdk'
+import { registerCapabilities } from '@loopy/skills'
+
+const loopy = new LoopyBridge({ token: process.env.LOOPY_AGENT_REGISTRY_TOKEN! })
+
+await registerCapabilities({
+  bridge:  loopy,
+  agentId: process.env.LOOPY_AGENT_ID!,
+  // Automatically discovers:
+  //   · SKILL.md files in ~/.claude/skills/ and .claude/skills/
+  //   · MCP servers from ~/.claude/claude_desktop_config.json
+  //   · Claude Code built-in tools (Read, Write, Bash, etc.)
 })
 ```
 
-Full documentation: [docs.loopythinking.ai](https://docs.loopythinking.ai)
+---
+
+## What's in this repository
+
+```
+loopy-oss/
+├── packages/
+│   ├── sdk/       @loopy/sdk        — TypeScript client (loops, signals, mapper, capabilities)
+│   ├── skills/    @loopy/skills     — registerCapabilities() helper for agent session start
+│   ├── db/                          — PostgreSQL migrations (007 migrations, seeds, RLS policies)
+│   ├── protocol/                    — JSON Schema + OpenAPI 3.1 spec
+│   └── docs/                        — Mintlify documentation source
+├── apps/
+│   ├── api/       Hono + Node 20    — REST API (loops, signals, agents, orgs, admin)
+│   └── web/       React + Vite      — Dashboard (/dashboard, /loops/:id, /admin, /framework)
+├── docker/                          — docker-compose.yml + Dockerfiles + init SQL
+└── .github/workflows/               — CI (test + lint), npm publish on tag, docs sync
+```
+
+---
+
+## The `/framework` page
+
+Every self-hosted Loopy instance ships with a built-in reference page at `/framework` that explains the cognitive model behind loops: the five-layer cycle, what a Work Signal is, how Confidence is calculated, and what IPL measures. It's the conceptual documentation that makes Loopy more than just another task tracker.
+
+---
+
+## IPL — Índice de Productividad Liberada
+
+Loopy measures how many **human-equivalent hours** your agents executed per loop. The OSS version uses a deterministic heuristic (signal type × weight for agent-sourced signals). The Cloud version uses an AI classifier. You can override per-signal via `estimatedHumanMinutes` in signal metadata.
+
+This metric answers: *how much of this work did the machine do?* — not as a replacement for human judgment, but as an honest accounting of delegation.
 
 ---
 
 ## Roadmap
 
-The roadmap is public and community-driven. See [GitHub Projects →](https://github.com/loopy-thinking/loopy-oss/projects)
+| Version | Status | What it includes |
+|---------|--------|-----------------|
+| **v0.1.0-beta** | ✅ shipped | `@loopy/sdk` on npm, monorepo scaffold, protocol spec |
+| **v0.2.0** | ✅ shipped | Auto-registro de skills/tools, IPL por loop |
+| **v0.2.1** | ✅ shipped | Multi-org, panel ejecutivo, sidebar, `/framework`, `@loopy/skills` |
+| **v0.3.0** | 🔜 planned | Invite flow, IPL weight calibration, onboarding hardening |
+| **v1.0 — loopy-mcp** | 🔜 planned | MCP server for Claude Desktop, Cursor, VS Code |
 
-High-level phases:
-
-1. **SDK v0.1** — Extract and publish `@loopy/sdk` to npm (May 2026)
-2. **Self-Hosting** — Stable `docker-compose` + public PostgreSQL schema (June 2026)
-3. **Public Launch** — GitHub public + Hacker News + Discord community (June 2026)
-4. **MCP Server** — `loopy-mcp` for Claude Desktop, Cursor, and VS Code (July 2026)
+The full roadmap lives in [GitHub Projects →](https://github.com/loopy-thinking/loopy-oss/projects).
 
 ---
 
 ## Contributing
 
-We welcome contributions of all sizes — documentation fixes, new SDK features, self-hosting guides, and integrations.
+We welcome contributions of all sizes. See [CONTRIBUTING.md](./CONTRIBUTING.md) for setup instructions and the PR process.
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
+Looking for a first issue? Check the [`good-first-issue`](https://github.com/loopy-thinking/loopy-oss/issues?q=label%3Agood-first-issue) label — they're scoped, documented, and ready to pick up.
+
+---
+
+## Self-hosting vs. Cloud
+
+| Capability | OSS (self-hosted) | Cloud ([loopythinking.ai](https://loopythinking.ai)) |
+|------------|:-----------------:|:----------------------------------------------------:|
+| Loop lifecycle | ✅ | ✅ |
+| Work Signals | ✅ | ✅ |
+| Confidence Index | ✅ | ✅ |
+| IPL (heuristic) | ✅ | ✅ (AI-powered) |
+| `@loopy/sdk` | ✅ | ✅ |
+| `@loopy/skills` | ✅ | ✅ |
+| Docker self-host | ✅ | — |
+| Multi-org | ✅ | ✅ |
+| Executive panel | ✅ | ✅ |
+| Advanced governance | — | ✅ |
+| SSO / SAML | — | ✅ |
+| Email invite flow | — | ✅ |
+| Billing / limits | — | ✅ |
 
 ---
 
@@ -127,14 +214,14 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) to get started.
 
 Loopy OSS is licensed under the [GNU Affero General Public License v3.0](./LICENSE).
 
-This means you can use, modify, and distribute this software freely — including for commercial purposes — as long as you make your changes available under the same license. If you run a modified version as a network service, you must provide access to the source code.
+You can use, modify, and distribute this software freely — including for commercial purposes — as long as derivative works remain under AGPL. If you run a modified version as a network service, you must provide access to the source.
 
-For a commercial license that removes the AGPL requirements (e.g., for embedding Loopy in a proprietary product), contact [dev@loopy-thinking.com](mailto:dev@loopy-thinking.com).
+For a commercial license (embedding Loopy in a proprietary product), contact [dev@loopy-thinking.com](mailto:dev@loopy-thinking.com).
 
 ---
 
 ## Community
 
-- **GitHub Discussions:** [github.com/loopy-thinking/loopy-oss/discussions](https://github.com/loopy-thinking/loopy-oss/discussions)
-- **Discord:** Coming in Phase 3 (June 2026)
+- **GitHub Discussions:** [loopy-thinking/loopy-oss/discussions](https://github.com/loopy-thinking/loopy-oss/discussions)
+- **Discord:** Coming with the public launch (June 2026)
 - **Email:** [dev@loopy-thinking.com](mailto:dev@loopy-thinking.com)
