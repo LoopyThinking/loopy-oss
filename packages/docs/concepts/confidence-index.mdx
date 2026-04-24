@@ -1,0 +1,63 @@
+---
+title: Confidence Index
+description: A 0–100 score that measures how grounded a loop is based on its signals.
+---
+
+## What is the confidence index?
+
+The **confidence index** is a number between 0 and 100 that reflects how evidence-based a loop is. It grows every time a signal is emitted, with higher weight given to signals that represent deeper cognitive work.
+
+A loop that has been thoroughly analyzed, interpreted, and decided on will score higher than one that only has a list of actions taken.
+
+## How it's calculated
+
+Each signal type contributes a fixed number of points:
+
+| Signal type | Points |
+|-------------|--------|
+| `decision` | +20 |
+| `reflection` | +15 |
+| `interpretation` | +12 |
+| `action` | +10 |
+| `perception` | +8 |
+
+The index is the sum of all signal weights, capped at 100.
+
+**Example:** A loop with 2 perception signals, 1 interpretation, and 1 decision starts at:
+`8 + 8 + 12 + 20 = 48` → **48/100**
+
+Add a reflection signal: `48 + 15 = 63` → **63/100**
+
+## Reading the index
+
+| Range | Label | Meaning |
+|-------|-------|---------|
+| 75–100 | **High** | Well-grounded. Decision supported by strong evidence. |
+| 40–74 | **Building** | In progress. More signal coverage recommended. |
+| 0–39 | **Low** | Early stage or sparse. Not enough evidence yet. |
+
+## OSS vs Cloud
+
+The OSS confidence index is **deterministic**: it's a direct function of signal weights, recalculated on every new signal.
+
+The [Loopy Thinking Cloud](https://loopythinking.ai) version uses **AI-powered IPL** (Índice de Productividad Liberada) — a more nuanced score that factors in signal quality, loop duration, agent contribution percentage, and historical patterns.
+
+The OSS formula is transparent, reproducible, and auditable. What you see is exactly what the math says.
+
+## Accessing the index
+
+The `confidence_index` is a field on every loop object:
+
+```typescript
+const loop = await loopy.getLoop(id)
+console.log(loop.confidenceIndex) // e.g. 65
+```
+
+It's also returned inline on the API:
+
+```bash
+curl http://localhost:3001/loops/$LOOP_ID \
+  -H "Authorization: Bearer $TOKEN"
+
+# → { "confidence_index": 65, ... }
+```

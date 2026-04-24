@@ -1,0 +1,173 @@
+---
+title: API Reference
+description: All 8 REST endpoints of the Loopy OSS API.
+openapi: /openapi.yaml
+---
+
+The Loopy OSS API is a JSON REST API built with [Hono](https://hono.dev). All endpoints except `/health` require a Bearer token.
+
+## Authentication
+
+```
+Authorization: Bearer <token>
+```
+
+Two token types are accepted:
+
+- **User JWT** — from Supabase Auth (Cloud) or generated with `JWT_SECRET` (self-hosted)
+- **Agent Token** — from `POST /agents`, prefixed with `lpy_agent_`
+
+## Base URL
+
+| Environment | URL |
+|-------------|-----|
+| Local (Docker Compose) | `http://localhost:3001` |
+| Self-hosted | Your deployed API URL |
+| Loopy Cloud | `https://loopythinking.ai/api` |
+
+---
+
+## Endpoints
+
+### Health
+
+<ParamField path="GET /health" type="public">
+Returns service status. No authentication required.
+
+**Response:**
+```json
+{
+  "status": "ok",
+  "version": "0.1.0-beta",
+  "timestamp": "2026-04-22T10:00:00.000Z"
+}
+```
+</ParamField>
+
+---
+
+### Loops
+
+<ParamField path="GET /loops" type="protected">
+List all loops for the authenticated user.
+
+**Query parameters:**
+- `status` (optional): `open` | `closed` | `blocked`
+
+**Response:** `Loop[]`
+</ParamField>
+
+<ParamField path="POST /loops" type="protected">
+Create a new loop.
+
+**Body:**
+```json
+{
+  "title": "Migrate auth to new provider",
+  "hypothesis": "Migration will take less than 2 days",
+  "scope": "personal"
+}
+```
+
+**Response:** `Loop` (201)
+</ParamField>
+
+<ParamField path="GET /loops/:id" type="protected">
+Get a single loop with all its signals.
+
+**Response:** `Loop & { signals: WorkSignal[] }`
+</ParamField>
+
+<ParamField path="POST /loops/:id/close" type="protected">
+Close a loop. Closed loops cannot receive new signals.
+
+**Body (optional):**
+```json
+{ "resolution": "Chose Supabase Auth. Migration done in 1.5 days." }
+```
+
+**Response:** `Loop` with `status: "closed"`
+</ParamField>
+
+<ParamField path="GET /loops/:id/signals" type="protected">
+List signals for a loop.
+
+**Query parameters:**
+- `source` (optional): `human` | `agent`
+- `type` (optional): `perception` | `interpretation` | `decision` | `action` | `reflection`
+
+**Response:** `WorkSignal[]`
+</ParamField>
+
+---
+
+### Signals
+
+<ParamField path="POST /signals" type="protected">
+Emit a work signal. This is the primary endpoint used by agents.
+
+**Body:**
+```json
+{
+  "loopId": "550e8400-e29b-41d4-a716-446655440000",
+  "type": "action",
+  "content": "Deployed v0.1.0-beta to npm registry",
+  "source": "agent",
+  "metadata": { "tool": "claude-cowork" }
+}
+```
+
+**Response:** `WorkSignal` (201)
+</ParamField>
+
+---
+
+### Agents
+
+<ParamField path="POST /agents" type="protected">
+Register an agent and receive its Bearer token.
+
+<Warning>
+The token is returned **only once**. Store it securely — it cannot be recovered.
+</Warning>
+
+**Body:**
+```json
+{
+  "agentName": "my-claude-agent",
+  "description": "Claude agent for my workspace"
+}
+```
+
+**Response (201):**
+```json
+{
+  "id": "uuid",
+  "agentName": "my-claude-agent",
+  "token": "lpy_agent_abc123...",
+  "description": "Claude agent for my workspace",
+  "created_at": "2026-04-22T10:00:00.000Z"
+}
+```
+</ParamField>
+
+---
+
+## Error responses
+
+All errors follow the same shape:
+
+```json
+{
+  "error": "Not Found",
+  "message": "Loop not found"
+}
+```
+
+| Status | Error | When |
+|--------|-------|------|
+| 400 | Bad Request | Missing required field or invalid value |
+| 401 | Unauthorized | Missing, expired, or invalid token |
+| 404 | Not Found | Resource doesn't exist or belongs to another user |
+| 409 | Conflict | Agent name already exists for this user |
+| 500 | Internal Server Error | Unexpected server error |

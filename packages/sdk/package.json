@@ -1,24 +1,45 @@
 {
   "name": "@loopy/sdk",
-  "version": "0.1.0-beta",
+  "version": "0.3.0",
   "description": "SDK for integrating with Loopy Thinking — register work signals and create loops",
   "license": "AGPL-3.0",
-  "main": "dist/index.cjs",
-  "module": "dist/index.js",
+  "author": "Loopy Thinking <dev@loopy-thinking.com>",
+  "homepage": "https://github.com/loopy-thinking/loopy-oss#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopy-thinking/loopy-oss.git",
+    "directory": "packages/sdk"
+  },
+  "bugs": {
+    "url": "https://github.com/loopy-thinking/loopy-oss/issues"
+  },
+  "keywords": [
+    "loopy",
+    "agent",
+    "work-signals",
+    "loops",
+    "productivity",
+    "ai",
+    "sdk",
+    "typescript"
+  ],
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "require": "./dist/index.cjs",
-      "types": "./dist/index.d.ts"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "scripts": {
-    "build": "tsup",
-    "dev": "tsup --watch",
+    "build": "tsup src/index.ts --format esm,cjs --dts --sourcemap --no-config",
+    "dev": "tsup src/index.ts --format esm,cjs --dts --sourcemap --watch --no-config",
     "test": "vitest run",
     "test:watch": "vitest",
     "lint": "tsc --noEmit"

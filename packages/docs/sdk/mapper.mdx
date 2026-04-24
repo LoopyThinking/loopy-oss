@@ -1,0 +1,94 @@
+---
+title: LoopyMapper
+description: Auto-classify work activity into a cognitive layer and emit it as a signal.
+---
+
+## Overview
+
+`LoopyMapper` combines classification and emission into one call. It reads the description text, infers the cognitive layer from keywords, and emits the signal — so you don't have to decide the type manually.
+
+```typescript
+import { LoopyMapper } from '@loopy/sdk'
+
+await LoopyMapper.map(loopId, {
+  description: 'Analyzed the error logs and found a memory leak in the API',
+  source: 'agent',
+}, config)
+// → emits signal with type: 'perception'
+```
+
+---
+
+## `LoopyMapper.map(loopId, activity, config)`
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `loopId` | `string` | ✅ | Target loop UUID |
+| `activity.description` | `string` | ✅ | Plain-text description of the work |
+| `activity.source` | `'human' \| 'agent'` | — | Defaults to `'agent'` |
+| `activity.metadata` | `Record<string, unknown>` | — | Optional context |
+
+Returns the emitted `WorkSignal`.
+
+---
+
+## Classification rules
+
+The mapper classifies by checking for keyword substrings in the description (case-insensitive):
+
+| Layer | Triggers when description contains |
+|-------|-----------------------------------|
+| `perception` | `analyz`, `observ`, `detect`, `scan`, `read` |
+| `interpretation` | `interpret`, `evaluat`, `assess`, `review`, `understand` |
+| `decision` | `decid`, `choos`, `select`, `priorit`, `approv` |
+| `reflection` | `reflect`, `learn`, `retrospect`, `conclusion` |
+| `action` | *(default — no keyword match)* |
+
+The first matching layer wins. Layers are checked in the order above.
+
+<Note>
+The keyword matching uses substring patterns (not full words), so `"evaluated"`, `"evaluating"`, and `"re-evaluation"` all trigger `interpretation`.
+
+One edge case: if your description contains the word `README`, it will contain the substring `read` and trigger `perception`. Write your descriptions to describe the activity, not the file name.
+</Note>
+
+---
+
+## Examples
+
+```typescript
+// perception — contains "analyz"
+await LoopyMapper.map(id, {
+  description: 'Analyzed current edge function structure — 12 functions, heavy Supabase coupling',
+}, config)
+
+// interpretation — contains "evaluat"
+await LoopyMapper.map(id, {
+  description: 'Evaluated Hono vs Express: Hono is TypeScript-native, runs on Node + edge',
+}, config)
+
+// decision — contains "decid"
+await LoopyMapper.map(id, {
+  description: 'Decided to use Hono. Rebuilding from scratch rather than migrating.',
+}, config)
+
+// action — no keyword match (default)
+await LoopyMapper.map(id, {
+  description: 'Scaffolded apps/api/ with Hono, auth middleware, and /health endpoint',
+}, config)
+
+// reflection — contains "retrospect"
+await LoopyMapper.map(id, {
+  description: 'Retrospective: Hono was the right call. Ship was 2x faster than Express estimate.',
+}, config)
+```
+
+---
+
+## When to use Mapper vs Signals
+
+| Use `LoopyMapper` when | Use `LoopySignals` directly when |
+|-----------------------|----------------------------------|
+| You trust the description text to be accurate | You want to control the exact layer |
+| Building an agent that generates natural-language summaries | The description might contain misleading keywords |
+| Rapid integration | You need predictable, auditable classification |

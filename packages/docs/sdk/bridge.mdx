@@ -1,0 +1,105 @@
+---
+title: LoopyBridge
+description: Main client for creating and managing loops.
+---
+
+## Overview
+
+`LoopyBridge` is the main entry point for loop management. Create one instance per application and reuse it.
+
+```typescript
+import { LoopyBridge } from '@loopy/sdk'
+
+const loopy = new LoopyBridge({
+  token: process.env.LOOPY_TOKEN,
+  baseUrl: process.env.LOOPY_BASE_URL, // optional
+})
+```
+
+---
+
+## Methods
+
+### `getLoop(id)`
+
+Fetch a single loop by ID, including its signals.
+
+```typescript
+const loop = await loopy.getLoop('550e8400-e29b-41d4-a716-446655440000')
+// → Loop { id, title, hypothesis, status, confidenceIndex, signals, ... }
+```
+
+**Throws** if the loop doesn't exist or doesn't belong to the authenticated user.
+
+---
+
+### `listActiveLoops()`
+
+Returns all open loops for the authenticated user, ordered by creation date descending.
+
+```typescript
+const loops = await loopy.listActiveLoops()
+// → Loop[]
+```
+
+---
+
+### `createLoop(data)`
+
+Creates a new loop and returns it.
+
+```typescript
+const loop = await loopy.createLoop({
+  title: 'Migrate auth to Supabase',         // required
+  hypothesis: 'Migration takes < 2 days',    // optional
+  scope: 'personal',                         // optional: 'personal' | 'team' | 'organizational'
+})
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `title` | `string` | ✅ | Short descriptive title (max 255 chars) |
+| `hypothesis` | `string` | — | Working assumption being tested |
+| `scope` | `'personal' \| 'team' \| 'organizational'` | — | Defaults to `'personal'` |
+
+---
+
+### `closeLoop(id, resolution?)`
+
+Marks a loop as closed. A closed loop cannot receive new signals.
+
+```typescript
+const closed = await loopy.closeLoop(
+  loop.id,
+  'Chose Supabase Auth. Migration completed in 1.5 days.'
+)
+// → Loop { status: 'closed', resolution: '...', closed_at: '...' }
+```
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `id` | `string` | ✅ | Loop UUID |
+| `resolution` | `string` | — | Decision or outcome (recommended) |
+
+**Throws** if the loop is already closed or doesn't exist.
+
+---
+
+## Error handling
+
+All methods throw an `Error` with a descriptive message on failure:
+
+```typescript
+try {
+  const loop = await loopy.getLoop(id)
+} catch (err) {
+  if (err instanceof Error) {
+    console.error(err.message) // e.g. "Loopy API error: 404 Not Found"
+  }
+}
+```
+
+Common error patterns:
+- `"Loopy API error: 401 Unauthorized"` — token is missing, expired, or invalid
+- `"Loopy API error: 404 Not Found"` — loop doesn't exist or belongs to another user
+- Network errors from `fetch` — connection refused, DNS failure, etc.

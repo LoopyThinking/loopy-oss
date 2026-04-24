@@ -1,0 +1,59 @@
+---
+title: Contributing
+description: How to contribute to Loopy OSS.
+---
+
+Loopy OSS is open to contributions. Here's how to get involved.
+
+## Ways to contribute
+
+- **Fix a bug** — check the [issue tracker](https://github.com/loopy-thinking/loopy-oss/issues) for bugs labeled `bug`
+- **Improve docs** — typos, unclear explanations, missing examples
+- **Add tests** — more coverage is always welcome
+- **Good first issues** — issues labeled [`good first issue`](https://github.com/loopy-thinking/loopy-oss/issues?q=is%3Aopen+label%3A%22good+first+issue%22)
+
+## Setup
+
+```bash
+git clone https://github.com/loopy-thinking/loopy-oss.git
+cd loopy-oss
+npm install
+npm run build   # build all packages
+npm run test    # run all tests
+```
+
+## Workflow
+
+1. Fork the repo
+2. Create a branch: `git checkout -b fix/your-description`
+3. Make your change
+4. Run tests: `npm run test`
+5. Run lint: `npm run lint`
+6. Open a PR against `main`
+
+## Pull request guidelines
+
+- Keep PRs focused — one concern per PR
+- Include tests for any behavior change
+- Update docs if you change a public API
+- Reference the issue number in the PR description
+
+## Code style
+
+- TypeScript strict mode everywhere
+- No `any` types in public APIs
+- Prefer explicit over clever
+
+## What belongs in OSS vs Cloud
+
+Before implementing a new feature, check the [OSS/Cloud boundary table](/introduction#whats-in-the-oss-release). Features involving collaboration, governance, advanced analytics, or billing belong in the Cloud product.
+
+When in doubt, open an issue and ask first.
+
+## Community
+
+Join the [Loopy Discord](https://discord.gg/loopy-oss) for discussion, questions, and announcements.
+
+## License
+
+By contributing, you agree that your contributions will be licensed under the [AGPL v3](https://github.com/loopy-thinking/loopy-oss/blob/main/LICENSE).

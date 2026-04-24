@@ -1,0 +1,76 @@
+---
+title: Installation
+description: Add @loopy/sdk to your project.
+---
+
+## Install
+
+```bash
+npm install @loopy/sdk
+```
+
+The SDK has zero production dependencies. It uses the native `fetch` API available in Node.js 18+, Deno, Bun, and all modern browsers.
+
+## Requirements
+
+- Node.js 20+ (or any runtime with native `fetch`)
+- TypeScript 5.0+ (optional but recommended)
+
+## Configuration
+
+The SDK needs two things: a **token** and a **base URL**.
+
+```typescript
+import { LoopyBridge } from '@loopy/sdk'
+
+const loopy = new LoopyBridge({
+  // Required: agent registry token or user JWT
+  token: process.env.LOOPY_TOKEN,
+
+  // Optional: defaults to https://loopythinking.ai
+  // Set this for self-hosted instances
+  baseUrl: process.env.LOOPY_BASE_URL,
+})
+```
+
+### Token types
+
+| Type | Where to get it | Use for |
+|------|----------------|---------|
+| **Agent token** | `POST /agents` → copy the `token` field | Agents emitting signals |
+| **User JWT** | Generated with `JWT_SECRET` (self-hosted) or Supabase Auth (Cloud) | User-facing operations |
+
+### Self-hosted configuration
+
+```typescript
+const loopy = new LoopyBridge({
+  token: process.env.LOOPY_AGENT_TOKEN,
+  baseUrl: 'http://localhost:3001',  // or your deployed API URL
+})
+```
+
+### Environment variables
+
+```bash
+# .env
+LOOPY_TOKEN=lpy_agent_abc123...         # agent token
+LOOPY_BASE_URL=http://localhost:3001    # self-hosted API URL
+```
+
+## What's exported
+
+```typescript
+import {
+  LoopyBridge,    // Loop management client
+  LoopySignals,   // Emit and query signals
+  LoopyMapper,    // Auto-classify and emit activity
+} from '@loopy/sdk'
+
+import type {
+  Loop,
+  WorkSignal,
+  LoopyConfig,
+  CognitiveLayer,
+  SignalSource,
+} from '@loopy/sdk'
+```

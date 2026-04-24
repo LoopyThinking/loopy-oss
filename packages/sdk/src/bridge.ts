@@ -1,4 +1,12 @@
-import type { LoopyConfig, Loop } from './types'
+import type {
+  LoopyConfig,
+  Loop,
+  AgentSkill,
+  AgentTool,
+  RegisterSkillPayload,
+  RegisterToolPayload,
+  RegisterBatchPayload,
+} from './types'
 
 /**
  * LoopyBridge — main client for connecting an agent to a Loopy instance.
@@ -62,5 +70,93 @@ export class LoopyBridge {
       method: 'POST',
       body: JSON.stringify({ resolution }),
     })
+  }
+
+  // ── Capabilities ────────────────────────────────────────────────────────────
+
+  /**
+   * Register (upsert) a single skill for the given agent.
+   * Safe to call on every session start — idempotent.
+   *
+   * @example
+   * await loopy.registerSkill(agentId, {
+   *   skillName: 'loopy-bridge',
+   *   version: '1.2.0',
+   *   source: 'plugin',
+   * })
+   */
+  async registerSkill(agentId: string, skill: RegisterSkillPayload): Promise<AgentSkill> {
+    return this.request<AgentSkill>(`/agents/${agentId}/skills`, {
+      method: 'POST',
+      body: JSON.stringify(skill),
+    })
+  }
+
+  /**
+   * Register (upsert) a single tool for the given agent.
+   *
+   * @example
+   * await loopy.registerTool(agentId, {
+   *   toolName: 'Read',
+   *   toolType: 'function',
+   *   provider: 'claude-code',
+   * })
+   */
+  async registerTool(agentId: string, tool: RegisterToolPayload): Promise<AgentTool> {
+    return this.request<AgentTool>(`/agents/${agentId}/tools`, {
+      method: 'POST',
+      body: JSON.stringify(tool),
+    })
+  }
+
+  /**
+   * Register all skills and/or tools in a single request.
+   * Intended for session startup — call once with everything the agent has.
+   *
+   * @example
+   * await loopy.registerBatch(agentId, {
+   *   skills: [
+   *     { skillName: 'loopy-bridge', version: '1.2.0', source: 'plugin' },
+   *     { skillName: 'docx',         version: '2.0.0', source: 'plugin' },
+   *   ],
+   *   tools: [
+   *     { toolName: 'Read',    toolType: 'function', provider: 'claude-code' },
+   *     { toolName: 'WebSearch', toolType: 'function', provider: 'claude-code' },
+   *   ],
+   * })
+   */
+  async registerBatch(
+    agentId: string,
+    payload: RegisterBatchPayload
+  ): Promise<{ registeredSkills: number; registeredTools: number }> {
+    const results = { registeredSkills: 0, registeredTools: 0 }
+
+    if (payload.skills && payload.skills.length > 0) {
+      const res = await this.request<{ registered: number }>(`/agents/${agentId}/skills/batch`, {
+        method: 'POST',
+        body: JSON.stringify({ skills: payload.skills }),
+      })
+      results.registeredSkills = res.registered
+    }
+
+    if (payload.tools && payload.tools.length > 0) {
+      const res = await this.request<{ registered: number }>(`/agents/${agentId}/tools/batch`, {
+        method: 'POST',
+        body: JSON.stringify({ tools: payload.tools }),
+      })
+      results.registeredTools = res.registered
+    }
+
+    return results
+  }
+
+  /** List all active skills registered for an agent */
+  async listSkills(agentId: string): Promise<AgentSkill[]> {
+    return this.request<AgentSkill[]>(`/agents/${agentId}/skills`)
+  }
+
+  /** List all active tools registered for an agent */
+  async listTools(agentId: string): Promise<AgentTool[]> {
+    return this.request<AgentTool[]>(`/agents/${agentId}/tools`)
   }
 }

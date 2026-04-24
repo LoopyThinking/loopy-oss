@@ -1,0 +1,91 @@
+---
+title: Work Signals
+description: Discrete units of human or agent activity emitted into a loop.
+---
+
+## What is a work signal?
+
+A **work signal** is a single, immutable record of something that happened inside a loop. It's the atom of the Loopy protocol.
+
+Every signal belongs to exactly one loop, carries a cognitive layer type, and records whether it came from a human or an agent.
+
+## Cognitive layers
+
+Signals are classified into five cognitive layers — the stages of how thinking moves from raw input to actionable output:
+
+| Layer | Keyword examples | What it captures |
+|-------|-----------------|-----------------|
+| `perception` | analyze, observe, detect, scan, read | Taking in information |
+| `interpretation` | interpret, evaluate, assess, review | Making sense of information |
+| `decision` | decide, choose, select, prioritize | Committing to a direction |
+| `action` | *(default)* | Doing something |
+| `reflection` | reflect, learn, retrospect, conclusion | Looking back |
+
+The timeline of layers across a loop tells a story: how did we go from raw observation to decision?
+
+## Anatomy of a signal
+
+| Field | Description |
+|-------|-------------|
+| `loopId` | The loop this signal belongs to |
+| `type` | Cognitive layer: `perception`, `interpretation`, `decision`, `action`, `reflection` |
+| `content` | Human-readable description of what happened |
+| `source` | `human` or `agent` |
+| `metadata` | Optional key-value pairs for tool context, session IDs, etc. |
+
+## Emitting a signal
+
+<Tabs>
+  <Tab title="SDK (manual)">
+    ```typescript
+    await LoopySignals.emit({
+      loopId: loop.id,
+      type: 'action',
+      content: 'Deployed v0.1.0-beta to npm registry',
+      source: 'agent',
+      metadata: { tool: 'claude-cowork', session: 'abc123' },
+    }, config)
+    ```
+  </Tab>
+  <Tab title="SDK (auto-classify)">
+    ```typescript
+    // LoopyMapper classifies the cognitive layer from the description text
+    await LoopyMapper.map(loop.id, {
+      description: 'Analyzed error logs and identified the root cause',
+      source: 'agent',
+    }, config)
+    // → type: 'perception' (contains "analyzed")
+    ```
+  </Tab>
+  <Tab title="API">
+    ```bash
+    curl -X POST http://localhost:3001/signals \
+      -H "Authorization: Bearer $AGENT_TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "loopId": "loop-uuid",
+        "type": "perception",
+        "content": "Analyzed error logs and identified the root cause",
+        "source": "agent"
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+## Signals are immutable
+
+Once emitted, a signal cannot be updated or deleted. This is intentional — the timeline of a loop is an audit trail of how thinking evolved.
+
+## Signals update the confidence index
+
+Every signal emitted into a loop recalculates its `confidence_index`. Each layer has a different weight:
+
+| Layer | Weight |
+|-------|--------|
+| `decision` | +20 |
+| `reflection` | +15 |
+| `interpretation` | +12 |
+| `action` | +10 |
+| `perception` | +8 |
+
+The index is capped at 100. A loop that has gone through the full cognitive cycle (perception → decision → reflection) reaches maximum confidence faster than one with only actions.
