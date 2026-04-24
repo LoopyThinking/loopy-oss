@@ -133,6 +133,24 @@ await registerCapabilities({
 })
 ```
 
+### MCP server (Claude Desktop, Cursor, VS Code)
+
+Connect any MCP-compatible client to Loopy without writing code. Add to your `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "loopy": {
+      "command": "npx",
+      "args": ["-y", "@loopythinking/mcp"],
+      "env": { "LOOPY_AGENT_REGISTRY_TOKEN": "your_token" }
+    }
+  }
+}
+```
+
+7 tools available: `create_loop`, `emit_signal`, `map_signal`, `close_loop`, `get_loop`, `list_active_loops`, `get_confidence`. See [`packages/mcp/README.md`](./packages/mcp/README.md) for Cursor and VS Code setup.
+
 ---
 
 ## What's in this repository
@@ -175,8 +193,9 @@ This metric answers: *how much of this work did the machine do?* — not as a re
 | **v0.1.0-beta** | ✅ shipped | `@loopythinking/sdk` on npm, monorepo scaffold, protocol spec |
 | **v0.2.0** | ✅ shipped | Auto-registro de skills/tools, IPL por loop |
 | **v0.2.1** | ✅ shipped | Multi-org, panel ejecutivo, sidebar, `/framework`, `@loopythinking/skills` |
-| **v0.3.0** | 🔜 planned | Invite flow, IPL weight calibration, onboarding hardening |
-| **v1.0 — loopy-mcp** | 🔜 planned | MCP server for Claude Desktop, Cursor, VS Code |
+| **v0.3.0** | ✅ shipped | Invite accept flow, Settings page, IPL env var config |
+| **v1.0 — `@loopythinking/mcp`** | ✅ shipped | MCP server — 7 tools for Claude Desktop, Cursor, VS Code |
+| **v1.1** | 🔜 next | IPL weight calibration with real data, email invite flow, onboarding wizard |
 
 The full roadmap lives in [GitHub Projects →](https://github.com/loopy-thinking/loopy-oss/projects).
 
