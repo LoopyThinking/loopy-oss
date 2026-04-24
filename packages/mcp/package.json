@@ -1,6 +1,6 @@
 {
-  "name": "loopy-mcp",
-  "version": "0.1.0",
+  "name": "@loopythinking/mcp",
+  "version": "0.1.1",
   "description": "MCP server for Loopy Thinking — connect Claude Desktop, Cursor, and VS Code to your Loopy instance",
   "license": "AGPL-3.0",
   "author": "Loopy Thinking <dev@loopy-thinking.com>",
@@ -35,7 +35,7 @@
     "README.md"
   ],
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && chmod +x dist/index.js",
     "dev": "tsup --watch",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build"
