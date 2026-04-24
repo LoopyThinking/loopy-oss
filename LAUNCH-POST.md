@@ -42,9 +42,9 @@ Together these three primitives let you answer a question most AI tooling ignore
 
 Everything you need to run a Loopy instance and connect agents to it:
 
-**`@loopy/sdk`** — a TypeScript client for creating loops, emitting signals, and querying the state of your agent's work. Published on npm.
+**`@loopythinking/sdk`** — a TypeScript client for creating loops, emitting signals, and querying the state of your agent's work. Published on npm.
 
-**`@loopy/skills`** — a helper that auto-discovers your `SKILL.md` files and MCP server configs, then registers everything with Loopy at session start. One function call: `registerCapabilities({ bridge, agentId })`.
+**`@loopythinking/skills`** — a helper that auto-discovers your `SKILL.md` files and MCP server configs, then registers everything with Loopy at session start. One function call: `registerCapabilities({ bridge, agentId })`.
 
 **`apps/api`** — a Hono-based REST API that handles the full lifecycle: loops, signals, agents, organizations, and an executive panel with aggregate metrics.
 
@@ -113,7 +113,7 @@ docker compose up
 Or just install the SDK:
 
 ```bash
-npm install @loopy/sdk
+npm install @loopythinking/sdk
 ```
 
 The repository is at [github.com/loopy-thinking/loopy-oss](https://github.com/loopy-thinking/loopy-oss).

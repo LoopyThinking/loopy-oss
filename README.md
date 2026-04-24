@@ -4,7 +4,7 @@
 > Track what your agents did, why, and how much of the work they actually carried.
 
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL%20v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
-[![npm](https://img.shields.io/npm/v/@loopy/sdk?label=%40loopy%2Fsdk)](https://www.npmjs.com/package/@loopy/sdk)
+[![npm](https://img.shields.io/npm/v/@loopythinking/sdk?label=%40loopy%2Fsdk)](https://www.npmjs.com/package/@loopythinking/sdk)
 [![CI](https://github.com/loopy-thinking/loopy-oss/actions/workflows/ci.yml/badge.svg)](https://github.com/loopy-thinking/loopy-oss/actions/workflows/ci.yml)
 
 ---
@@ -34,14 +34,14 @@ Loopy gives agents and humans a **shared ledger** for cognitive work.
   ─────────────────────               ──────────────────────────────────────
                                        ┌─────────────────────────────────┐
   ┌──────────────────┐   REST / SDK    │  apps/api  (Hono, Node 20)      │
-  │  @loopy/sdk      │ ──────────────► │  /loops  /signals  /agents      │
+  │  @loopythinking/sdk      │ ──────────────► │  /loops  /signals  /agents      │
   │  LoopyBridge     │                 │  /admin  /orgs  /agents/:id/    │
   │  LoopySignals    │                 │          skills + tools          │
   │  LoopyMapper     │                 └──────────────┬──────────────────┘
   └──────────────────┘                                │
                                                       │ SQL
   ┌──────────────────┐   auto-register               ▼
-  │  @loopy/skills   │ ──────────────► ┌─────────────────────────────────┐
+  │  @loopythinking/skills   │ ──────────────► ┌─────────────────────────────────┐
   │  registerCap()   │   skills+tools  │  PostgreSQL                     │
   └──────────────────┘                 │  loops · work_signals           │
                                        │  agent_registry · capabilities  │
@@ -72,11 +72,11 @@ Open `http://localhost:3000`. The API runs at `http://localhost:3001`.
 ### SDK
 
 ```bash
-npm install @loopy/sdk
+npm install @loopythinking/sdk
 ```
 
 ```typescript
-import { LoopyBridge, LoopySignals, LoopyMapper } from '@loopy/sdk'
+import { LoopyBridge, LoopySignals, LoopyMapper } from '@loopythinking/sdk'
 
 const loopy = new LoopyBridge({
   token:   process.env.LOOPY_AGENT_REGISTRY_TOKEN!,
@@ -114,12 +114,12 @@ await loopy.closeLoop(loop.id, 'Regex fix deployed. Hypothesis confirmed.')
 Call this once at session start. It discovers your `SKILL.md` files and MCP servers, then registers everything with Loopy in one idempotent batch:
 
 ```bash
-npm install @loopy/skills
+npm install @loopythinking/skills
 ```
 
 ```typescript
-import { LoopyBridge } from '@loopy/sdk'
-import { registerCapabilities } from '@loopy/skills'
+import { LoopyBridge } from '@loopythinking/sdk'
+import { registerCapabilities } from '@loopythinking/skills'
 
 const loopy = new LoopyBridge({ token: process.env.LOOPY_AGENT_REGISTRY_TOKEN! })
 
@@ -140,8 +140,8 @@ await registerCapabilities({
 ```
 loopy-oss/
 ├── packages/
-│   ├── sdk/       @loopy/sdk        — TypeScript client (loops, signals, mapper, capabilities)
-│   ├── skills/    @loopy/skills     — registerCapabilities() helper for agent session start
+│   ├── sdk/       @loopythinking/sdk        — TypeScript client (loops, signals, mapper, capabilities)
+│   ├── skills/    @loopythinking/skills     — registerCapabilities() helper for agent session start
 │   ├── db/                          — PostgreSQL migrations (007 migrations, seeds, RLS policies)
 │   ├── protocol/                    — JSON Schema + OpenAPI 3.1 spec
 │   └── docs/                        — Mintlify documentation source
@@ -172,9 +172,9 @@ This metric answers: *how much of this work did the machine do?* — not as a re
 
 | Version | Status | What it includes |
 |---------|--------|-----------------|
-| **v0.1.0-beta** | ✅ shipped | `@loopy/sdk` on npm, monorepo scaffold, protocol spec |
+| **v0.1.0-beta** | ✅ shipped | `@loopythinking/sdk` on npm, monorepo scaffold, protocol spec |
 | **v0.2.0** | ✅ shipped | Auto-registro de skills/tools, IPL por loop |
-| **v0.2.1** | ✅ shipped | Multi-org, panel ejecutivo, sidebar, `/framework`, `@loopy/skills` |
+| **v0.2.1** | ✅ shipped | Multi-org, panel ejecutivo, sidebar, `/framework`, `@loopythinking/skills` |
 | **v0.3.0** | 🔜 planned | Invite flow, IPL weight calibration, onboarding hardening |
 | **v1.0 — loopy-mcp** | 🔜 planned | MCP server for Claude Desktop, Cursor, VS Code |
 
@@ -198,8 +198,8 @@ Looking for a first issue? Check the [`good-first-issue`](https://github.com/loo
 | Work Signals | ✅ | ✅ |
 | Confidence Index | ✅ | ✅ |
 | IPL (heuristic) | ✅ | ✅ (AI-powered) |
-| `@loopy/sdk` | ✅ | ✅ |
-| `@loopy/skills` | ✅ | ✅ |
+| `@loopythinking/sdk` | ✅ | ✅ |
+| `@loopythinking/skills` | ✅ | ✅ |
 | Docker self-host | ✅ | — |
 | Multi-org | ✅ | ✅ |
 | Executive panel | ✅ | ✅ |

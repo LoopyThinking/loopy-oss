@@ -1,11 +1,11 @@
 /**
- * @loopy/skills — auto-register agent skills and tools with a Loopy instance.
+ * @loopythinking/skills — auto-register agent skills and tools with a Loopy instance.
  *
  * Main entry point: `registerCapabilities()`
  *
  * @example
- * import { LoopyBridge } from '@loopy/sdk'
- * import { registerCapabilities } from '@loopy/skills'
+ * import { LoopyBridge } from '@loopythinking/sdk'
+ * import { registerCapabilities } from '@loopythinking/skills'
  *
  * const loopy = new LoopyBridge({ token: process.env.LOOPY_AGENT_REGISTRY_TOKEN })
  * await registerCapabilities({ bridge: loopy, agentId: process.env.LOOPY_AGENT_ID })

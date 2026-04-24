@@ -73,7 +73,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - Web: `/framework` page — 6 sections (ciclo cognitivo, Work Signals, Confidence Index, IPL, Scope, Q&A)
 - Web deps: `recharts ^2.12.0`, `lucide-react ^0.441.0`
 
-**`@loopy/skills` package** (`packages/skills/`)
+**`@loopythinking/skills` package** (`packages/skills/`)
 - `registerCapabilities({ bridge, agentId })` — discovers SKILL.md files and MCP configs, registers everything in one idempotent batch call
 - `parseSkillFile` / `parseSkillContent` — YAML frontmatter parser (no external deps)
 - `parseMcpConfig` / `discoverMcpTools` — reads `mcpServers` from Claude Desktop config and `.mcp.json`
@@ -127,7 +127,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ### Added
 - Turborepo monorepo scaffold
-- `@loopy/sdk` — `LoopyBridge`, `LoopySignals`, `LoopyMapper`, full TypeScript types
+- `@loopythinking/sdk` — `LoopyBridge`, `LoopySignals`, `LoopyMapper`, full TypeScript types
 - `packages/protocol/` — JSON Schema for Loop and WorkSignal + OpenAPI 3.1 spec
 - `packages/db/migrations/` — 004 migrations (loops, work_signals, agent_registry, indexes + RLS)
 - `apps/api/` — Hono REST API: 8 core endpoints, JWT + agent token auth middleware

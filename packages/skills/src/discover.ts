@@ -118,7 +118,7 @@ export function discoverSkills(options: DiscoverOptions = {}): ParsedSkill[] {
       findSkillFiles(dir, 0, skillFiles)
     } catch (err) {
       if (!silent) {
-        console.warn(`[@loopy/skills] Warning: error scanning ${dir}:`, err)
+        console.warn(`[@loopythinking/skills] Warning: error scanning ${dir}:`, err)
       }
     }
   }
@@ -134,7 +134,7 @@ export function discoverSkills(options: DiscoverOptions = {}): ParsedSkill[] {
       skills.push(parsed)
     } catch (err) {
       if (!silent) {
-        console.warn(`[@loopy/skills] Warning: could not parse ${filePath}:`, err)
+        console.warn(`[@loopythinking/skills] Warning: could not parse ${filePath}:`, err)
       }
     }
   }

@@ -13,8 +13,8 @@ body:
     attributes:
       label: Area
       options:
-        - "@loopy/sdk"
-        - "@loopy/skills"
+        - "@loopythinking/sdk"
+        - "@loopythinking/skills"
         - "apps/api"
         - "apps/web"
         - "packages/db"

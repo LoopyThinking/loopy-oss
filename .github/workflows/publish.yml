@@ -1,4 +1,4 @@
-name: Publish @loopy/sdk to npm
+name: Publish @loopythinking/sdk to npm
 
 on:
   push:
@@ -33,7 +33,7 @@ jobs:
       - name: Test
         run: npx turbo test
 
-      - name: Publish @loopy/sdk
+      - name: Publish @loopythinking/sdk
         run: npm publish --workspace packages/sdk --access public --provenance
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}

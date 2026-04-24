@@ -1,5 +1,5 @@
 // Shared types for the API layer.
-// These mirror the database schema and the @loopy/sdk types,
+// These mirror the database schema and the @loopythinking/sdk types,
 // but are kept independent to avoid coupling the API to the SDK.
 
 export type LoopStatus = 'open' | 'closed' | 'blocked'
