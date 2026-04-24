@@ -7,6 +7,8 @@ import loops from './routes/loops.js'
 import signals from './routes/signals.js'
 import agents from './routes/agents.js'
 import capabilities from './routes/capabilities.js'
+import orgs from './routes/orgs.js'
+import admin from './routes/admin.js'
 
 const app = new Hono()
 
@@ -23,11 +25,15 @@ app.route('/health', health)
 app.use('/loops/*', authMiddleware)
 app.use('/signals/*', authMiddleware)
 app.use('/agents/*', authMiddleware)
+app.use('/orgs/*', authMiddleware)
+app.use('/admin/*', authMiddleware)
 
 app.route('/loops', loops)
 app.route('/signals', signals)
 app.route('/agents', agents)
 app.route('/agents', capabilities)   // /agents/:agentId/skills + /agents/:agentId/tools
+app.route('/orgs', orgs)
+app.route('/admin', admin)
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 
