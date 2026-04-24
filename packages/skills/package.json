@@ -1,6 +1,6 @@
 {
   "name": "@loopy/skills",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "description": "Helper for auto-registering agent skills and tools with a Loopy instance",
   "license": "AGPL-3.0",
   "type": "module",
