@@ -222,5 +222,58 @@ export const api = {
       ),
   },
 
+  // ── Me / profile ──────────────────────────────────────────────────────────
+
+  me: {
+    get: () =>
+      request<{
+        id: string
+        email: string
+        display_name: string | null
+        created_at: string
+        orgs: Array<{ id: string; name: string; slug: string; role: OrgRole }>
+      }>('/me'),
+
+    update: (data: { display_name: string }) =>
+      request<{ id: string; email: string; display_name: string | null }>('/me', {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }),
+
+    agents: () =>
+      request<Array<{
+        id: string
+        agent_name: string
+        description: string | null
+        is_active: boolean
+        created_at: string
+        last_seen_at: string | null
+      }>>('/me/agents'),
+
+    revokeAgent: (agentId: string) =>
+      request<void>(`/me/agents/${agentId}`, { method: 'DELETE' }),
+  },
+
+  // ── Invites ────────────────────────────────────────────────────────────────
+
+  invites: {
+    get: (token: string) =>
+      request<{
+        org_id: string
+        org_name: string
+        org_slug: string
+        role: OrgRole
+        expires_at: string
+      }>(`/invites/${token}`),
+
+    accept: (token: string) =>
+      request<{
+        org_id: string
+        org_name: string
+        role: OrgRole
+        already_member: boolean
+      }>('/invites/accept', { method: 'POST', body: JSON.stringify({ token }) }),
+  },
+
   health: () => request<{ status: string; version: string }>('/health'),
 }
