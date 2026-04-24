@@ -1,0 +1,560 @@
+openapi: 3.1.0
+
+info:
+  title: Loopy OSS API
+  version: 0.1.0-beta
+  description: |
+    REST API for the open-source core of Loopy Thinking.
+
+    The Loopy protocol models work as a cycle:
+    > human or agent activity → Work Signal → Loop → Confidence Index → close with retrospective
+
+    ## Authentication
+
+    All endpoints require a Bearer token in the `Authorization` header.
+    Two token types are accepted:
+
+    - **User JWT** — issued by Supabase Auth after login. Identifies a user.
+    - **Agent Token** — generated via `POST /agents`. Identifies a registered agent acting on behalf of a user.
+
+    ```
+    Authorization: Bearer <token>
+    ```
+  contact:
+    name: Loopy OSS
+    url: https://github.com/loopy-thinking/loopy-oss
+    email: dev@loopy-thinking.com
+  license:
+    name: AGPL-3.0
+    url: https://www.gnu.org/licenses/agpl-3.0.html
+
+servers:
+  - url: http://localhost:3001
+    description: Local development
+  - url: https://loopythinking.ai/api
+    description: Loopy Cloud (production)
+
+tags:
+  - name: health
+    description: Service health check
+  - name: loops
+    description: Manage operational loops
+  - name: signals
+    description: Emit and query work signals
+  - name: agents
+    description: Register agents for API access
+
+paths:
+
+  /health:
+    get:
+      operationId: getHealth
+      tags: [health]
+      summary: Health check
+      description: Returns service status. No authentication required.
+      security: []
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthResponse'
+
+  /loops:
+    get:
+      operationId: listLoops
+      tags: [loops]
+      summary: List loops
+      description: Returns all loops for the authenticated user. Filter by status with the `status` query parameter.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: status
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [open, closed, blocked]
+          description: Filter loops by status. Omit to return all loops.
+      responses:
+        '200':
+          description: List of loops
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Loop'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+    post:
+      operationId: createLoop
+      tags: [loops]
+      summary: Create a loop
+      description: Creates a new operational loop with a title, optional hypothesis, and scope.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLoopRequest'
+            example:
+              title: "Decide on API framework for OSS"
+              hypothesis: "Hono will be faster to ship than Express and more readable for contributors"
+              scope: "personal"
+      responses:
+        '201':
+          description: Loop created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loop'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /loops/{id}:
+    get:
+      operationId: getLoop
+      tags: [loops]
+      summary: Get a loop
+      description: Returns a single loop by ID, including its work signals.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoopId'
+      responses:
+        '200':
+          description: Loop detail with signals
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoopWithSignals'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /loops/{id}/close:
+    post:
+      operationId: closeLoop
+      tags: [loops]
+      summary: Close a loop
+      description: |
+        Marks a loop as closed and records the resolution — the decision or outcome
+        that ended the loop. A closed loop cannot receive new signals.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoopId'
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CloseLoopRequest'
+            example:
+              resolution: "Chose Hono. Shipped the API in 2 days, team found it readable."
+      responses:
+        '200':
+          description: Loop closed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Loop'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /loops/{id}/signals:
+    get:
+      operationId: listSignalsByLoop
+      tags: [signals]
+      summary: List signals for a loop
+      description: Returns all work signals emitted to a specific loop, ordered by creation time.
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/LoopId'
+        - name: source
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [human, agent]
+          description: Filter signals by source.
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: [perception, interpretation, decision, action, reflection]
+          description: Filter signals by cognitive layer type.
+      responses:
+        '200':
+          description: List of work signals
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WorkSignal'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /signals:
+    post:
+      operationId: emitSignal
+      tags: [signals]
+      summary: Emit a work signal
+      description: |
+        Emits a work signal into a loop. This is the primary endpoint used by agents
+        to register activity on behalf of a user.
+
+        The `loopId` in the request body must reference an existing open loop owned
+        by the user associated with the token.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EmitSignalRequest'
+            example:
+              loopId: "550e8400-e29b-41d4-a716-446655440000"
+              type: "action"
+              content: "Deployed v0.1.0-beta to npm registry"
+              source: "agent"
+              metadata:
+                tool: "claude-cowork"
+                session_id: "abc123"
+      responses:
+        '201':
+          description: Signal emitted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkSignal'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: Loop not found or not accessible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /agents:
+    post:
+      operationId: registerAgent
+      tags: [agents]
+      summary: Register an agent
+      description: |
+        Registers a new agent and returns a Bearer token the agent can use
+        to authenticate API requests.
+
+        The token is returned **only once** at creation time — store it securely.
+        It is stored as a hash server-side and cannot be recovered.
+      security:
+        - BearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterAgentRequest'
+            example:
+              agentName: "claude-cowork-agent"
+              description: "Claude agent running in Cowork mode for Jaime's workspace"
+      responses:
+        '201':
+          description: Agent registered. Token is shown only once.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RegisterAgentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+components:
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        User JWT from Supabase Auth, or Agent Token from `POST /agents`.
+
+  parameters:
+    LoopId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+      description: UUID of the loop
+
+  responses:
+    Unauthorized:
+      description: Missing or invalid token
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Unauthorized"
+            message: "Missing or invalid Bearer token"
+    BadRequest:
+      description: Invalid request body
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Bad Request"
+            message: "title is required"
+    NotFound:
+      description: Resource not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error: "Not Found"
+            message: "Loop not found"
+
+  schemas:
+
+    # ── Health ────────────────────────────────────────────────────────────────
+
+    HealthResponse:
+      type: object
+      required: [status, version]
+      properties:
+        status:
+          type: string
+          enum: [ok]
+        version:
+          type: string
+          description: API version string
+          example: "0.1.0-beta"
+        timestamp:
+          type: string
+          format: date-time
+
+    # ── Loop ─────────────────────────────────────────────────────────────────
+
+    Loop:
+      type: object
+      required: [id, title, status, scope, confidence_index, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          example: "Decide on API framework for OSS"
+        hypothesis:
+          type: [string, "null"]
+          description: Working hypothesis or goal this loop is testing
+          example: "Hono will be faster to ship and more readable for contributors"
+        status:
+          type: string
+          enum: [open, closed, blocked]
+        scope:
+          type: string
+          enum: [personal, team, organizational]
+          default: personal
+        confidence_index:
+          type: integer
+          minimum: 0
+          maximum: 100
+          description: Evidence-based score indicating how grounded this loop is (0–100)
+          example: 72
+        resolution:
+          type: [string, "null"]
+          description: Closing statement explaining the decision or outcome
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        closed_at:
+          type: [string, "null"]
+          format: date-time
+
+    LoopWithSignals:
+      allOf:
+        - $ref: '#/components/schemas/Loop'
+        - type: object
+          properties:
+            signals:
+              type: array
+              items:
+                $ref: '#/components/schemas/WorkSignal'
+
+    CreateLoopRequest:
+      type: object
+      required: [title]
+      properties:
+        title:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Short, descriptive title for the loop
+        hypothesis:
+          type: string
+          description: Working hypothesis or goal this loop is testing
+        scope:
+          type: string
+          enum: [personal, team, organizational]
+          default: personal
+
+    CloseLoopRequest:
+      type: object
+      properties:
+        resolution:
+          type: string
+          description: Decision or outcome that ended the loop
+
+    # ── Work Signal ───────────────────────────────────────────────────────────
+
+    WorkSignal:
+      type: object
+      required: [id, loop_id, type, content, source, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        loop_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        type:
+          type: string
+          enum: [perception, interpretation, decision, action, reflection]
+          description: Cognitive layer this signal maps to
+          example: action
+        content:
+          type: string
+          minLength: 1
+          description: Human-readable description of the work activity
+          example: "Deployed v0.1.0-beta to npm registry"
+        source:
+          type: string
+          enum: [human, agent]
+          default: human
+        metadata:
+          type: object
+          description: Arbitrary key-value pairs for additional context
+          additionalProperties: true
+          example:
+            tool: "claude-cowork"
+            session_id: "abc123"
+        created_at:
+          type: string
+          format: date-time
+
+    EmitSignalRequest:
+      type: object
+      required: [loopId, type, content, source]
+      properties:
+        loopId:
+          type: string
+          format: uuid
+          description: ID of the loop this signal belongs to
+        type:
+          type: string
+          enum: [perception, interpretation, decision, action, reflection]
+          description: Cognitive layer this signal maps to
+        content:
+          type: string
+          minLength: 1
+          description: Human-readable description of the work activity
+        source:
+          type: string
+          enum: [human, agent]
+          default: human
+        metadata:
+          type: object
+          additionalProperties: true
+          description: Arbitrary key-value pairs for additional context
+
+    # ── Agent ─────────────────────────────────────────────────────────────────
+
+    RegisterAgentRequest:
+      type: object
+      required: [agentName]
+      properties:
+        agentName:
+          type: string
+          minLength: 1
+          maxLength: 100
+          description: Unique name identifying this agent
+          example: "claude-cowork-agent"
+        description:
+          type: string
+          description: Human-readable description of what this agent does
+          example: "Claude agent running in Cowork mode for Jaime's workspace"
+
+    RegisterAgentResponse:
+      type: object
+      required: [id, agentName, token, created_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        agentName:
+          type: string
+          example: "claude-cowork-agent"
+        token:
+          type: string
+          description: |
+            Bearer token for this agent. Shown only once — store it securely.
+            It is stored as a hash server-side and cannot be recovered.
+          example: "lpy_agent_abc123xyz..."
+        description:
+          type: [string, "null"]
+        created_at:
+          type: string
+          format: date-time
+
+    # ── Error ─────────────────────────────────────────────────────────────────
+
+    ErrorResponse:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: string
+          description: Short error code
+          example: "Not Found"
+        message:
+          type: string
+          description: Human-readable explanation
+          example: "Loop not found"

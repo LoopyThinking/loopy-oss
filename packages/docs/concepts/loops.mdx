@@ -1,0 +1,93 @@
+---
+title: Loops
+description: The core unit of work in the Loopy protocol.
+---
+
+## What is a loop?
+
+A **loop** is an operational container that organizes work signals over time toward a decision or outcome.
+
+Think of it as a named investigation with a hypothesis. You open a loop when you start working on something meaningful, emit signals as work progresses, and close it when you reach a decision — or abandon it if it gets blocked.
+
+```
+open → [signals accumulate] → closed
+         ↓
+       (blocked if stuck)
+```
+
+## Anatomy of a loop
+
+| Field | Description |
+|-------|-------------|
+| `title` | Short, descriptive name. What are you working toward? |
+| `hypothesis` | The working assumption being tested. Optional but recommended. |
+| `status` | `open`, `closed`, or `blocked` |
+| `scope` | `personal`, `team`, or `organizational` |
+| `confidence_index` | 0–100 score that grows as signals accumulate |
+| `resolution` | The decision or outcome when closing. Set on close. |
+
+## Creating a loop
+
+<Tabs>
+  <Tab title="SDK">
+    ```typescript
+    const loop = await loopy.createLoop({
+      title: 'Decide on API framework',
+      hypothesis: 'Hono will be faster to ship than Express',
+      scope: 'personal',
+    })
+    ```
+  </Tab>
+  <Tab title="API">
+    ```bash
+    curl -X POST http://localhost:3001/loops \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{
+        "title": "Decide on API framework",
+        "hypothesis": "Hono will be faster to ship than Express",
+        "scope": "personal"
+      }'
+    ```
+  </Tab>
+</Tabs>
+
+## Closing a loop
+
+Closing a loop marks it as resolved. Once closed, no more signals can be emitted into it.
+
+<Tabs>
+  <Tab title="SDK">
+    ```typescript
+    await loopy.closeLoop(loop.id, 'Chose Hono. Shipped in 2 days.')
+    ```
+  </Tab>
+  <Tab title="API">
+    ```bash
+    curl -X POST http://localhost:3001/loops/$LOOP_ID/close \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -d '{"resolution": "Chose Hono. Shipped in 2 days."}'
+    ```
+  </Tab>
+</Tabs>
+
+## Scope
+
+The `scope` field describes who this loop is relevant to:
+
+- **`personal`** — only visible to the user who created it (default in OSS)
+- **`team`** — shared with team members (Cloud feature)
+- **`organizational`** — org-wide visibility (Cloud feature)
+
+In the OSS version, all loops are effectively personal regardless of scope.
+
+## Best practices
+
+**Keep titles action-oriented.** "Decide on database" is better than "Database research".
+
+**Write a hypothesis.** Even a rough one. It forces clarity about what you're trying to find out, and becomes the benchmark when you close the loop.
+
+**Close loops promptly.** An open loop with no recent signals is a smell. Either close it with what you know, or mark it blocked.
+
+**One decision per loop.** If a loop spawns two separate decisions, close the first and open new loops for each branch.

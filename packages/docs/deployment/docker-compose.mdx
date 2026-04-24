@@ -1,0 +1,65 @@
+---
+title: Docker Compose
+description: Self-host the full Loopy stack with a single command.
+---
+
+Docker Compose is the recommended way to self-host Loopy. It runs PostgreSQL, runs all migrations automatically, and starts the API.
+
+<Info>
+Looking for the 10-minute quickstart? See [Quickstart](/quickstart).
+</Info>
+
+## What's included
+
+| Service | Image | Port |
+|---------|-------|------|
+| `db` | `postgres:16-alpine` | 5432 (local debug only) |
+| `api` | Built from `apps/api/` | 3001 |
+| `web` | Built from `apps/web/` | 3000 (Phase 3) |
+
+## Production checklist
+
+Before deploying to a real server:
+
+<Steps>
+  <Step title="Use strong secrets">
+    Generate real values: `openssl rand -hex 32` for both `POSTGRES_PASSWORD` and `JWT_SECRET`.
+  </Step>
+  <Step title="Lock down CORS">
+    Set `CORS_ORIGIN` to your exact frontend URL. Never use `*` in production.
+  </Step>
+  <Step title="Remove the DB port">
+    Delete the `ports` mapping from the `db` service so PostgreSQL is not publicly accessible.
+  </Step>
+  <Step title="Add a reverse proxy">
+    Put Caddy or Nginx in front of the API with HTTPS. Loopy API should never be exposed directly on port 3001 in production.
+  </Step>
+  <Step title="Mount persistent storage">
+    The `db_data` volume is Docker-managed by default. For production, use a named volume mapped to a real disk path or a managed database.
+  </Step>
+</Steps>
+
+## Updating
+
+```bash
+cd docker
+git pull
+docker compose build api
+docker compose up -d
+```
+
+New migrations are not applied automatically on update — you'll need to run them manually if you add migrations.
+
+## Logs
+
+```bash
+docker compose logs -f api
+docker compose logs -f db
+```
+
+## Resetting all data
+
+```bash
+docker compose down -v  # removes db_data volume
+docker compose up -d    # fresh start, migrations re-run
+```

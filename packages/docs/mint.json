@@ -1,0 +1,92 @@
+{
+  "$schema": "https://mintlify.com/schema.json",
+  "name": "Loopy OSS",
+  "logo": {
+    "light": "/logo/light.svg",
+    "dark": "/logo/dark.svg"
+  },
+  "favicon": "/favicon.svg",
+  "colors": {
+    "primary": "#5660f5",
+    "light": "#7585ff",
+    "dark": "#3a33ce",
+    "anchors": {
+      "from": "#5660f5",
+      "to": "#3a33ce"
+    }
+  },
+  "topbarLinks": [
+    {
+      "name": "GitHub",
+      "url": "https://github.com/loopy-thinking/loopy-oss"
+    }
+  ],
+  "topbarCtaButton": {
+    "name": "npm install",
+    "url": "https://www.npmjs.com/package/@loopy/sdk"
+  },
+  "tabs": [
+    { "name": "SDK", "url": "sdk" },
+    { "name": "API Reference", "url": "api" }
+  ],
+  "anchors": [
+    {
+      "name": "GitHub",
+      "icon": "github",
+      "url": "https://github.com/loopy-thinking/loopy-oss"
+    },
+    {
+      "name": "Discord",
+      "icon": "discord",
+      "url": "https://discord.gg/loopy-oss"
+    },
+    {
+      "name": "npm",
+      "icon": "npm",
+      "url": "https://www.npmjs.com/package/@loopy/sdk"
+    }
+  ],
+  "navigation": [
+    {
+      "group": "Get Started",
+      "pages": ["introduction", "quickstart"]
+    },
+    {
+      "group": "Concepts",
+      "pages": [
+        "concepts/loops",
+        "concepts/work-signals",
+        "concepts/confidence-index"
+      ]
+    },
+    {
+      "group": "SDK",
+      "pages": [
+        "sdk/installation",
+        "sdk/bridge",
+        "sdk/signals",
+        "sdk/mapper"
+      ]
+    },
+    {
+      "group": "API Reference",
+      "pages": ["api/reference"]
+    },
+    {
+      "group": "Deployment",
+      "pages": [
+        "deployment/docker-compose",
+        "deployment/railway",
+        "deployment/render"
+      ]
+    },
+    {
+      "group": "Contributing",
+      "pages": ["contribute"]
+    }
+  ],
+  "footerSocials": {
+    "github": "https://github.com/loopy-thinking/loopy-oss",
+    "twitter": "https://twitter.com/loopythinking"
+  }
+}

@@ -1,0 +1,47 @@
+---
+title: Introduction
+description: The open-source protocol for tracking human and agent work as structured signals.
+---
+
+## What is Loopy?
+
+Loopy is an **open-source work signal protocol**. It gives humans and AI agents a shared vocabulary for recording what's happening inside a project — not just tasks completed, but *why* decisions were made, *what* was observed, and *how* confidence evolved over time.
+
+The mental model is simple:
+
+> human or agent activity → **Work Signal** → **Loop** → **Confidence Index** → close with retrospective
+
+Every meaningful unit of work becomes a signal. Signals accumulate inside a loop. The loop closes when a decision is reached.
+
+## Why it exists
+
+Most productivity tools track *what* was done. Loopy tracks *how thinking evolved*.
+
+When an AI agent runs autonomously — analyzing, deciding, acting — the work becomes invisible unless it's recorded in a structured way. Loopy solves this by giving agents and humans the same API to emit signals.
+
+The result is a shared timeline: you can see exactly what the agent observed, what it concluded, what it decided, and what it did. And when you look back, the confidence index tells you how grounded that loop was.
+
+## What's in the OSS release
+
+| Package | What it does |
+|---------|-------------|
+| `@loopy/sdk` | TypeScript client — create loops, emit signals, map activity |
+| `@loopy/protocol` | JSON Schema + OpenAPI spec — the wire format |
+| `apps/api` | REST API built with Hono — self-hosteable |
+| `apps/web` | Minimal React frontend — visualize loops and signals |
+| `packages/db` | PostgreSQL migrations — the core schema |
+| `docker/` | Docker Compose — run everything locally in one command |
+
+## What's in the Cloud version
+
+Collaboration (team/org loops), AI-powered IPL analytics, SSO, billing, governance policies, and priority support remain in [Loopy Thinking Cloud](https://loopythinking.ai).
+
+The OSS core is not a stripped-down version — it's the full protocol. The Cloud version adds features that require shared infrastructure.
+
+## License
+
+Loopy OSS is released under [AGPL v3](https://github.com/loopy-thinking/loopy-oss/blob/main/LICENSE). You can self-host, fork, and build on top of it freely. If you distribute a modified version as a network service, you must open-source your changes.
+
+<Card title="Quickstart" icon="rocket" href="/quickstart">
+  Deploy Loopy in under 10 minutes with Docker Compose.
+</Card>
