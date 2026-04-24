@@ -9,7 +9,7 @@ const allowedOrigin = process.env.CORS_ORIGIN ?? '*'
 export const corsMiddleware = cors({
   origin: allowedOrigin,
   allowMethods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Org-Id'],
   exposeHeaders: ['Content-Length'],
   maxAge: 600,
   credentials: allowedOrigin !== '*',
