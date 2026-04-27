@@ -183,6 +183,37 @@ capabilities.post('/:agentId/skills/batch', async (c) => {
 })
 
 /**
+ * DELETE /agents/:agentId/skills/:skillId
+ * Soft-delete a skill (set is_active = false).
+ */
+capabilities.delete('/:agentId/skills/:skillId', async (c) => {
+  const routeAgentId = c.req.param('agentId')
+  const skillId      = c.req.param('skillId')
+  const agentId = await resolveAgentOwnership(
+    routeAgentId,
+    c.get('agentId'),
+    c.get('userId')
+  )
+
+  if (!agentId) {
+    return c.json({ error: 'Forbidden', message: 'Agent not found or access denied' }, 403)
+  }
+
+  const [row] = await sql<Array<{ id: string }>>`
+    UPDATE agent_skills
+    SET is_active = false
+    WHERE id = ${skillId} AND agent_id = ${agentId}
+    RETURNING id
+  `
+
+  if (!row) {
+    return c.json({ error: 'Not Found', message: 'Skill not found' }, 404)
+  }
+
+  return c.body(null, 204)
+})
+
+/**
  * GET /agents/:agentId/skills
  * List all active skills for an agent.
  */
@@ -341,6 +372,37 @@ capabilities.post('/:agentId/tools/batch', async (c) => {
   }
 
   return c.json({ registered: results.length, tools: results }, 200)
+})
+
+/**
+ * DELETE /agents/:agentId/tools/:toolId
+ * Soft-delete a tool (set is_active = false).
+ */
+capabilities.delete('/:agentId/tools/:toolId', async (c) => {
+  const routeAgentId = c.req.param('agentId')
+  const toolId       = c.req.param('toolId')
+  const agentId = await resolveAgentOwnership(
+    routeAgentId,
+    c.get('agentId'),
+    c.get('userId')
+  )
+
+  if (!agentId) {
+    return c.json({ error: 'Forbidden', message: 'Agent not found or access denied' }, 403)
+  }
+
+  const [row] = await sql<Array<{ id: string }>>`
+    UPDATE agent_tools
+    SET is_active = false
+    WHERE id = ${toolId} AND agent_id = ${agentId}
+    RETURNING id
+  `
+
+  if (!row) {
+    return c.json({ error: 'Not Found', message: 'Tool not found' }, 404)
+  }
+
+  return c.body(null, 204)
 })
 
 /**

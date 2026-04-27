@@ -22,6 +22,9 @@ export interface Loop {
   created_at: string
   updated_at: string
   closed_at: string | null
+  // Populated from v_team_loops view (admin team queries)
+  owner_name?: string | null
+  owner_email?: string
 }
 
 export interface WorkSignal {
@@ -74,6 +77,19 @@ export interface OrgMember {
   // Joined from users table when listing members
   email?: string
   display_name?: string | null
+}
+
+export interface OrgInvite {
+  id: string
+  org_id: string
+  token: string
+  role: OrgRole
+  expires_at: string
+  accepted_at: string | null
+  revoked_at: string | null
+  created_at: string
+  // Joined from users table when listing invites
+  invited_by_email?: string
 }
 
 // ── Capability types (agent_skills + agent_tools) ────────────────────────────
