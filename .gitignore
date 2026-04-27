@@ -33,3 +33,6 @@ coverage/
 
 # Docker
 docker-compose.override.yml
+
+# Git bundles (backup artifacts)
+*.bundle

@@ -102,7 +102,7 @@ VALUES (
   'AGPL v3 is the right choice to prevent SaaS forks without contribution',
   'open', 'personal', 100, 12
 )
-ON CONFLICT (id) DO NOTHING;
+ON CONFLICT (id) DO UPDATE SET status = 'open', resolution = NULL, closed_at = NULL;
 
 INSERT INTO work_signals (loop_id, user_id, org_id, type, content, source, estimated_human_minutes)
 VALUES

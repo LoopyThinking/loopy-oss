@@ -1,17 +1,17 @@
-# @loopy/sdk
+# @loopythinking/sdk
 
 TypeScript SDK for [Loopy Thinking](https://loopythinking.ai) — register work signals, manage loops, and connect agents to the Loopy protocol.
 
 ## Installation
 
 ```bash
-npm install @loopy/sdk
+npm install @loopythinking/sdk
 ```
 
 ## Quick Start
 
 ```typescript
-import { LoopyBridge, LoopySignals, LoopyMapper } from '@loopy/sdk'
+import { LoopyBridge, LoopySignals, LoopyMapper } from '@loopythinking/sdk'
 
 const loopy = new LoopyBridge({
   token: process.env.LOOPY_AGENT_REGISTRY_TOKEN,

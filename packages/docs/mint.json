@@ -23,7 +23,7 @@
   ],
   "topbarCtaButton": {
     "name": "npm install",
-    "url": "https://www.npmjs.com/package/@loopy/sdk"
+    "url": "https://www.npmjs.com/package/@loopythinking/sdk"
   },
   "tabs": [
     { "name": "SDK", "url": "sdk" },
@@ -43,7 +43,7 @@
     {
       "name": "npm",
       "icon": "npm",
-      "url": "https://www.npmjs.com/package/@loopy/sdk"
+      "url": "https://www.npmjs.com/package/@loopythinking/sdk"
     }
   ],
   "navigation": [
