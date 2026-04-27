@@ -1,0 +1,50 @@
+---
+title: Render
+description: Deploy Loopy OSS to Render with a managed PostgreSQL database.
+---
+
+[Render](https://render.com) offers a generous free tier and works well for self-hosted Loopy instances.
+
+## Steps
+
+<Steps>
+  <Step title="Create a PostgreSQL database">
+    In Render dashboard → **New** → **PostgreSQL**. Choose the free tier for testing, or a paid plan for production. Copy the **Internal Database URL**.
+  </Step>
+
+  <Step title="Create a Web Service for the API">
+    **New** → **Web Service** → connect your forked `loopy-oss` repo.
+
+    Configure:
+    - **Root directory:** `apps/api`
+    - **Build command:** `npm ci && npm run build`
+    - **Start command:** `node dist/index.js`
+    - **Instance type:** Free (testing) or Starter ($7/month)
+  </Step>
+
+  <Step title="Set environment variables">
+    In the Web Service → **Environment**:
+
+    | Variable | Value |
+    |----------|-------|
+    | `DATABASE_URL` | Internal Database URL from step 1 |
+    | `JWT_SECRET` | `openssl rand -hex 32` output |
+    | `CORS_ORIGIN` | Your frontend URL |
+    | `PORT` | `3001` |
+  </Step>
+
+  <Step title="Run migrations">
+    In Render dashboard → your PostgreSQL service → **PSQL Command** → connect and paste the migration files from `packages/db/migrations/` in order.
+  </Step>
+
+  <Step title="Deploy">
+    Render deploys automatically on every push to `main`. Verify with:
+    ```bash
+    curl https://your-service.onrender.com/health
+    ```
+  </Step>
+</Steps>
+
+<Warning>
+Render's free tier spins down after 15 minutes of inactivity. Use a paid tier or a cron ping for production.
+</Warning>

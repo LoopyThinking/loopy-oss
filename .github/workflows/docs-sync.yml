@@ -1,0 +1,44 @@
+name: Sync Docs to Mintlify
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'packages/docs/**'
+
+jobs:
+  sync:
+    name: Sync packages/docs → LoopyThinking/docs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout loopy-oss
+        uses: actions/checkout@v4
+        with:
+          path: loopy-oss
+
+      - name: Checkout docs repo
+        uses: actions/checkout@v4
+        with:
+          repository: LoopyThinking/docs
+          token: ${{ secrets.DOCS_DEPLOY_TOKEN }}
+          path: docs-repo
+
+      - name: Sync packages/docs/ → docs-repo/
+        run: |
+          # Remove existing content (except .git)
+          find docs-repo -mindepth 1 -not -path 'docs-repo/.git*' -delete
+          # Copy new content
+          cp -r loopy-oss/packages/docs/. docs-repo/
+
+      - name: Commit and push if changed
+        working-directory: docs-repo
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to sync."
+          else
+            git commit -m "docs: sync from loopy-oss packages/docs [skip ci]"
+            git push
+          fi

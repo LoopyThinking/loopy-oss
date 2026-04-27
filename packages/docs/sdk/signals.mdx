@@ -1,0 +1,109 @@
+---
+title: LoopySignals
+description: Emit work signals and query signal history.
+---
+
+## Overview
+
+`LoopySignals` is a static class for emitting and querying work signals. Unlike `LoopyBridge`, it doesn't maintain state — you pass the config on each call.
+
+```typescript
+import { LoopySignals } from '@loopy/sdk'
+
+const config = {
+  token: process.env.LOOPY_AGENT_TOKEN,
+  baseUrl: process.env.LOOPY_BASE_URL,
+}
+```
+
+---
+
+## Methods
+
+### `LoopySignals.emit(signal, config)`
+
+Emits a work signal into a loop and returns the created signal.
+
+```typescript
+const signal = await LoopySignals.emit({
+  loopId: loop.id,
+  type: 'action',
+  content: 'Deployed v0.1.0-beta to npm registry',
+  source: 'agent',
+  metadata: {
+    tool: 'claude-cowork',
+    session: 'abc123',
+  },
+}, config)
+```
+
+**Signal fields:**
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `loopId` | `string` | ✅ | UUID of the target loop |
+| `type` | `CognitiveLayer` | ✅ | One of the five cognitive layers |
+| `content` | `string` | ✅ | Human-readable description of the activity |
+| `source` | `'human' \| 'agent'` | ✅ | Who emitted this signal |
+| `metadata` | `Record<string, unknown>` | — | Arbitrary context (tool name, session ID, etc.) |
+
+**Throws** if the loop is closed, doesn't exist, or the token is invalid.
+
+---
+
+### `LoopySignals.listByLoop(loopId, config)`
+
+Returns all signals for a given loop, ordered by creation time ascending.
+
+```typescript
+const signals = await LoopySignals.listByLoop(loop.id, config)
+// → WorkSignal[]
+```
+
+---
+
+## Cognitive layer quick reference
+
+| Value | When to use |
+|-------|-------------|
+| `'perception'` | Taking in information — reading, scanning, observing |
+| `'interpretation'` | Making sense of information — evaluating, assessing |
+| `'decision'` | Committing to a direction — choosing, approving |
+| `'action'` | Doing something — the default |
+| `'reflection'` | Looking back — learning, retrospecting |
+
+<Tip>
+Not sure which layer to use? Use `LoopyMapper` instead — it classifies the layer automatically from the description text.
+</Tip>
+
+---
+
+## Example: agent emitting a full cognitive cycle
+
+```typescript
+const config = { token: process.env.LOOPY_AGENT_TOKEN }
+
+// 1. Perception — taking in information
+await LoopySignals.emit({
+  loopId,
+  type: 'perception',
+  content: 'Scanned 47 PRs merged in the last sprint. Found 3 with no tests.',
+  source: 'agent',
+}, config)
+
+// 2. Interpretation — making sense of it
+await LoopySignals.emit({
+  loopId,
+  type: 'interpretation',
+  content: 'The untested PRs are all in the payments module — high risk area.',
+  source: 'agent',
+}, config)
+
+// 3. Decision — committing to a direction
+await LoopySignals.emit({
+  loopId,
+  type: 'decision',
+  content: 'Prioritize test coverage for payments module before next sprint.',
+  source: 'agent',
+}, config)
+```

@@ -23,7 +23,7 @@ El OSS entrega ese flujo completo, self-hosteable, con SDK publicado en npm. Las
 |-----------|-----|-----------|
 | Loop lifecycle (create, signal, close) | ✅ | ✅ |
 | Confidence Index básico | ✅ | ✅ |
-| SDK `@loopy/sdk` | ✅ | ✅ |
+| SDK `@loopythinking/sdk` | ✅ | ✅ |
 | MCP Server `loopy-mcp` | ✅ | ✅ |
 | Self-hosting con Docker | ✅ | — |
 | Frontend mínimo (visualizar loops/signals) | ✅ | ✅ |
@@ -45,7 +45,7 @@ El OSS entrega ese flujo completo, self-hosteable, con SDK publicado en npm. Las
 ```
 loopy-oss/
 ├── packages/
-│   ├── sdk/              ← @loopy/sdk — cliente TypeScript (YA EXISTE, conservar)
+│   ├── sdk/              ← @loopythinking/sdk — cliente TypeScript (YA EXISTE, conservar)
 │   ├── protocol/         ← JSON Schema + OpenAPI spec (CREAR)
 │   ├── db/               ← Schema PostgreSQL + migrations limpias (RECONSTRUIR)
 │   └── mcp/              ← loopy-mcp server (CREAR en Fase 4)
@@ -138,13 +138,13 @@ LoopyMapper.map(loopId, { description, source?, metadata? }, config)
 - [ ] Agregar `packages/sdk/tsconfig.json` y script `build` con tsup
 - [ ] Configurar exports en package.json para ESM + CJS
 - [ ] Tests básicos con Vitest
-- [ ] Publicar como `@loopy/sdk@0.1.0-beta` en npm
+- [ ] Publicar como `@loopythinking/sdk@0.1.0-beta` en npm
 
 ---
 
 ## FASE 1 — SDK Build + Scaffolding Base
 **Período:** Semanas 1–3 (21 abril – 11 mayo 2026)  
-**Entregable:** `@loopy/sdk` v0.1.0-beta publicado en npm + monorepo scaffold completo
+**Entregable:** `@loopythinking/sdk` v0.1.0-beta publicado en npm + monorepo scaffold completo
 
 ### Semana 1: GitHub, Monorepo, SDK Build (en curso)
 
@@ -194,7 +194,7 @@ LoopyMapper.map(loopId, { description, source?, metadata? }, config)
 
 - [ ] Crear cuenta npm bajo org `@loopy`
 
-- [ ] Publicar `@loopy/sdk@0.1.0-beta` en npm
+- [ ] Publicar `@loopythinking/sdk@0.1.0-beta` en npm
 
 - [ ] Actualizar README principal con instrucción de instalación
 
@@ -204,7 +204,7 @@ LoopyMapper.map(loopId, { description, source?, metadata? }, config)
 - [ ] `packages/protocol/` con JSON Schema + OpenAPI
 - [ ] Tests Vitest pasando en CI
 - [ ] CI/CD con GitHub Actions funcionando
-- [ ] `@loopy/sdk@0.1.0-beta` publicado en npm
+- [ ] `@loopythinking/sdk@0.1.0-beta` publicado en npm
 
 ---
 
@@ -534,7 +534,7 @@ get_confidence       ← obtener confidence index de un loop
 ## Métricas de Éxito a 90 Días (al 30 junio 2026)
 
 - [ ] 500+ estrellas en GitHub
-- [ ] 200+ descargas semanales de `@loopy/sdk` en npm
+- [ ] 200+ descargas semanales de `@loopythinking/sdk` en npm
 - [ ] 100+ miembros activos en Discord
 - [ ] 3+ instancias self-hosted documentadas por usuarios externos
 - [ ] 10+ clientes pagos Cloud provenientes del canal OSS
@@ -602,6 +602,6 @@ La separación es una fortaleza, no un workaround.
 
 - **Email OSS:** dev@loopy-thinking.com
 - **GitHub:** https://github.com/loopy-thinking/loopy-oss
-- **npm:** https://www.npmjs.com/package/@loopy/sdk
+- **npm:** https://www.npmjs.com/package/@loopythinking/sdk
 - **Docs:** docs.loopythinking.dev (disponible en Fase 3)
 - **Discord:** por crear en Semana 9

@@ -1,0 +1,44 @@
+---
+title: Railway
+description: Deploy Loopy OSS to Railway in minutes.
+---
+
+[Railway](https://railway.app) is the fastest way to deploy Loopy OSS to production with a managed PostgreSQL database.
+
+## Steps
+
+<Steps>
+  <Step title="Fork the repo">
+    Fork [loopy-thinking/loopy-oss](https://github.com/loopy-thinking/loopy-oss) to your GitHub account.
+  </Step>
+
+  <Step title="Create a new Railway project">
+    Go to [railway.app/new](https://railway.app/new) → **Deploy from GitHub repo** → select your fork.
+  </Step>
+
+  <Step title="Add a PostgreSQL database">
+    In your Railway project → **New** → **Database** → **PostgreSQL**. Railway provisions the database and sets `DATABASE_URL` automatically.
+  </Step>
+
+  <Step title="Configure the API service">
+    In the Railway project, set the root directory to `apps/api` and add these environment variables:
+
+    | Variable | Value |
+    |----------|-------|
+    | `JWT_SECRET` | `openssl rand -hex 32` output |
+    | `CORS_ORIGIN` | Your frontend URL (or `*` for now) |
+    | `PORT` | `3001` |
+  </Step>
+
+  <Step title="Run migrations">
+    In Railway → your PostgreSQL service → **Query** tab, paste and run the migrations from `packages/db/migrations/` in order (001 → 002 → 003 → 004).
+  </Step>
+
+  <Step title="Verify">
+    Visit `https://your-api.up.railway.app/health` — you should see `{"status":"ok"}`.
+  </Step>
+</Steps>
+
+## Estimated cost
+
+Railway's Hobby plan ($5/month) covers a small Loopy instance. The free tier may work for testing but has sleep-mode limitations.

@@ -7,6 +7,10 @@ import loops from './routes/loops.js'
 import signals from './routes/signals.js'
 import agents from './routes/agents.js'
 import capabilities from './routes/capabilities.js'
+import orgs from './routes/orgs.js'
+import admin from './routes/admin.js'
+import invites from './routes/invites.js'
+import me from './routes/me.js'
 
 const app = new Hono()
 
@@ -23,11 +27,19 @@ app.route('/health', health)
 app.use('/loops/*', authMiddleware)
 app.use('/signals/*', authMiddleware)
 app.use('/agents/*', authMiddleware)
+app.use('/orgs/*', authMiddleware)
+app.use('/admin/*', authMiddleware)
+app.use('/me/*', authMiddleware)
+// /invites/:token is public; /invites/accept requires auth (handled inside route)
 
 app.route('/loops', loops)
 app.route('/signals', signals)
 app.route('/agents', agents)
 app.route('/agents', capabilities)   // /agents/:agentId/skills + /agents/:agentId/tools
+app.route('/orgs', orgs)
+app.route('/admin', admin)
+app.route('/invites', invites)       // GET /invites/:token (public) + POST /invites/accept (auth)
+app.route('/me', me)                 // GET/PATCH /me, GET/DELETE /me/agents
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 

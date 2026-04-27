@@ -1,0 +1,180 @@
+---
+title: Quickstart
+description: Deploy a self-hosted Loopy instance and emit your first signal in under 10 minutes.
+---
+
+## Prerequisites
+
+- [Docker](https://docs.docker.com/get-docker/) 24+ and Docker Compose v2+
+- [Node.js](https://nodejs.org) 20+ (for the SDK examples)
+- A terminal
+
+---
+
+## Step 1 — Clone the repo
+
+```bash
+git clone https://github.com/loopy-thinking/loopy-oss.git
+cd loopy-oss
+```
+
+## Step 2 — Create your `.env` file
+
+```bash
+cp .env.example .env
+```
+
+Open `.env` and set two required values:
+
+```bash
+# Random password for PostgreSQL
+POSTGRES_PASSWORD=mysecretpassword
+
+# 32-byte hex secret for JWT signing
+# Generate one now:
+JWT_SECRET=$(openssl rand -hex 32)
+echo "JWT_SECRET=$JWT_SECRET" >> .env
+```
+
+## Step 3 — Start the stack
+
+```bash
+cd docker
+docker compose up -d
+```
+
+This pulls `postgres:16-alpine`, builds the Hono API, runs all 4 migrations, and starts the API on port 3001. Give it about 20 seconds on first run.
+
+## Step 4 — Verify the API is running
+
+```bash
+curl http://localhost:3001/health
+```
+
+```json
+{ "status": "ok", "version": "0.1.0-beta", "timestamp": "..." }
+```
+
+## Step 5 — Generate a JWT token
+
+For self-hosted deployments, generate a token using your `JWT_SECRET`:
+
+```bash
+node -e "
+const { SignJWT } = require('jose');
+const secret = new TextEncoder().encode('$(grep JWT_SECRET .env | cut -d= -f2)');
+new SignJWT({ sub: '00000000-0000-0000-0000-000000000001' })
+  .setProtectedHeader({ alg: 'HS256' })
+  .setExpirationTime('30d')
+  .sign(secret)
+  .then(t => console.log('TOKEN=' + t));
+"
+```
+
+Copy the token value. You'll use it as `$TOKEN` in the steps below.
+
+## Step 6 — Create a loop
+
+```bash
+curl -X POST http://localhost:3001/loops \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "title": "Migrate auth to new provider",
+    "hypothesis": "The migration will take 2 days with zero downtime",
+    "scope": "personal"
+  }'
+```
+
+Save the `id` from the response as `$LOOP_ID`.
+
+## Step 7 — Register an agent
+
+```bash
+curl -X POST http://localhost:3001/agents \
+  -H "Authorization: Bearer $TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{"agentName": "my-agent", "description": "My first Loopy agent"}'
+```
+
+<Warning>
+Save the `token` from the response immediately — it's shown only once.
+</Warning>
+
+Use the agent token as `$AGENT_TOKEN` below.
+
+## Step 8 — Emit a signal
+
+```bash
+curl -X POST http://localhost:3001/signals \
+  -H "Authorization: Bearer $AGENT_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"loopId\": \"$LOOP_ID\",
+    \"type\": \"action\",
+    \"content\": \"Analyzed current auth implementation — 3 endpoints affected\",
+    \"source\": \"agent\"
+  }"
+```
+
+## Step 9 — Check the loop
+
+```bash
+curl -H "Authorization: Bearer $TOKEN" \
+  http://localhost:3001/loops/$LOOP_ID
+```
+
+You'll see the loop with `confidence_index` updated and your signal in the `signals` array.
+
+---
+
+## Using the SDK
+
+You can also use `@loopy/sdk` instead of raw curl:
+
+```bash
+npm install @loopy/sdk
+```
+
+```typescript
+import { LoopyBridge, LoopyMapper } from '@loopy/sdk'
+
+const loopy = new LoopyBridge({
+  token: process.env.LOOPY_TOKEN,
+  baseUrl: 'http://localhost:3001',
+})
+
+// Create a loop
+const loop = await loopy.createLoop({
+  title: 'Migrate auth to new provider',
+  hypothesis: 'The migration will take 2 days with zero downtime',
+})
+
+// Let the mapper classify the activity automatically
+await LoopyMapper.map(loop.id, {
+  description: 'Analyzed current auth implementation — 3 endpoints affected',
+  source: 'agent',
+}, { token: process.env.LOOPY_AGENT_TOKEN, baseUrl: 'http://localhost:3001' })
+
+// Close the loop when done
+await loopy.closeLoop(loop.id, 'Migration complete. Zero downtime achieved.')
+```
+
+---
+
+## What's next
+
+<CardGroup cols={2}>
+  <Card title="Concepts" icon="book" href="/concepts/loops">
+    Understand loops, signals, and the confidence index.
+  </Card>
+  <Card title="SDK Reference" icon="code" href="/sdk/installation">
+    Full SDK documentation with examples.
+  </Card>
+  <Card title="API Reference" icon="server" href="/api/reference">
+    All 8 endpoints documented.
+  </Card>
+  <Card title="Deploy to Railway" icon="train" href="/deployment/railway">
+    One-click deploy to Railway.
+  </Card>
+</CardGroup>

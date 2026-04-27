@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: GitHub Discussions (questions, ideas, show-and-tell)
+    url: https://github.com/loopy-thinking/loopy-oss/discussions
+    about: Not sure if it's a bug? Start a discussion first.
+  - name: Email
+    url: mailto:dev@loopy-thinking.com
+    about: Security vulnerabilities or commercial licensing.

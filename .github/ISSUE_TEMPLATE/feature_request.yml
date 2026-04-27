@@ -1,0 +1,59 @@
+name: Feature request
+description: Propose a new feature or improvement
+labels: ["enhancement", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Before opening a feature request, check [GitHub Discussions](https://github.com/loopy-thinking/loopy-oss/discussions)
+        to see if it's already being discussed. For large proposals, start a Discussion first.
+
+  - type: dropdown
+    id: area
+    attributes:
+      label: Area
+      options:
+        - "@loopythinking/sdk"
+        - "@loopythinking/skills"
+        - "apps/api"
+        - "apps/web"
+        - "packages/db"
+        - "docker / self-hosting"
+        - "documentation"
+        - "new package"
+        - "other"
+    validations:
+      required: true
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem does this solve?
+      description: Describe the situation that makes this feature valuable.
+      placeholder: "Right now there's no way to query loops by confidence range. I want to surface low-confidence loops in my weekly review."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed solution
+      description: How would you implement or expose this feature?
+      placeholder: |
+        Add a `minConfidence` / `maxConfidence` query param to `GET /loops`.
+        In the SDK: `loopy.listActiveLoops({ confidenceBelow: 40 })`.
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: What other approaches did you consider?
+
+  - type: checkboxes
+    id: willing
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to open a PR for this
