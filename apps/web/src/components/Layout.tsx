@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, Repeat2, Bot, BarChart2, BookOpen,
-  Settings, ChevronDown, LogOut, User, Key, Building2, Menu, X,
+  Settings, ChevronDown, LogOut, User, Key, Building2, Menu, X, Users,
 } from 'lucide-react'
 import {
   api, clearToken, clearCurrentOrgId,
@@ -23,7 +23,8 @@ const navItems = [
   { to: '/framework', icon: BookOpen,        label: 'Framework' },
   { to: '/settings',  icon: Settings,        label: 'Ajustes' },
 ]
-const adminItem = { to: '/admin', icon: BarChart2, label: 'Panel ejecutivo' }
+const adminItem     = { to: '/admin',       icon: BarChart2, label: 'Panel ejecutivo' }
+const adminTeamItem = { to: '/admin/team',  icon: Users,     label: 'Equipo' }
 
 export function Layout({ children, title, breadcrumbs }: LayoutProps) {
   const [orgs, setOrgs]            = useState<Organization[]>([])
@@ -98,22 +99,37 @@ export function Layout({ children, title, breadcrumbs }: LayoutProps) {
           </NavLink>
         ))}
         {isAdmin && (
-          <NavLink
-            to={adminItem.to}
-            onClick={() => setSidebar(false)}
-            className={({ isActive }) =>
-              `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
-                isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
-              }`
-            }
-          >
-            <adminItem.icon size={17} strokeWidth={1.75} />
-            {adminItem.label}
-          </NavLink>
+          <>
+            <NavLink
+              to={adminItem.to}
+              end
+              onClick={() => setSidebar(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`
+              }
+            >
+              <adminItem.icon size={17} strokeWidth={1.75} />
+              {adminItem.label}
+            </NavLink>
+            <NavLink
+              to={adminTeamItem.to}
+              onClick={() => setSidebar(false)}
+              className={({ isActive }) =>
+                `flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                  isActive ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900'
+                }`
+              }
+            >
+              <adminTeamItem.icon size={17} strokeWidth={1.75} />
+              {adminTeamItem.label}
+            </NavLink>
+          </>
         )}
       </div>
       <div className="px-5 py-4 border-t border-gray-100">
-        <span className="text-xs text-gray-400">v0.3.0</span>
+        <span className="text-xs text-gray-400">v0.4.0</span>
       </div>
     </nav>
   )

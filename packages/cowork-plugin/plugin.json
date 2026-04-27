@@ -1,0 +1,46 @@
+{
+  "name": "loopy-oss",
+  "version": "0.4.0",
+  "displayName": "Loopy OSS",
+  "description": "Connect Claude Cowork to your self-hosted Loopy OSS instance. Register agents, create loops, emit signals, and manage your team — no cloud required.",
+  "author": "LoopyThinking",
+  "license": "AGPL-3.0-only",
+  "skills": [
+    {
+      "name": "loopy-oss-bridge",
+      "path": "skills/loopy-oss-bridge/SKILL.md",
+      "description": "Setup, agent registration, and org context"
+    },
+    {
+      "name": "loopy-oss-loop-mapper",
+      "path": "skills/loopy-oss-loop-mapper/SKILL.md",
+      "description": "Translate work into loops (Work Signal → Loop pipeline)"
+    },
+    {
+      "name": "loopy-oss-signal-emit",
+      "path": "skills/loopy-oss-signal-emit/SKILL.md",
+      "description": "Emit a signal to an existing loop"
+    },
+    {
+      "name": "loopy-oss-collab-bridge",
+      "path": "skills/loopy-oss-collab-bridge/SKILL.md",
+      "description": "Invite teammates and share loops"
+    },
+    {
+      "name": "loopy-oss-ipl-tracker",
+      "path": "skills/loopy-oss-ipl-tracker/SKILL.md",
+      "description": "Summarise IPL hours liberated by agents"
+    }
+  ],
+  "env": {
+    "LOOPY_BASE_URL": {
+      "description": "Base URL of your Loopy OSS API (without trailing slash)",
+      "default": "http://localhost:3001",
+      "required": false
+    },
+    "LOOPY_AGENT_TOKEN": {
+      "description": "Agent token returned by POST /agents. Set after first registration.",
+      "required": false
+    }
+  }
+}

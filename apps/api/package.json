@@ -1,6 +1,6 @@
 {
   "name": "@loopy/api",
-  "version": "0.1.0",
+  "version": "0.4.0",
   "description": "Loopy OSS REST API — self-hosteable backend built with Hono",
   "license": "AGPL-3.0",
   "private": true,

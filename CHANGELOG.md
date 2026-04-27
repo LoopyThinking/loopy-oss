@@ -6,6 +6,64 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.4.0] — 2026-04-27
+
+### Added
+
+**Block A — Loopy OSS Cowork plugin (`packages/cowork-plugin/`)**
+- New `@loopythinking/cowork-plugin` package (v0.4.0) for self-hosted instances.
+- Five skills: `loopy-oss-bridge`, `loopy-oss-loop-mapper`, `loopy-oss-signal-emit`, `loopy-oss-collab-bridge`, `loopy-oss-ipl-tracker`.
+- Each skill targets `LOOPY_BASE_URL` / `LOOPY_AGENT_TOKEN` from env — no cloud endpoints, no Orion, no corporate fields.
+- `plugin.json` manifest with env variable declarations.
+
+**Block B — Team management UI (`/admin/team`)**
+- New `Team.tsx` page with active member list, role change dropdown, remove member.
+- Pending invites table with revoke and copy-link actions.
+- Generate invite form (role + validity days) with success card showing the full accept URL.
+- New API: `GET /orgs/:id/invites` (list pending), `DELETE /orgs/:id/invites/:inviteId` (revoke → sets `revoked_at`).
+- Sidebar link "Equipo" added for admin/owner roles.
+
+**Block C — Agent detail page (`/agents/:id`)**
+- New `AgentDetail.tsx` with three tabs: Resumen, Skills, Tools.
+- Skills tab: lists active skills with source badge, version, last_seen_at, deactivate button.
+- Tools tab: lists active tools with type badge, deactivate button.
+- Agents list now links to detail page with chevron indicator.
+- New API: `DELETE /agents/:agentId/skills/:skillId` and `DELETE /agents/:agentId/tools/:toolId` (soft-delete, `is_active = false`).
+
+**Block D — Team loops & navigation**
+- New `Loops.tsx` full-width sortable table at `/loops` — fixes the dead sidebar link.
+- `GET /loops?scope=team` — admin+ only; returns all org loops with owner info.
+- `canSeeLoop()` helper in `loops.ts` — admins of the loop's org can read it.
+- `GET /loops/:id` now uses `canSeeLoop` and returns `owner_name` / `owner_email`.
+- Dashboard: segmented toggle "Mis loops / Del equipo" visible to admin+ roles.
+- `LoopCard`: optional `showOwner` prop shows owner name below title in team view.
+- `LoopDetail`: "Close loop" button hidden for non-owners.
+- Admin panel: 5th KPI "Top owner", loops table grouped by owner, IPL por usuario bar list, Agentes más activos card (top 3).
+
+**Migration 009 (`packages/db/migrations/009_v040_workflow.sql`)**
+- `ALTER TABLE org_invites ADD COLUMN revoked_at TIMESTAMPTZ`.
+- `idx_org_invites_pending` partial index.
+- `CREATE OR REPLACE VIEW v_team_loops` with owner join.
+
+### Changed
+
+- `GET /invites/:token` now returns 410 Gone when `revoked_at IS NOT NULL`.
+- Sidebar footer bumped to `v0.4.0`.
+- `apps/api/package.json`, `apps/web/package.json`, `packages/sdk/package.json` bumped to `0.4.0`.
+- `useLoops()` hook accepts `{ scope?, status? }` params.
+- `api.loops.list()` accepts `{ scope?, status? }` params.
+- `api.orgs.members()` now requires `orgId` param.
+
+### SDK additions (`@loopythinking/sdk@0.4.0`)
+
+- `LoopyBridge.deactivateSkill(agentId, skillId)` — soft-delete a skill.
+- `LoopyBridge.deactivateTool(agentId, toolId)` — soft-delete a tool.
+- `LoopyBridge.listOrgInvites(orgId)` — list pending invites.
+- `LoopyBridge.revokeOrgInvite(orgId, inviteId)` — revoke an invite.
+- `LoopyBridge.listLoops({ scope?, status? })` — supports `scope=team`.
+
+---
+
 ## [0.3.0] — 2026-04-24
 
 ### Added

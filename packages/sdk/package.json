@@ -1,6 +1,6 @@
 {
   "name": "@loopythinking/sdk",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "description": "SDK for integrating with Loopy Thinking — register work signals and create loops",
   "license": "AGPL-3.0",
   "author": "Loopy Thinking <dev@loopy-thinking.com>",

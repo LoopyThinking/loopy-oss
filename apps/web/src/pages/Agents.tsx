@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Bot, Copy, Check, Trash2, Loader2, Plus } from 'lucide-react'
+import { Link } from 'react-router-dom'
+import { Bot, Copy, Check, Trash2, Loader2, Plus, ChevronRight } from 'lucide-react'
 import { Layout } from '../components/Layout'
 import { api } from '../lib/api'
 
@@ -162,8 +163,8 @@ export function Agents() {
         ) : (
           <div className="space-y-2">
             {agents.map(agent => (
-              <div key={agent.id} className={`flex items-center justify-between px-4 py-3 bg-white rounded-xl border ${agent.is_active ? 'border-gray-100' : 'border-gray-100 opacity-50'}`}>
-                <div className="min-w-0">
+              <div key={agent.id} className={`flex items-center justify-between px-4 py-3 bg-white rounded-xl border transition-colors ${agent.is_active ? 'border-gray-100 hover:border-indigo-100' : 'border-gray-100 opacity-50'}`}>
+                <Link to={`/agents/${agent.id}`} className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="text-sm font-medium text-gray-800">{agent.agent_name}</p>
                     {!agent.is_active && <span className="text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">revocado</span>}
@@ -173,7 +174,7 @@ export function Agents() {
                     {agent.id.slice(0, 8)}…
                     {agent.last_seen_at ? ` · último uso ${new Date(agent.last_seen_at).toLocaleDateString('es')}` : ' · sin actividad'}
                   </p>
-                </div>
+                </Link>
                 <div className="flex items-center gap-1 ml-3 shrink-0">
                   <CopyButton text={agent.id} />
                   {agent.is_active && (
@@ -182,6 +183,9 @@ export function Agents() {
                       <Trash2 size={14} />
                     </button>
                   )}
+                  <Link to={`/agents/${agent.id}`} className="p-1.5 text-gray-300 hover:text-indigo-500 rounded transition-colors">
+                    <ChevronRight size={14} />
+                  </Link>
                 </div>
               </div>
             ))}
