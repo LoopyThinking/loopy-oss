@@ -22,6 +22,7 @@ invites.get('/:token', async (c) => {
     role: string
     expires_at: string
     accepted_at: string | null
+    revoked_at: string | null
   }>>`
     SELECT
       i.id,
@@ -30,7 +31,8 @@ invites.get('/:token', async (c) => {
       o.slug  AS org_slug,
       i.role,
       i.expires_at,
-      i.accepted_at
+      i.accepted_at,
+      i.revoked_at
     FROM org_invites i
     JOIN organizations o ON o.id = i.org_id
     WHERE i.token = ${token}
@@ -43,6 +45,10 @@ invites.get('/:token', async (c) => {
 
   if (invite.accepted_at) {
     return c.json({ error: 'Gone', message: 'This invite has already been accepted' }, 410)
+  }
+
+  if (invite.revoked_at) {
+    return c.json({ error: 'Gone', message: 'This invite has been revoked' }, 410)
   }
 
   if (new Date(invite.expires_at) < new Date()) {

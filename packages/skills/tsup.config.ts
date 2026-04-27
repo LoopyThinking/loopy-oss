@@ -8,5 +8,5 @@ export default defineConfig({
   clean: true,
   target: 'node18',
   // Node built-ins (fs, path, os) are always external
-  external: ['@loopy/sdk'],
+  external: ['@loopythinking/sdk'],
 })

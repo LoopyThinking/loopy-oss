@@ -42,7 +42,7 @@ Create `docker/deploy-railway.md` with step-by-step instructions to deploy the f
 
 **Labels:** `good-first-issue` `help-wanted` `testing` `sdk`
 
-**Title:** `test(@loopy/sdk): add unit tests for LoopyMapper.classify()`
+**Title:** `test(@loopythinking/sdk): add unit tests for LoopyMapper.classify()`
 
 **Body:**
 
@@ -56,7 +56,7 @@ Add a test file at `packages/sdk/src/__tests__/mapper.test.ts` using Vitest.
 
 - [ ] At least 10 test cases covering all five cognitive layers
 - [ ] At least 2 edge-case tests (empty string, ambiguous text)
-- [ ] Tests pass with `npx turbo test --filter=@loopy/sdk`
+- [ ] Tests pass with `npx turbo test --filter=@loopythinking/sdk`
 - [ ] No changes to the production code (unless you find a bug — then open a separate issue)
 
 ### Resources
@@ -104,7 +104,7 @@ Add a language toggle to the `/framework` page that switches between Spanish and
 
 **Labels:** `good-first-issue` `help-wanted` `sdk`
 
-**Title:** `feat(@loopy/sdk): add LoopySignals.listByAgent(agentId)`
+**Title:** `feat(@loopythinking/sdk): add LoopySignals.listByAgent(agentId)`
 
 **Body:**
 
@@ -165,7 +165,7 @@ Create `docker/deploy-render.md` with a step-by-step guide to deploy Loopy OSS o
 
 **Labels:** `good-first-issue` `help-wanted` `docs` `sdk`
 
-**Title:** `docs(@loopy/sdk): document estimatedHumanMinutes with a worked example`
+**Title:** `docs(@loopythinking/sdk): document estimatedHumanMinutes with a worked example`
 
 **Body:**
 

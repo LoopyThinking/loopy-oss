@@ -1,6 +1,6 @@
 import { readFileSync } from 'fs'
 import { basename, dirname } from 'path'
-import type { RegisterSkillPayload, SkillSource } from '@loopy/sdk'
+import type { RegisterSkillPayload, SkillSource } from '@loopythinking/sdk'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -24,7 +24,7 @@ interface SkillFrontmatter {
 //
 // SKILL.md files use a minimal YAML frontmatter block between --- delimiters.
 // We parse only the fields we care about without pulling in a full YAML library,
-// keeping @loopy/skills dependency-free at runtime.
+// keeping @loopythinking/skills dependency-free at runtime.
 //
 // Supported value types: plain strings and quoted strings.
 // Multiline values and complex YAML are not needed for skill metadata.

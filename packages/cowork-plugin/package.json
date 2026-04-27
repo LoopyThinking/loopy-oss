@@ -1,0 +1,11 @@
+{
+  "name": "@loopythinking/cowork-plugin",
+  "version": "0.4.0",
+  "description": "Cowork plugin for self-hosted Loopy OSS instances",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LoopyThinking/loopy-oss.git",
+    "directory": "packages/cowork-plugin"
+  }
+}

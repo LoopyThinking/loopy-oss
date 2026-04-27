@@ -42,9 +42,9 @@ Together these three primitives let you answer a question most AI tooling ignore
 
 Everything you need to run a Loopy instance and connect agents to it:
 
-**`@loopy/sdk`** — a TypeScript client for creating loops, emitting signals, and querying the state of your agent's work. Published on npm.
+**`@loopythinking/sdk`** — a TypeScript client for creating loops, emitting signals, and querying the state of your agent's work. Published on npm.
 
-**`@loopy/skills`** — a helper that auto-discovers your `SKILL.md` files and MCP server configs, then registers everything with Loopy at session start. One function call: `registerCapabilities({ bridge, agentId })`.
+**`@loopythinking/skills`** — a helper that auto-discovers your `SKILL.md` files and MCP server configs, then registers everything with Loopy at session start. One function call: `registerCapabilities({ bridge, agentId })`.
 
 **`apps/api`** — a Hono-based REST API that handles the full lifecycle: loops, signals, agents, organizations, and an executive panel with aggregate metrics.
 
@@ -93,11 +93,29 @@ A few things surprised us:
 
 ---
 
+## What's in the release
+
+Everything from the protocol to the dashboard to a working MCP server:
+
+**`@loopythinking/sdk`** — TypeScript client for loops, signals, and capabilities. `npm install @loopythinking/sdk`.
+
+**`@loopythinking/skills`** — one-call auto-registration of your SKILL.md files and MCP tools at session start. `npm install @loopythinking/skills`.
+
+**`@loopythinking/mcp`** — MCP server with 7 tools (`create_loop`, `emit_signal`, `map_signal`, `close_loop`, `get_loop`, `list_active_loops`, `get_confidence`). Drop it into Claude Desktop, Cursor, or VS Code with `npx @loopythinking/mcp`. No code required.
+
+**`apps/api`** — Hono REST API: loops, signals, agents, multi-org, executive panel.
+
+**`apps/web`** — React dashboard: loop timeline, confidence/IPL badges, admin panel with Recharts, `/framework` reference page.
+
+**`packages/db`** — 8 PostgreSQL migrations with RLS, upgrade paths, and seeds.
+
+**`docker/`** — `cp .env.example .env && docker compose up`. Running in under 10 minutes.
+
 ## What's next
 
-The MCP server (`loopy-mcp`) is next. It will expose all six core operations — create loop, emit signal, close loop, get loop, list loops, get confidence — as MCP tools, making Loopy connectable from Claude Desktop, Cursor, VS Code Copilot, or any MCP-compatible client without writing SDK code.
+The immediate roadmap: IPL weight calibration with real loop data (the defaults are conservative starting points), email transactional flow for org invites (the endpoint returns a token — we'll add the email layer), and a better onboarding wizard for first-time self-hosters.
 
-After that: weight calibration for IPL (the default heuristic is a starting point, not a final answer), a proper invite and team onboarding flow, and eventually a real-time collaboration layer.
+Longer term: a real-time collaboration layer for team loops, and governance policies that can automatically escalate low-confidence decisions.
 
 ---
 
@@ -113,7 +131,7 @@ docker compose up
 Or just install the SDK:
 
 ```bash
-npm install @loopy/sdk
+npm install @loopythinking/sdk
 ```
 
 The repository is at [github.com/loopy-thinking/loopy-oss](https://github.com/loopy-thinking/loopy-oss).

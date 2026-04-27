@@ -49,6 +49,40 @@ export interface Organization {
   created_at: string
 }
 
+export interface AgentSkill {
+  id: string
+  agent_id: string
+  skill_name: string
+  version: string | null
+  description: string | null
+  source: 'built-in' | 'user' | 'plugin'
+  metadata: Record<string, unknown>
+  is_active: boolean
+  registered_at: string
+  last_seen_at: string
+}
+
+export interface AgentTool {
+  id: string
+  agent_id: string
+  tool_name: string
+  tool_type: 'mcp' | 'connector' | 'function'
+  provider: string | null
+  description: string | null
+  metadata: Record<string, unknown>
+  is_active: boolean
+  registered_at: string
+  last_seen_at: string
+}
+
+export interface OrgInvite {
+  id: string
+  role: OrgRole
+  expires_at: string
+  created_at: string
+  revoked_at: string | null
+}
+
 export interface AdminOverview {
   total_loops: number
   active_loops: number
@@ -154,8 +188,13 @@ async function request<T>(path: string, options: RequestInit = {}, withOrg = fal
 
 export const api = {
   loops: {
-    list: (status?: LoopStatus) =>
-      request<Loop[]>(`/loops${status ? `?status=${status}` : ''}`, {}, true),
+    list: (params?: { status?: LoopStatus; scope?: 'mine' | 'team' }) => {
+      const qs = new URLSearchParams()
+      if (params?.status) qs.set('status', params.status)
+      if (params?.scope)  qs.set('scope', params.scope)
+      const q = qs.toString()
+      return request<Loop[]>(`/loops${q ? `?${q}` : ''}`, {}, true)
+    },
 
     get: (id: string) =>
       request<LoopWithSignals>(`/loops/${id}`, {}, true),
@@ -192,8 +231,50 @@ export const api = {
     create: (data: { name: string; slug?: string }) =>
       request<Organization>('/orgs', { method: 'POST', body: JSON.stringify(data) }),
 
-    members: () =>
-      request<Array<{ user_id: string; email: string; display_name: string | null; role: OrgRole; joined_at: string }>>('/orgs/current/members', {}, true),
+    members: (orgId: string) =>
+      request<Array<{ user_id: string; email: string; display_name: string | null; role: OrgRole; joined_at: string }>>(
+        `/orgs/${orgId}/members`, {}, true
+      ),
+
+    updateMember: (orgId: string, userId: string, role: OrgRole) =>
+      request<{ user_id: string; org_id: string; role: OrgRole }>(
+        `/orgs/${orgId}/members`,
+        { method: 'POST', body: JSON.stringify({ user_id: userId, role }) },
+        true
+      ),
+
+    removeMember: (orgId: string, userId: string) =>
+      request<void>(`/orgs/${orgId}/members/${userId}`, { method: 'DELETE' }, true),
+
+    listInvites: (orgId: string) =>
+      request<OrgInvite[]>(`/orgs/${orgId}/invites`, {}, true),
+
+    createInvite: (orgId: string, data: { role: OrgRole; expires_in_days?: number }) =>
+      request<{ invite_token: string; expires_at: string; role: string; accept_url: string }>(
+        `/orgs/${orgId}/invites`,
+        { method: 'POST', body: JSON.stringify(data) },
+        true
+      ),
+
+    revokeInvite: (orgId: string, inviteId: string) =>
+      request<void>(`/orgs/${orgId}/invites/${inviteId}`, { method: 'DELETE' }, true),
+  },
+
+  // ── Agent capabilities ─────────────────────────────────────────────────────
+
+  agents: {
+    skills: {
+      list: (agentId: string) =>
+        request<AgentSkill[]>(`/agents/${agentId}/skills`, {}, true),
+      deactivate: (agentId: string, skillId: string) =>
+        request<void>(`/agents/${agentId}/skills/${skillId}`, { method: 'DELETE' }, true),
+    },
+    tools: {
+      list: (agentId: string) =>
+        request<AgentTool[]>(`/agents/${agentId}/tools`, {}, true),
+      deactivate: (agentId: string, toolId: string) =>
+        request<void>(`/agents/${agentId}/tools/${toolId}`, { method: 'DELETE' }, true),
+    },
   },
 
   // ── Admin panel ────────────────────────────────────────────────────────────

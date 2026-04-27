@@ -43,8 +43,8 @@ and a Confidence Index — so you can track what was done, why, and how much
 of it was actually done by the machine.
 
 What's in the repo:
-· @loopy/sdk — TypeScript client (npm install @loopy/sdk)
-· @loopy/skills — auto-registers your SKILL.md + MCP tools at session start
+· @loopythinking/sdk — TypeScript client (npm install @loopythinking/sdk)
+· @loopythinking/skills — auto-registers your SKILL.md + MCP tools at session start
 · REST API (Hono), React dashboard, PostgreSQL schema + migrations
 · docker compose up → running in < 10 min
 
@@ -87,8 +87,8 @@ models cognitive work as Signals (atomic events) inside Loops
 how evidence-backed a loop is before you act on it.
 
 Technical contents:
-- @loopy/sdk on npm (LoopyBridge, LoopySignals, LoopyMapper)
-- @loopy/skills helper (reads SKILL.md + MCP config, registers capabilities)
+- @loopythinking/sdk on npm (LoopyBridge, LoopySignals, LoopyMapper)
+- @loopythinking/skills helper (reads SKILL.md + MCP config, registers capabilities)
 - Hono API, React dashboard with /admin panel and /framework reference
 - PostgreSQL with 7 migrations incl. multi-org model
 - docker compose up → full stack in < 10 min
@@ -114,15 +114,15 @@ The problem: when agents do real work, that work is invisible. No audit trail, n
 The solution: 3 primitives — Work Signals, Loops, and a Confidence Index — that give agents and humans a shared vocabulary.
 
 What's open:
-→ @loopy/sdk (npm) — TypeScript client for loops + signals
-→ @loopy/skills — auto-register your skills + MCP tools at session start
+→ @loopythinking/sdk (npm) — TypeScript client for loops + signals
+→ @loopythinking/skills — auto-register your skills + MCP tools at session start
 → Full self-hostable stack: API + React dashboard + Postgres
 → docker compose up in < 10 min
 → AGPL v3
 
 GitHub: https://github.com/loopy-thinking/loopy-oss
 
-Would love feedback from people building with Claude, especially on the IPL metric and the @loopy/skills auto-registration pattern.
+Would love feedback from people building with Claude, especially on the IPL metric and the @loopythinking/skills auto-registration pattern.
 ```
 
 ---
@@ -151,8 +151,8 @@ for how much of the work the machine actually did.
 - **Confidence Index** — 0-100 governance score, not a vanity metric
 
 **What's in the repo:**
-- `@loopy/sdk` on npm
-- `@loopy/skills` — one-call registration of SKILL.md + MCP tools
+- `@loopythinking/sdk` on npm
+- `@loopythinking/skills` — one-call registration of SKILL.md + MCP tools
 - REST API (Hono), React dashboard, PostgreSQL migrations
 - `docker compose up` → running in < 10 minutes
 - AGPL v3
@@ -200,7 +200,7 @@ Simple model. Surprisingly powerful in practice.
 
 **Tweet 4 (SDK):**
 ```
-npm install @loopy/sdk
+npm install @loopythinking/sdk
 
 const loop = await loopy.createLoop({
   title:      'Investigate activation drop',
@@ -217,7 +217,7 @@ await LoopySignals.emit({
 
 **Tweet 5 (skills):**
 ```
-npm install @loopy/skills
+npm install @loopythinking/skills
 
 await registerCapabilities({ bridge: loopy, agentId })
 

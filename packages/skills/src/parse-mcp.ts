@@ -1,7 +1,7 @@
 import { readFileSync, existsSync } from 'fs'
 import { join, resolve } from 'path'
 import { homedir, platform } from 'os'
-import type { RegisterToolPayload } from '@loopy/sdk'
+import type { RegisterToolPayload } from '@loopythinking/sdk'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -182,7 +182,7 @@ export function discoverMcpTools(options: {
       }
     } catch (err) {
       if (!silent) {
-        console.warn(`[@loopy/skills] Warning: could not parse MCP config at ${p}:`, err)
+        console.warn(`[@loopythinking/skills] Warning: could not parse MCP config at ${p}:`, err)
       }
     }
   }

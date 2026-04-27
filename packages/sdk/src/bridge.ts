@@ -155,8 +155,45 @@ export class LoopyBridge {
     return this.request<AgentSkill[]>(`/agents/${agentId}/skills`)
   }
 
+  /** Soft-delete (deactivate) a skill — sets is_active = false */
+  async deactivateSkill(agentId: string, skillId: string): Promise<void> {
+    await this.request<void>(`/agents/${agentId}/skills/${skillId}`, { method: 'DELETE' })
+  }
+
   /** List all active tools registered for an agent */
   async listTools(agentId: string): Promise<AgentTool[]> {
     return this.request<AgentTool[]>(`/agents/${agentId}/tools`)
+  }
+
+  /** Soft-delete (deactivate) a tool — sets is_active = false */
+  async deactivateTool(agentId: string, toolId: string): Promise<void> {
+    await this.request<void>(`/agents/${agentId}/tools/${toolId}`, { method: 'DELETE' })
+  }
+
+  /** List pending (unaccepted, unrevoked) invites for an org (admin+ only) */
+  async listOrgInvites(orgId: string): Promise<Array<{
+    id: string; role: string; expires_at: string; created_at: string
+  }>> {
+    return this.request(`/orgs/${orgId}/invites`)
+  }
+
+  /** Revoke an org invite (sets revoked_at, does not hard-delete) */
+  async revokeOrgInvite(orgId: string, inviteId: string): Promise<void> {
+    await this.request<void>(`/orgs/${orgId}/invites/${inviteId}`, { method: 'DELETE' })
+  }
+
+  /**
+   * List loops. Pass scope='team' (admin+) to see all org loops.
+   *
+   * @example
+   * const myLoops   = await loopy.listLoops()
+   * const teamLoops = await loopy.listLoops({ scope: 'team' })
+   */
+  async listLoops(params?: { scope?: 'mine' | 'team'; status?: string }): Promise<Loop[]> {
+    const qs = new URLSearchParams()
+    if (params?.scope)  qs.set('scope', params.scope)
+    if (params?.status) qs.set('status', params.status)
+    const q = qs.toString()
+    return this.request<Loop[]>(`/loops${q ? `?${q}` : ''}`)
   }
 }

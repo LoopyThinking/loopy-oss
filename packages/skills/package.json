@@ -1,5 +1,5 @@
 {
-  "name": "@loopy/skills",
+  "name": "@loopythinking/skills",
   "version": "0.3.0",
   "description": "Helper for auto-registering agent skills and tools with a Loopy instance",
   "license": "AGPL-3.0",
@@ -14,17 +14,22 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "scripts": {
     "build": "tsup",
     "dev": "tsup --watch",
     "test": "vitest run",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
   },
   "peerDependencies": {
-    "@loopy/sdk": ">=0.1.0"
+    "@loopythinking/sdk": ">=0.1.0"
   },
   "devDependencies": {
-    "@loopy/sdk": "file:../sdk",
+    "@loopythinking/sdk": "file:../sdk",
     "@types/node": "^20.0.0",
     "tsup": "^8.0.0",
     "typescript": "^5.5.0",

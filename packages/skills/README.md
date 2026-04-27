@@ -1,4 +1,4 @@
-# @loopy/skills
+# @loopythinking/skills
 
 Auto-register agent skills and tools with a Loopy OSS instance.
 
@@ -7,14 +7,14 @@ Call `registerCapabilities()` once at session start from your skill's init code.
 ## Installation
 
 ```bash
-npm install @loopy/skills @loopy/sdk
+npm install @loopythinking/skills @loopythinking/sdk
 ```
 
 ## Quick start
 
 ```typescript
-import { LoopyBridge } from '@loopy/sdk'
-import { registerCapabilities } from '@loopy/skills'
+import { LoopyBridge } from '@loopythinking/sdk'
+import { registerCapabilities } from '@loopythinking/skills'
 
 const loopy = new LoopyBridge({
   token:   process.env.LOOPY_AGENT_REGISTRY_TOKEN!,
@@ -25,8 +25,8 @@ await registerCapabilities({
   bridge:  loopy,
   agentId: process.env.LOOPY_AGENT_ID!,
 })
-// [@loopy/skills] Registering 8 skill(s) + 12 tool(s) for agent 3f9a1c2b…
-// [@loopy/skills] Done — 8 skill(s), 12 tool(s) registered.
+// [@loopythinking/skills] Registering 8 skill(s) + 12 tool(s) for agent 3f9a1c2b…
+// [@loopythinking/skills] Done — 8 skill(s), 12 tool(s) registered.
 ```
 
 That's it. The call is idempotent — running it on every session start only updates `last_seen_at` on existing records.
@@ -37,7 +37,7 @@ That's it. The call is idempotent — running it on every session start only upd
 
 ### Skills — SKILL.md files
 
-`@loopy/skills` scans these directories by default:
+`@loopythinking/skills` scans these directories by default:
 
 | Directory | Source tag |
 |-----------|-----------|
@@ -130,8 +130,8 @@ In your `SKILL.md`-driven skill, call `registerCapabilities` inside the session-
 
 ```typescript
 // Inside your loopy-bridge or custom skill's session init
-import { LoopyBridge } from '@loopy/sdk'
-import { registerCapabilities } from '@loopy/skills'
+import { LoopyBridge } from '@loopythinking/sdk'
+import { registerCapabilities } from '@loopythinking/skills'
 
 const AGENT_ID = process.env.LOOPY_AGENT_ID
 const TOKEN    = process.env.LOOPY_AGENT_REGISTRY_TOKEN
@@ -139,7 +139,7 @@ const TOKEN    = process.env.LOOPY_AGENT_REGISTRY_TOKEN
 if (AGENT_ID && TOKEN) {
   const bridge = new LoopyBridge({ token: TOKEN })
   registerCapabilities({ bridge, agentId: AGENT_ID, silent: true })
-    .catch(err => console.warn('[@loopy/skills] Registration failed:', err.message))
+    .catch(err => console.warn('[@loopythinking/skills] Registration failed:', err.message))
   // Fire-and-forget is fine — registration failure should not block the skill
 }
 ```
@@ -158,7 +158,7 @@ import {
   discoverMcpTools,    // auto-discover across candidate config paths
   discoverSkills,      // scan directories for SKILL.md files
   getBuiltinTools,     // get subset of Claude Code built-in tools
-} from '@loopy/skills'
+} from '@loopythinking/skills'
 ```
 
 ---

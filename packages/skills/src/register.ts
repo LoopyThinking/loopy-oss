@@ -1,4 +1,4 @@
-import type { LoopyBridge, RegisterSkillPayload, RegisterToolPayload } from '@loopy/sdk'
+import type { LoopyBridge, RegisterSkillPayload, RegisterToolPayload } from '@loopythinking/sdk'
 import { discoverSkills, type DiscoverOptions } from './discover.js'
 import { discoverMcpTools, getBuiltinTools } from './parse-mcp.js'
 
@@ -114,8 +114,8 @@ export interface RegisterCapabilitiesResult {
  *
  * @example
  * // In your loopy-bridge SKILL.md init or equivalent:
- * import { LoopyBridge } from '@loopy/sdk'
- * import { registerCapabilities } from '@loopy/skills'
+ * import { LoopyBridge } from '@loopythinking/sdk'
+ * import { registerCapabilities } from '@loopythinking/skills'
  *
  * const loopy = new LoopyBridge({ token: process.env.LOOPY_AGENT_REGISTRY_TOKEN })
  * const result = await registerCapabilities({
@@ -180,7 +180,7 @@ export async function registerCapabilities(
 
   if (!silent) {
     console.log(
-      `[@loopy/skills] ${dryRun ? '[DRY RUN] ' : ''}Registering ` +
+      `[@loopythinking/skills] ${dryRun ? '[DRY RUN] ' : ''}Registering ` +
       `${finalSkills.length} skill(s) + ${finalTools.length} tool(s) ` +
       `for agent ${agentId.slice(0, 8)}…`
     )
@@ -205,7 +205,7 @@ export async function registerCapabilities(
 
   if (!silent) {
     console.log(
-      `[@loopy/skills] Done — ${registeredSkills} skill(s), ${registeredTools} tool(s) registered.`
+      `[@loopythinking/skills] Done — ${registeredSkills} skill(s), ${registeredTools} tool(s) registered.`
     )
   }
 

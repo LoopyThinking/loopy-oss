@@ -2,7 +2,7 @@ import { Hono } from 'hono'
 import { randomBytes } from 'crypto'
 import sql from '../db/client.js'
 import { orgMiddleware, hasRole, forbiddenRole } from '../middleware/org.js'
-import type { AuthVariables, Organization, OrgMember } from '../types.js'
+import type { AuthVariables, Organization, OrgMember, OrgInvite } from '../types.js'
 
 const orgs = new Hono<{ Variables: AuthVariables }>()
 
@@ -191,6 +191,81 @@ orgs.post('/:id/invites', async (c) => {
     // Provide a sample accept URL; the web app will implement /invites/accept/:token
     accept_url: `/invites/accept/${invite.token}`,
   }, 201)
+})
+
+// ── GET /orgs/:id/invites — list pending invites (admin+) ────────────────────
+
+orgs.get('/:id/invites', async (c) => {
+  const orgId  = c.get('orgId')
+  const myRole = c.get('orgRole')
+
+  if (!hasRole(myRole, 'admin')) {
+    return c.json(forbiddenRole('admin'), 403)
+  }
+
+  const invites = await sql<Array<{
+    id: string
+    role: string
+    expires_at: string
+    created_at: string
+    revoked_at: string | null
+    invited_by_email: string | null
+  }>>`
+    SELECT
+      i.id,
+      i.role,
+      i.expires_at,
+      i.created_at,
+      i.revoked_at,
+      NULL::text AS invited_by_email
+    FROM org_invites i
+    WHERE i.org_id = ${orgId}
+      AND i.accepted_at IS NULL
+      AND i.revoked_at IS NULL
+      AND i.expires_at > now()
+    ORDER BY i.created_at DESC
+  `
+
+  return c.json(invites)
+})
+
+// ── DELETE /orgs/:id/invites/:inviteId — revoke an invite (admin+) ─────────────
+
+orgs.delete('/:id/invites/:inviteId', async (c) => {
+  const orgId    = c.get('orgId')
+  const myRole   = c.get('orgRole')
+  const inviteId = c.req.param('inviteId')
+
+  if (!hasRole(myRole, 'admin')) {
+    return c.json(forbiddenRole('admin'), 403)
+  }
+
+  const [invite] = await sql<Array<{ id: string; accepted_at: string | null; revoked_at: string | null }>>`
+    SELECT id, accepted_at, revoked_at
+    FROM org_invites
+    WHERE id = ${inviteId} AND org_id = ${orgId}
+    LIMIT 1
+  `
+
+  if (!invite) {
+    return c.json({ error: 'Not Found', message: 'Invite not found' }, 404)
+  }
+
+  if (invite.accepted_at) {
+    return c.json({ error: 'Conflict', message: 'Invite has already been accepted' }, 409)
+  }
+
+  if (invite.revoked_at) {
+    return c.json({ error: 'Conflict', message: 'Invite is already revoked' }, 409)
+  }
+
+  await sql`
+    UPDATE org_invites
+    SET revoked_at = now()
+    WHERE id = ${inviteId}
+  `
+
+  return c.body(null, 204)
 })
 
 // ── DELETE /orgs/:id/members/:userId — remove a member (admin+) ──────────────

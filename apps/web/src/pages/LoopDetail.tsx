@@ -1,10 +1,22 @@
 import { useState, useEffect } from 'react'
 import { useParams, useNavigate, Link } from 'react-router-dom'
-import { api } from '../lib/api'
+import { api, getToken } from '../lib/api'
 import { SignalTimeline } from '../components/SignalTimeline'
 import { ConfidenceBadge } from '../components/ConfidenceBadge'
 import { IPLBadge } from '../components/IPLBadge'
 import type { LoopWithSignals } from '../lib/api'
+
+// Decode the user ID from the JWT token (sub claim).
+function getCurrentUserId(): string | null {
+  try {
+    const token = getToken()
+    if (!token) return null
+    const payload = JSON.parse(atob(token.split('.')[1]))
+    return payload.sub ?? null
+  } catch {
+    return null
+  }
+}
 
 export function LoopDetail() {
   const { id } = useParams<{ id: string }>()
@@ -15,6 +27,8 @@ export function LoopDetail() {
   const [closing, setClosing] = useState(false)
   const [resolution, setResolution] = useState('')
   const [showCloseForm, setShowCloseForm] = useState(false)
+
+  const currentUserId = getCurrentUserId()
 
   useEffect(() => {
     if (!id) return
@@ -108,8 +122,8 @@ export function LoopDetail() {
             </div>
           )}
 
-          {/* Close button */}
-          {loop.status === 'open' && !showCloseForm && (
+          {/* Close button — only shown to the loop owner */}
+          {loop.status === 'open' && !showCloseForm && loop.user_id === currentUserId && (
             <button
               onClick={() => setShowCloseForm(true)}
               className="w-full rounded-lg border border-slate-200 py-2 text-sm font-medium

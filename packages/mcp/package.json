@@ -1,0 +1,51 @@
+{
+  "name": "@loopythinking/mcp",
+  "version": "0.1.1",
+  "description": "MCP server for Loopy Thinking — connect Claude Desktop, Cursor, and VS Code to your Loopy instance",
+  "license": "AGPL-3.0",
+  "author": "Loopy Thinking <dev@loopy-thinking.com>",
+  "homepage": "https://github.com/loopy-thinking/loopy-oss#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/loopy-thinking/loopy-oss.git",
+    "directory": "packages/mcp"
+  },
+  "bugs": {
+    "url": "https://github.com/loopy-thinking/loopy-oss/issues"
+  },
+  "keywords": [
+    "loopy",
+    "mcp",
+    "model-context-protocol",
+    "agent",
+    "loops",
+    "work-signals",
+    "claude",
+    "cursor",
+    "ai"
+  ],
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "loopy-mcp": "./dist/index.js"
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "tsup && chmod +x dist/index.js",
+    "dev": "tsup --watch",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "tsup": "^8.0.0",
+    "typescript": "^5.5.0"
+  }
+}

@@ -20,9 +20,13 @@ function timeAgo(iso: string): string {
 
 interface LoopCardProps {
   loop: Loop
+  /** Show the owner name below the title (for admin team view) */
+  showOwner?: boolean
 }
 
-export function LoopCard({ loop }: LoopCardProps) {
+export function LoopCard({ loop, showOwner }: LoopCardProps) {
+  const ownerLabel = (loop as any).owner_name ?? (loop as any).owner_email ?? null
+
   return (
     <Link
       to={`/loops/${loop.id}`}
@@ -34,6 +38,9 @@ export function LoopCard({ loop }: LoopCardProps) {
           <h3 className="truncate font-semibold text-slate-900 text-base leading-tight">
             {loop.title}
           </h3>
+          {showOwner && ownerLabel && (
+            <p className="mt-0.5 text-xs text-indigo-500 font-medium">{ownerLabel}</p>
+          )}
           {loop.hypothesis && (
             <p className="mt-1 text-sm text-slate-500 line-clamp-2 leading-snug">
               {loop.hypothesis}
