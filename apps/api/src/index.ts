@@ -11,6 +11,7 @@ import orgs from './routes/orgs.js'
 import admin from './routes/admin.js'
 import invites from './routes/invites.js'
 import me from './routes/me.js'
+import llm from './routes/llm.js'
 
 const app = new Hono()
 
@@ -40,6 +41,7 @@ app.route('/orgs', orgs)
 app.route('/admin', admin)
 app.route('/invites', invites)       // GET /invites/:token (public) + POST /invites/accept (auth)
 app.route('/me', me)                 // GET/PATCH /me, GET/DELETE /me/agents
+app.route('/orgs/:orgId/llm-configs', llm)  // /orgs/:id/llm-configs/* (admin+)
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 
