@@ -139,6 +139,98 @@ export interface ActivityPoint {
   signal_count: number
 }
 
+// ── Analytics / LLM types ────────────────────────────────────────────────────────
+
+export type LLMProviderType = 'anthropic' | 'openai' | 'google' | 'openai_compatible'
+
+export interface OrgLlmConfig {
+  id: string
+  org_id: string
+  provider: LLMProviderType
+  display_name: string
+  model: string
+  base_url: string | null
+  api_key_cipher: string
+  api_key_last4: string
+  is_default: boolean
+  is_active: boolean
+  last_tested_at: string | null
+  last_test_ok: boolean | null
+  last_test_error: string | null
+  created_by: string
+  created_at: string
+  updated_at: string
+}
+
+/** Public-facing LLM config (no cipher) */
+export interface OrgLlmConfigPublic {
+  id: string
+  org_id: string
+  provider: LLMProviderType
+  display_name: string
+  model: string
+  base_url: string | null
+  api_key_last4: string
+  is_default: boolean
+  is_active: boolean
+  last_tested_at: string | null
+  last_test_ok: boolean | null
+  last_test_error: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface AnalysisTemplate {
+  key: string
+  name: string
+  description: string
+  category: 'roi' | 'adoption' | 'optimization' | 'people' | 'risk'
+  default_period: string
+  has_custom_prompt: boolean
+}
+
+export interface AnalysisTemplateDetail extends AnalysisTemplate {
+  default_prompt: string
+  org_prompt: string | null
+  output_schema: Record<string, unknown>
+}
+
+export interface Analysis {
+  id: string
+  org_id: string
+  template_key: string
+  period_label: string
+  prompt_used: string
+  data_inputs: Record<string, unknown>
+  llm_config_id: string | null
+  llm_provider: string | null
+  llm_model: string | null
+  result: Record<string, unknown> | null
+  status: 'pending' | 'running' | 'succeeded' | 'failed'
+  error: string | null
+  scheduled: boolean
+  created_by: string | null
+  created_at: string
+  completed_at: string | null
+}
+
+export interface AnalysisSchedule {
+  id: string
+  org_id: string
+  template_key: string
+  period: string
+  cadence: 'weekly' | 'monthly'
+  day_of_week: number | null
+  hour: number
+  timezone: string
+  llm_config_id: string | null
+  is_active: boolean
+  last_run_at: string | null
+  next_run_at: string
+  created_by: string
+  created_at: string
+}
+
 // Hono context variables set by auth + org middleware
 export interface AuthVariables {
   userId: string
