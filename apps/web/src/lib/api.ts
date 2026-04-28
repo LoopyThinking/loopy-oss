@@ -275,6 +275,12 @@ export const api = {
 
     revokeInvite: (orgId: string, inviteId: string) =>
       request<void>(`/orgs/${orgId}/invites/${inviteId}`, { method: 'DELETE' }, true),
+
+    updateSettings: (orgId: string, data: { hourly_rate_usd?: number }) =>
+      request<{ id: string; hourly_rate_usd: string; role: string }>(`/orgs/${orgId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
   },
 
   // ── LLM configs ────────────────────────────────────────────────────────────
@@ -418,4 +424,82 @@ export const api = {
   },
 
   health: () => request<{ status: string; version: string }>('/health'),
+
+  // ── Analytics ──────────────────────────────────────────────────────────────
+
+  analytics: {
+    templates: {
+      list: () =>
+        request<Array<{
+          key: string; name: string; description: string; category: string
+          default_period: string; has_custom_prompt: boolean
+        }>>('/analytics/templates', {}, true),
+
+      get: (key: string) =>
+        request<{
+          key: string; name: string; description: string; category: string
+          default_period: string; default_prompt: string; org_prompt: string | null
+          output_schema: Record<string, unknown>
+        }>(`/analytics/templates/${key}`, {}, true),
+
+      savePrompt: (key: string, prompt: string) =>
+        request<{ ok: boolean }>(`/analytics/templates/${key}/prompt`, {
+          method: 'PUT',
+          body: JSON.stringify({ prompt }),
+        }, true),
+
+      resetPrompt: (key: string) =>
+        request<void>(`/analytics/templates/${key}/prompt`, { method: 'DELETE' }, true),
+    },
+
+    run: (data: {
+      template_key: string; period?: string; llm_config_id?: string | null; prompt_override?: string
+    }) => request<{ analysis_id: string }>('/analytics/run', {
+      method: 'POST', body: JSON.stringify(data),
+    }, true),
+
+    listAnalyses: (params?: { template_key?: string; limit?: number; offset?: number }) => {
+      const qs = new URLSearchParams()
+      if (params?.template_key) qs.set('template_key', params.template_key)
+      if (params?.limit) qs.set('limit', String(params.limit))
+      if (params?.offset) qs.set('offset', String(params.offset))
+      const q = qs.toString()
+      return request<Array<{
+        id: string; template_key: string; period_label: string; status: string
+        llm_provider: string | null; llm_model: string | null; error: string | null
+        scheduled: boolean; created_at: string; completed_at: string | null
+      }>>(`/analytics/analyses${q ? `?${q}` : ''}`, {}, true)
+    },
+
+    getAnalysis: (id: string) =>
+      request<{
+        id: string; template_key: string; period_label: string; prompt_used: string
+        data_inputs: Record<string, unknown>; result: Record<string, unknown> | null
+        llm_provider: string | null; llm_model: string | null
+        status: string; error: string | null; created_at: string; completed_at: string | null
+      }>(`/analytics/analyses/${id}`, {}, true),
+
+    markdownUrl: (id: string) => `${BASE_URL}/analytics/analyses/${id}/markdown`,
+
+    schedules: {
+      list: () =>
+        request<Array<{
+          id: string; template_key: string; period: string; cadence: string
+          hour: number; timezone: string; is_active: boolean
+          last_run_at: string | null; next_run_at: string
+        }>>('/analytics/schedules', {}, true),
+
+      create: (data: {
+        template_key: string; period?: string; cadence: string
+        hour?: number; timezone?: string; llm_config_id?: string
+      }) => request<any>('/analytics/schedules', { method: 'POST', body: JSON.stringify(data) }, true),
+
+      update: (id: string, data: {
+        is_active?: boolean; cadence?: string; hour?: number; period?: string
+      }) => request<any>(`/analytics/schedules/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, true),
+
+      remove: (id: string) =>
+        request<void>(`/analytics/schedules/${id}`, { method: 'DELETE' }, true),
+    },
+  },
 }

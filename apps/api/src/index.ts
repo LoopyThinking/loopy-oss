@@ -12,6 +12,8 @@ import admin from './routes/admin.js'
 import invites from './routes/invites.js'
 import me from './routes/me.js'
 import llm from './routes/llm.js'
+import analytics from './routes/analytics.js'
+import { startCron } from './cron.js'
 
 const app = new Hono()
 
@@ -30,6 +32,7 @@ app.use('/signals/*', authMiddleware)
 app.use('/agents/*', authMiddleware)
 app.use('/orgs/*', authMiddleware)
 app.use('/admin/*', authMiddleware)
+app.use('/analytics/*', authMiddleware)
 app.use('/me/*', authMiddleware)
 // /invites/:token is public; /invites/accept requires auth (handled inside route)
 
@@ -42,6 +45,7 @@ app.route('/admin', admin)
 app.route('/invites', invites)       // GET /invites/:token (public) + POST /invites/accept (auth)
 app.route('/me', me)                 // GET/PATCH /me, GET/DELETE /me/agents
 app.route('/orgs/:orgId/llm-configs', llm)  // /orgs/:id/llm-configs/* (admin+)
+app.route('/analytics', analytics)          // /analytics/* (admin+)
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 
@@ -59,6 +63,8 @@ app.onError((err, c) => {
 // ── Start server ──────────────────────────────────────────────────────────────
 
 const port = Number(process.env.PORT ?? 3001)
+
+startCron()
 
 serve({ fetch: app.fetch, port }, () => {
   console.log(`🚀 Loopy API running on http://localhost:${port}`)
