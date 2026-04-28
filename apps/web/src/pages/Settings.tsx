@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Check, Copy, Trash2, Loader2, User, Key, Building2 } from 'lucide-react'
+import { Check, Copy, Trash2, Loader2, User, Key, Building2, Sparkles } from 'lucide-react'
 import { Layout } from '../components/Layout'
-import { api } from '../lib/api'
+import { api, getCurrentOrgId } from '../lib/api'
+import { LlmConfigSection } from '../components/settings/LlmConfigSection'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -261,6 +262,11 @@ export function Settings() {
             </div>
           )}
         </Section>
+
+        {/* ── Proveedores LLM — only for admin+ ────────────────────────────── */}
+        {profile?.orgs?.some(o => o.id === getCurrentOrgId() && (o.role === 'admin' || o.role === 'owner')) && (
+          <LlmConfigSection />
+        )}
 
       </div>
     </Layout>

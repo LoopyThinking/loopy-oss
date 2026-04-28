@@ -108,6 +108,23 @@ export interface AdminLoopsResponse {
   offset: number
 }
 
+export interface LlmConfigPublic {
+  id: string
+  org_id: string
+  provider: string
+  display_name: string
+  model: string
+  base_url: string | null
+  api_key_last4: string
+  is_default: boolean
+  is_active: boolean
+  last_tested_at: string | null
+  last_test_ok: boolean | null
+  last_test_error: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface AdminAgent {
   id: string
   agent_name: string
@@ -258,6 +275,50 @@ export const api = {
 
     revokeInvite: (orgId: string, inviteId: string) =>
       request<void>(`/orgs/${orgId}/invites/${inviteId}`, { method: 'DELETE' }, true),
+  },
+
+  // ── LLM configs ────────────────────────────────────────────────────────────
+
+  llm: {
+    list: (orgId: string) =>
+      request<LlmConfigPublic[]>(`/orgs/${orgId}/llm-configs`, {}, true),
+
+    create: (orgId: string, data: {
+      provider: string
+      display_name: string
+      model: string
+      base_url?: string
+      api_key: string
+      is_default?: boolean
+    }) => request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true),
+
+    update: (orgId: string, configId: string, data: {
+      display_name?: string
+      model?: string
+      base_url?: string
+      is_default?: boolean
+      is_active?: boolean
+    }) => request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, true),
+
+    rotate: (orgId: string, configId: string, apiKey: string) =>
+      request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}/rotate`, {
+        method: 'POST',
+        body: JSON.stringify({ api_key: apiKey }),
+      }, true),
+
+    test: (orgId: string, configId: string) =>
+      request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}/test`, {
+        method: 'POST',
+      }, true),
+
+    remove: (orgId: string, configId: string) =>
+      request<void>(`/orgs/${orgId}/llm-configs/${configId}`, { method: 'DELETE' }, true),
   },
 
   // ── Agent capabilities ─────────────────────────────────────────────────────
