@@ -22,7 +22,7 @@ interface SignalTimelineProps {
 export function SignalTimeline({ signals }: SignalTimelineProps) {
   if (signals.length === 0) {
     return (
-      <div className="rounded-xl border border-dashed border-slate-200 py-12 text-center text-slate-400">
+      <div className="rounded-xl border border-dashed border-edge py-12 text-center text-subtle">
         <p className="text-sm">No signals yet.</p>
         <p className="mt-1 text-xs">Signals appear here as work is registered.</p>
       </div>
@@ -32,7 +32,7 @@ export function SignalTimeline({ signals }: SignalTimelineProps) {
   return (
     <ol className="relative space-y-1">
       {/* Vertical line */}
-      <div className="absolute left-[11px] top-3 bottom-3 w-px bg-slate-200" aria-hidden />
+      <div className="absolute left-[11px] top-3 bottom-3 w-px bg-edge-subtle" aria-hidden />
 
       {signals.map((signal) => {
         const cfg = LAYER_CONFIG[signal.type]

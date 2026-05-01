@@ -32,6 +32,7 @@ services:
       JWT_SECRET: ${JWT_SECRET}
       PORT: 3001
       CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      LOOPY_ENCRYPTION_KEY: ${LOOPY_ENCRYPTION_KEY}
     ports:
       - "3001:3001"
     depends_on:

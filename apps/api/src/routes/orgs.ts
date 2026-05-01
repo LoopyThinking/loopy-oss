@@ -299,4 +299,31 @@ orgs.delete('/:id/members/:memberId', async (c) => {
   return c.body(null, 204)
 })
 
+// ── PATCH /orgs/:id — update org settings (admin+) ─────────────────────────────
+
+orgs.patch('/:id', async (c) => {
+  const myRole = c.get('orgRole')
+  if (!hasRole(myRole, 'admin')) return c.json(forbiddenRole('admin'), 403)
+
+  const orgId = c.get('orgId')
+  const body = await c.req.json<{ hourly_rate_usd?: number }>()
+
+  if (body.hourly_rate_usd !== undefined) {
+    if (body.hourly_rate_usd < 1 || body.hourly_rate_usd > 10000) {
+      return c.json({ error: 'Bad Request', message: 'hourly_rate_usd must be between 1 and 10000' }, 400)
+    }
+
+    await sql`
+      UPDATE organizations SET hourly_rate_usd = ${body.hourly_rate_usd}
+      WHERE id = ${orgId}
+    `
+  }
+
+  const [org] = await sql<Array<Organization & { hourly_rate_usd: string }>>`
+    SELECT * FROM organizations WHERE id = ${orgId}
+  `
+
+  return c.json({ ...org, role: c.get('orgRole') })
+})
+
 export default orgs

@@ -5,12 +5,12 @@ import { Layout } from '../components/Layout'
 // ── TOC structure ─────────────────────────────────────────────────────────────
 
 const sections = [
-  { id: 'ciclo',       label: 'El ciclo cognitivo del loop' },
+  { id: 'ciclo',       label: 'The loop cognitive cycle' },
   { id: 'signals',     label: 'Work Signals' },
   { id: 'confidence',  label: 'Confidence Index' },
-  { id: 'ipl',         label: 'IPL — Índice de Productividad Liberada' },
-  { id: 'scope',       label: 'Scope de un loop' },
-  { id: 'faq',         label: 'Preguntas frecuentes' },
+  { id: 'ipl',         label: 'IPL — Liberated Productivity Index' },
+  { id: 'scope',       label: 'Loop scope' },
+  { id: 'faq',         label: 'FAQ' },
 ]
 
 // ── Collapsible Q&A block ─────────────────────────────────────────────────────
@@ -18,19 +18,19 @@ const sections = [
 function QA({ q, children }: { q: string; children: React.ReactNode }) {
   const [open, setOpen] = useState(false)
   return (
-    <div className="border border-gray-100 rounded-xl overflow-hidden mb-2">
+    <div className="border border-edge rounded-xl overflow-hidden mb-2">
       <button
-        className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-gray-800 hover:bg-gray-50 transition-colors"
+        className="w-full flex items-center justify-between px-4 py-3 text-left text-sm font-medium text-primary hover:bg-hover transition-colors"
         onClick={() => setOpen(v => !v)}
       >
         <span>{q}</span>
         {open
-          ? <ChevronDown size={15} className="text-gray-400 shrink-0 ml-2" />
-          : <ChevronRight size={15} className="text-gray-400 shrink-0 ml-2" />
+          ? <ChevronDown size={15} className="text-subtle shrink-0 ml-2" />
+          : <ChevronRight size={15} className="text-subtle shrink-0 ml-2" />
         }
       </button>
       {open && (
-        <div className="px-4 pb-4 pt-1 text-sm text-gray-600 leading-relaxed border-t border-gray-50 space-y-2">
+        <div className="px-4 pb-4 pt-1 text-sm text-secondary leading-relaxed border-t border-edge space-y-2">
           {children}
         </div>
       )}
@@ -43,8 +43,8 @@ function QA({ q, children }: { q: string; children: React.ReactNode }) {
 function Section({ id, title, children }: { id: string; title: string; children: React.ReactNode }) {
   return (
     <section id={id} className="mb-12 scroll-mt-20">
-      <h2 className="text-xl font-semibold text-gray-900 mb-4">{title}</h2>
-      <div className="space-y-3 text-sm text-gray-600 leading-relaxed">
+      <h2 className="text-xl font-semibold text-primary mb-4">{title}</h2>
+      <div className="space-y-3 text-sm text-secondary leading-relaxed">
         {children}
       </div>
     </section>
@@ -81,7 +81,7 @@ export function Framework() {
 
   return (
     <Layout
-      title="Framework Loopy"
+      title="Loopy Framework"
       breadcrumbs={[{ label: 'Framework' }]}
     >
       <div className="flex gap-8 max-w-5xl">
@@ -89,8 +89,8 @@ export function Framework() {
         {/* ── TOC — desktop ──────────────────────────────────────────────── */}
         <aside className="hidden lg:block w-52 shrink-0">
           <div className="sticky top-20">
-            <p className="text-xs font-semibold text-gray-400 uppercase tracking-wide mb-3">
-              Contenido
+            <p className="text-xs font-semibold text-subtle uppercase tracking-wide mb-3">
+              Contents
             </p>
             <nav className="space-y-0.5">
               {sections.map(s => (
@@ -99,16 +99,16 @@ export function Framework() {
                   onClick={() => scrollTo(s.id)}
                   className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
                     activeSection === s.id
-                      ? 'bg-indigo-50 text-indigo-700 font-medium'
-                      : 'text-gray-500 hover:text-gray-800 hover:bg-gray-50'
+                      ? 'bg-accent-light text-accent font-medium'
+                      : 'text-muted hover:text-primary hover:bg-hover'
                   }`}
                 >
                   {s.label}
                 </button>
               ))}
             </nav>
-            <p className="mt-6 text-xs text-gray-300 leading-relaxed">
-              Basado en el framework Loopy v0.2 — sujeto a revisión conforme evoluciona el libro.
+            <p className="mt-6 text-xs text-subtle leading-relaxed">
+              Based on the Loopy framework v0.2 — subject to revision as the book evolves.
             </p>
           </div>
         </aside>
@@ -136,12 +136,12 @@ export function Framework() {
                 { layer: 'action',         emoji: '🔧', title: 'Acción',         desc: 'Ejecutar. "Hice X", "El agente corrió Y"' },
                 { layer: 'reflection',     emoji: '🔄', title: 'Reflexión',      desc: 'Aprender del resultado. "En retrospectiva…", "La hipótesis era…"' },
               ].map(({ layer, emoji, title, desc }) => (
-                <div key={layer} className="border border-gray-100 rounded-xl p-4">
+                <div key={layer} className="border border-edge rounded-xl p-4">
                   <div className="flex items-center gap-2 mb-1.5">
                     <span>{emoji}</span>
                     <LayerBadge layer={layer} label={title} />
                   </div>
-                  <p className="text-xs text-gray-500">{desc}</p>
+                  <p className="text-xs text-muted">{desc}</p>
                 </div>
               ))}
             </div>
@@ -175,13 +175,13 @@ export function Framework() {
             <p>
               Cada señal tiene tres propiedades esenciales:
             </p>
-            <ul className="list-disc list-inside space-y-1 text-sm text-gray-600 ml-2">
+            <ul className="list-disc list-inside space-y-1 text-sm text-secondary ml-2">
               <li><strong>type</strong> — la capa cognitiva (perception, interpretation, decision, action, reflection)</li>
-              <li><strong>source</strong> — quién la emite: <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">human</code> o <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">agent</code></li>
+              <li><strong>source</strong> — quién la emite: <code className="text-xs bg-elevated px-1 py-0.5 rounded">human</code> o <code className="text-xs bg-elevated px-1 py-0.5 rounded">agent</code></li>
               <li><strong>content</strong> — descripción legible de lo que ocurrió</li>
             </ul>
             <p className="mt-2">
-              Las señales de tipo <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">agent</code> tienen peso adicional en el Confidence Index y
+              Las señales de tipo <code className="text-xs bg-elevated px-1 py-0.5 rounded">agent</code> tienen peso adicional en el Confidence Index y
               contribuyen al IPL. Las señales humanas son el contexto; las del agente son el trabajo delegado.
             </p>
             <p>
@@ -202,13 +202,13 @@ export function Framework() {
               La fórmula OSS usa pesos deterministas por tipo de señal. Las señales más "decisivas"
               (decision, reflection) pesan más que las exploratorias (perception):
             </p>
-            <div className="bg-gray-50 rounded-xl p-4 font-mono text-xs text-gray-700 space-y-1">
-              <div>perception:     <span className="text-indigo-600 font-semibold">8 pts</span></div>
-              <div>interpretation: <span className="text-indigo-600 font-semibold">12 pts</span></div>
-              <div>decision:       <span className="text-indigo-600 font-semibold">20 pts</span></div>
-              <div>action:         <span className="text-indigo-600 font-semibold">10 pts</span></div>
-              <div>reflection:     <span className="text-indigo-600 font-semibold">15 pts</span></div>
-              <div className="pt-2 text-gray-400">MAX(100, suma de señales) → normalizado a 0–100</div>
+            <div className="bg-surface rounded-xl p-4 font-mono text-xs text-secondary space-y-1">
+              <div>perception:     <span className="text-accent font-semibold">8 pts</span></div>
+              <div>interpretation: <span className="text-accent font-semibold">12 pts</span></div>
+              <div>decision:       <span className="text-accent font-semibold">20 pts</span></div>
+              <div>action:         <span className="text-accent font-semibold">10 pts</span></div>
+              <div>reflection:     <span className="text-accent font-semibold">15 pts</span></div>
+              <div className="pt-2 text-subtle">MAX(100, suma de señales) → normalizado a 0–100</div>
             </div>
             <p className="mt-3">
               Un loop con Confidence Index bajo ({"<"}40) no necesariamente está mal — puede
@@ -236,18 +236,18 @@ export function Framework() {
             <p>
               La versión OSS usa una heurística de pesos por tipo de señal del agente:
             </p>
-            <div className="bg-gray-50 rounded-xl p-4 font-mono text-xs text-gray-700 space-y-1">
+            <div className="bg-surface rounded-xl p-4 font-mono text-xs text-secondary space-y-1">
               <div>perception agent:     <span className="text-violet-600 font-semibold">3 min</span></div>
               <div>interpretation agent: <span className="text-violet-600 font-semibold">8 min</span></div>
               <div>decision agent:       <span className="text-violet-600 font-semibold">15 min</span></div>
               <div>action agent:         <span className="text-violet-600 font-semibold">10 min</span></div>
               <div>reflection agent:     <span className="text-violet-600 font-semibold">6 min</span></div>
-              <div className="pt-2 text-gray-400">Las señales humanas NO contribuyen al IPL.</div>
+              <div className="pt-2 text-subtle">Las señales humanas NO contribuyen al IPL.</div>
             </div>
             <p className="mt-3">
               Los pesos son calibrables. Si tu agente emite señales de tipo <em>decision</em> para
               registrar una decisión que en realidad tomó 2 minutos, puedes pasar
-              <code className="text-xs bg-gray-100 px-1 py-0.5 rounded ml-1 mr-1">estimatedHumanMinutes</code>
+              <code className="text-xs bg-elevated px-1 py-0.5 rounded ml-1 mr-1">estimatedHumanMinutes</code>
               en el metadata de la señal para sobrescribir la heurística.
             </p>
             <div className="bg-violet-50 border border-violet-100 rounded-xl p-4 mt-3">
@@ -315,7 +315,7 @@ export function Framework() {
             <QA q="¿Puede un loop quedarse abierto indefinidamente?">
               <p>Técnicamente sí. En la práctica, un loop abierto durante más de 30 días sin señales nuevas
               suele ser una señal de que el loop perdió relevancia, cambió de forma o debería cerrarse como "bloqueado".</p>
-              <p>Usa el estado <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">blocked</code> cuando el loop
+              <p>Usa el estado <code className="text-xs bg-elevated px-1 py-0.5 rounded">blocked</code> cuando el loop
               no puede avanzar por una dependencia externa. Es más honesto que dejarlo abierto silenciosamente.</p>
             </QA>
 
@@ -331,7 +331,7 @@ export function Framework() {
               <p>En la versión OSS no existe una relación parent/child de loops a nivel de schema. La convención es
               referenciar el loop padre en el título o en el contenido de la señal: "Sub-tarea de loop [id]".</p>
               <p>Si necesitas jerarquía explícita, es una buena candidata para contribuir al OSS — el schema lo
-              admitiría con una columna <code className="text-xs bg-gray-100 px-1 py-0.5 rounded">parent_loop_id</code> nullable.</p>
+              admitiría con una columna <code className="text-xs bg-elevated px-1 py-0.5 rounded">parent_loop_id</code> nullable.</p>
             </QA>
 
             <QA q="¿Cómo sé si una señal va o no va en un loop?">
@@ -352,10 +352,10 @@ export function Framework() {
             </QA>
           </Section>
 
-          <p className="text-xs text-gray-300 pb-8">
-            Basado en el framework Loopy v0.2 · El contenido de esta página es referencia conceptual del libro,
-            no documentación del software. Para la referencia del API y el SDK, consulta{' '}
-            <a href="https://docs.loopythinking.dev" className="underline hover:text-gray-400" target="_blank" rel="noopener noreferrer">
+          <p className="text-xs text-subtle pb-8">
+            Based on the Loopy framework v0.2 · The content on this page is conceptual reference from the book,
+            not software documentation. For API and SDK reference, see{' '}
+            <a href="https://docs.loopythinking.dev" className="underline hover:text-muted" target="_blank" rel="noopener noreferrer">
               docs.loopythinking.dev
             </a>.
           </p>

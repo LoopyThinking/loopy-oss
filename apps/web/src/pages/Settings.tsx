@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react'
-import { Check, Copy, Trash2, Loader2, User, Key, Building2 } from 'lucide-react'
+import { Check, Copy, Trash2, Loader2, User, Key, Building2, Sparkles } from 'lucide-react'
 import { Layout } from '../components/Layout'
-import { api } from '../lib/api'
+import { api, getCurrentOrgId } from '../lib/api'
+import { LlmConfigSection } from '../components/settings/LlmConfigSection'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -30,10 +31,10 @@ function Section({ title, icon, children }: {
   children: React.ReactNode
 }) {
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden mb-6">
-      <div className="px-5 py-4 border-b border-gray-50 flex items-center gap-2">
-        <span className="text-gray-400">{icon}</span>
-        <h2 className="text-sm font-semibold text-gray-800">{title}</h2>
+    <div className="bg-card border border-edge rounded-xl overflow-hidden mb-6">
+      <div className="px-5 py-4 border-b border-edge-subtle flex items-center gap-2">
+        <span className="text-subtle">{icon}</span>
+        <h2 className="text-sm font-semibold text-primary">{title}</h2>
       </div>
       <div className="px-5 py-5">{children}</div>
     </div>
@@ -53,8 +54,8 @@ function CopyButton({ text }: { text: string }) {
   return (
     <button
       onClick={copy}
-      className="p-1.5 text-gray-400 hover:text-gray-700 hover:bg-gray-100 rounded transition-colors"
-      title="Copiar"
+      className="p-1.5 text-subtle hover:text-secondary hover:bg-hover rounded transition-colors"
+      title="Copy"
     >
       {copied ? <Check size={14} className="text-green-500" /> : <Copy size={14} />}
     </button>
@@ -115,7 +116,7 @@ export function Settings() {
   }
 
   function handleRevokeAgent(agentId: string, agentName: string) {
-    if (!confirm(`¿Revocar el token del agente "${agentName}"? Esta acción no se puede deshacer.`)) return
+    if (!confirm(`Revoke token for agent "${agentName}"? This action cannot be undone.`)) return
     api.me.revokeAgent(agentId)
       .then(() => setAgents(prev => prev.map(a => a.id === agentId ? { ...a, is_active: false } : a)))
       .catch(e => setError(e.message))
@@ -123,16 +124,16 @@ export function Settings() {
 
   if (loading) {
     return (
-      <Layout title="Ajustes" breadcrumbs={[{ label: 'Ajustes' }]}>
-        <div className="flex items-center justify-center h-64 text-gray-400 text-sm gap-2">
-          <Loader2 size={16} className="animate-spin" /> Cargando…
+      <Layout title="Settings" breadcrumbs={[{ label: 'Settings' }]}>
+        <div className="flex items-center justify-center h-64 text-subtle text-sm gap-2">
+          <Loader2 size={16} className="animate-spin" /> Loading…
         </div>
       </Layout>
     )
   }
 
   return (
-    <Layout title="Ajustes" breadcrumbs={[{ label: 'Ajustes' }]}>
+    <Layout title="Settings" breadcrumbs={[{ label: 'Settings' }]}>
       <div className="max-w-2xl">
 
         {error && (
@@ -141,62 +142,62 @@ export function Settings() {
           </div>
         )}
 
-        {/* ── Perfil ──────────────────────────────────────────────────────── */}
-        <Section title="Mi perfil" icon={<User size={15} />}>
+        {/* ── Profile ──────────────────────────────────────────────────────── */}
+        <Section title="My profile" icon={<User size={15} />}>
           <form onSubmit={handleSaveName} className="space-y-4">
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
-                Nombre visible
+              <label className="block text-xs font-medium text-secondary mb-1">
+                Display name
               </label>
               <input
                 type="text"
                 value={name}
                 onChange={e => setName(e.target.value)}
                 maxLength={120}
-                placeholder="Tu nombre"
-                className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                placeholder="Your name"
+                className="w-full px-3 py-2 text-sm border border-edge rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
               />
             </div>
             <div>
-              <label className="block text-xs font-medium text-gray-600 mb-1">
+              <label className="block text-xs font-medium text-secondary mb-1">
                 Email
               </label>
               <input
                 type="text"
                 value={profile?.email ?? '—'}
                 disabled
-                className="w-full px-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg text-gray-400 cursor-not-allowed"
+                className="w-full px-3 py-2 text-sm bg-surface border border-edge rounded-lg text-subtle cursor-not-allowed"
               />
             </div>
             <div className="flex items-center gap-3">
               <button
                 type="submit"
                 disabled={saving || !name.trim()}
-                className="py-2 px-4 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors"
+                className="py-2 px-4 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors"
               >
-                {saving ? 'Guardando…' : 'Guardar'}
+                {saving ? 'Saving…' : 'Save'}
               </button>
               {saved && (
                 <span className="text-xs text-green-600 flex items-center gap-1">
-                  <Check size={13} /> Guardado
+                  <Check size={13} /> Saved
                 </span>
               )}
             </div>
           </form>
         </Section>
 
-        {/* ── Tokens de agente ────────────────────────────────────────────── */}
-        <Section title="Tokens de agente" icon={<Key size={15} />}>
-          <p className="text-xs text-gray-500 mb-4">
-            Los tokens de agente permiten que scripts y skills se autentiquen en la API.
-            El token en claro solo se muestra una vez, al registrar el agente. Aquí puedes
-            ver qué agentes tienes activos y revocarlos si ya no los necesitas.
+        {/* ── Agent tokens ────────────────────────────────────────────── */}
+        <Section title="Agent tokens" icon={<Key size={15} />}>
+          <p className="text-xs text-muted mb-4">
+            Agent tokens let scripts and skills authenticate against the API.
+            The plain-text token is shown only once, when registering the agent. Here you can
+            see which agents are active and revoke them if no longer needed.
           </p>
 
           {agents.length === 0 ? (
-            <p className="text-sm text-gray-400 text-center py-4">
-              No tienes agentes registrados todavía.<br />
-              <span className="text-xs">Usa <code className="bg-gray-100 px-1 py-0.5 rounded">POST /agents</code> para crear uno.</span>
+            <p className="text-sm text-subtle text-center py-4">
+              You don't have any registered agents yet.<br />
+              <span className="text-xs">Use <code className="bg-elevated px-1 py-0.5 rounded">POST /agents</code> to create one.</span>
             </p>
           ) : (
             <div className="space-y-2">
@@ -204,25 +205,25 @@ export function Settings() {
                 <div
                   key={agent.id}
                   className={`flex items-center justify-between px-4 py-3 rounded-xl border ${
-                    agent.is_active ? 'border-gray-100 bg-gray-50/50' : 'border-gray-100 bg-gray-50 opacity-50'
+                    agent.is_active ? 'border-edge bg-surface' : 'border-edge bg-surface opacity-50'
                   }`}
                 >
                   <div className="min-w-0">
                     <div className="flex items-center gap-2">
-                      <p className="text-sm font-medium text-gray-800 truncate">{agent.agent_name}</p>
+                      <p className="text-sm font-medium text-primary truncate">{agent.agent_name}</p>
                       {!agent.is_active && (
-                        <span className="text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">revocado</span>
+                        <span className="text-xs text-subtle bg-elevated px-1.5 py-0.5 rounded">revoked</span>
                       )}
                     </div>
                     {agent.description && (
-                      <p className="text-xs text-gray-500 truncate">{agent.description}</p>
+                      <p className="text-xs text-muted truncate">{agent.description}</p>
                     )}
-                    <p className="text-xs text-gray-400 mt-0.5">
+                    <p className="text-xs text-subtle mt-0.5">
                       ID: <span className="font-mono">{agent.id.slice(0, 8)}…</span>
                       {' · '}
                       {agent.last_seen_at
-                        ? `Último uso: ${new Date(agent.last_seen_at).toLocaleDateString('es')}`
-                        : 'Sin actividad'}
+                        ? `Last used: ${new Date(agent.last_seen_at).toLocaleDateString('en')}`
+                        : 'No activity'}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 ml-3 shrink-0">
@@ -230,8 +231,8 @@ export function Settings() {
                     {agent.is_active && (
                       <button
                         onClick={() => handleRevokeAgent(agent.id, agent.agent_name)}
-                        className="p-1.5 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                        title="Revocar token"
+                        className="p-1.5 text-subtle hover:text-red-500 hover:bg-red-light rounded transition-colors"
+                        title="Revoke token"
                       >
                         <Trash2 size={14} />
                       </button>
@@ -244,16 +245,16 @@ export function Settings() {
         </Section>
 
         {/* ── Organizaciones ──────────────────────────────────────────────── */}
-        <Section title="Mis organizaciones" icon={<Building2 size={15} />}>
+        <Section title="My organizations" icon={<Building2 size={15} />}>
           {!profile?.orgs?.length ? (
-            <p className="text-sm text-gray-400 text-center py-4">No perteneces a ninguna organización.</p>
+            <p className="text-sm text-subtle text-center py-4">You don't belong to any organization.</p>
           ) : (
             <div className="space-y-2">
               {profile.orgs.map(org => (
-                <div key={org.id} className="flex items-center justify-between px-4 py-3 rounded-xl border border-gray-100 bg-gray-50/50">
+                <div key={org.id} className="flex items-center justify-between px-4 py-3 rounded-xl border border-edge bg-surface">
                   <div>
-                    <p className="text-sm font-medium text-gray-800">{org.name}</p>
-                    <p className="text-xs text-gray-400 font-mono">{org.slug}</p>
+                    <p className="text-sm font-medium text-primary">{org.name}</p>
+                    <p className="text-xs text-subtle font-mono">{org.slug}</p>
                   </div>
                   <RoleBadge role={org.role} />
                 </div>
@@ -261,6 +262,11 @@ export function Settings() {
             </div>
           )}
         </Section>
+
+        {/* ── LLM Providers — only for admin+ ────────────────────────────── */}
+        {profile?.orgs?.some(o => o.id === getCurrentOrgId() && (o.role === 'admin' || o.role === 'owner')) && (
+          <LlmConfigSection />
+        )}
 
       </div>
     </Layout>

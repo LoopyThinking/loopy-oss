@@ -41,7 +41,7 @@ export function IPLBadge({ minutes, size = 'md', tooltip = true }: IPLBadgeProps
   const badge = (
     <span
       className={`inline-flex items-center gap-1 rounded-full border font-medium ${colorClass} ${sizeClass}`}
-      aria-label={`IPL: ${value}${unit} de trabajo liberado por el agente`}
+      aria-label={`IPL: ${value}${unit} agent-liberated productivity`}
     >
       {/* Lightning bolt icon — small inline SVG to avoid adding a dep */}
       <svg
@@ -66,18 +66,18 @@ export function IPLBadge({ minutes, size = 'md', tooltip = true }: IPLBadgeProps
       {badge}
       <span
         className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 mb-2 z-20
-                   w-52 rounded-lg bg-slate-900 px-3 py-2 text-xs text-slate-100 shadow-lg
+                   w-52 rounded-lg bg-elevated px-3 py-2 text-xs text-primary shadow-lg border border-edge
                    opacity-0 group-hover:opacity-100 transition-opacity duration-150"
         role="tooltip"
       >
-        <strong className="block font-semibold mb-0.5">IPL · Productividad Liberada</strong>
-        Minutos de trabajo humano ejecutados por el agente en este loop.{' '}
+        <strong className="block font-semibold mb-0.5">IPL · Liberated Productivity</strong>
+        Estimated human-minutes executed by agents in this loop.{' '}
         <a
           href="/framework#ipl"
           className="underline text-violet-300 hover:text-violet-200 pointer-events-auto"
           tabIndex={-1}
         >
-          Saber más →
+          Learn more →
         </a>
       </span>
     </span>

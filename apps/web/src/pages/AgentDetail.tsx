@@ -18,18 +18,18 @@ interface AgentDetail {
   last_seen_at: string | null
 }
 
-type TabId = 'resumen' | 'skills' | 'tools'
+type TabId = 'overview' | 'skills' | 'tools'
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function fmtDateTime(iso: string | null): string {
   if (!iso) return '—'
-  return new Date(iso).toLocaleString('es', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
+  return new Date(iso).toLocaleString('en', { day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit' })
 }
 
 function SourceBadge({ source }: { source: string }) {
@@ -69,12 +69,12 @@ interface TabsProps {
 
 function Tabs({ active, onChange, skillCount, toolCount }: TabsProps) {
   const tabs: { id: TabId; label: string; count?: number }[] = [
-    { id: 'resumen', label: 'Resumen' },
+    { id: 'overview', label: 'Overview' },
     { id: 'skills',  label: 'Skills',  count: skillCount },
     { id: 'tools',   label: 'Tools',   count: toolCount  },
   ]
   return (
-    <div role="tablist" className="flex gap-1 border-b border-gray-100 mb-6">
+    <div role="tablist" className="flex gap-1 border-b border-edge mb-6">
       {tabs.map(t => (
         <button
           key={t.id}
@@ -83,13 +83,13 @@ function Tabs({ active, onChange, skillCount, toolCount }: TabsProps) {
           onClick={() => onChange(t.id)}
           className={`px-4 py-2.5 text-sm font-medium rounded-t-lg transition-colors flex items-center gap-1.5 ${
             active === t.id
-              ? 'border-b-2 border-indigo-600 text-indigo-700 -mb-px'
-              : 'text-gray-500 hover:text-gray-800'
+              ? 'border-b-2 border-indigo-600 text-accent -mb-px'
+              : 'text-muted hover:text-primary'
           }`}
         >
           {t.label}
           {t.count !== undefined && (
-            <span className={`text-xs px-1.5 py-0.5 rounded-full ${active === t.id ? 'bg-indigo-100 text-indigo-700' : 'bg-gray-100 text-gray-500'}`}>
+            <span className={`text-xs px-1.5 py-0.5 rounded-full ${active === t.id ? 'bg-indigo-100 text-accent' : 'bg-elevated text-muted'}`}>
               {t.count}
             </span>
           )}
@@ -99,38 +99,38 @@ function Tabs({ active, onChange, skillCount, toolCount }: TabsProps) {
   )
 }
 
-// ── Tab: Resumen ──────────────────────────────────────────────────────────────
+// ── Tab: Overview ──────────────────────────────────────────────────────────────
 
-interface ResumenTabProps {
+interface OverviewTabProps {
   agent: AgentDetail
   onRevoke: () => void
 }
 
-function ResumenTab({ agent, onRevoke }: ResumenTabProps) {
+function OverviewTab({ agent, onRevoke }: OverviewTabProps) {
   return (
     <div className="space-y-4">
-      <div className="bg-white border border-gray-100 rounded-xl divide-y divide-gray-50">
-        <Row label="ID" value={<code className="text-xs font-mono text-gray-600">{agent.id}</code>} />
-        <Row label="Nombre" value={agent.agent_name} />
-        <Row label="Descripción" value={agent.description ?? <span className="text-gray-400">—</span>} />
+      <div className="bg-card border border-edge rounded-xl divide-y divide-edge-subtle">
+        <Row label="ID" value={<code className="text-xs font-mono text-secondary">{agent.id}</code>} />
+        <Row label="Name" value={agent.agent_name} />
+        <Row label="Description" value={agent.description ?? <span className="text-subtle">—</span>} />
         <Row
-          label="Estado"
+          label="Status"
           value={
             agent.is_active
-              ? <span className="flex items-center gap-1 text-green-700 text-sm"><CheckCircle2 size={14} /> Activo</span>
-              : <span className="flex items-center gap-1 text-red-500 text-sm"><XCircle size={14} /> Revocado</span>
+              ? <span className="flex items-center gap-1 text-green-700 text-sm"><CheckCircle2 size={14} /> Active</span>
+              : <span className="flex items-center gap-1 text-red-500 text-sm"><XCircle size={14} /> Revoked</span>
           }
         />
-        <Row label="Creado" value={<span className="flex items-center gap-1 text-sm text-gray-600"><Calendar size={13} className="text-gray-400" />{fmtDate(agent.created_at)}</span>} />
-        <Row label="Último uso" value={<span className="flex items-center gap-1 text-sm text-gray-600"><Clock size={13} className="text-gray-400" />{fmtDateTime(agent.last_seen_at)}</span>} />
+        <Row label="Created" value={<span className="flex items-center gap-1 text-sm text-secondary"><Calendar size={13} className="text-subtle" />{fmtDate(agent.created_at)}</span>} />
+        <Row label="Last used" value={<span className="flex items-center gap-1 text-sm text-secondary"><Clock size={13} className="text-subtle" />{fmtDateTime(agent.last_seen_at)}</span>} />
       </div>
 
       {agent.is_active && (
         <button
           onClick={onRevoke}
-          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-red-600 border border-red-200 rounded-lg hover:bg-red-light transition-colors"
         >
-          <Trash2 size={14} /> Revocar token
+          <Trash2 size={14} /> Revoke token
         </button>
       )}
     </div>
@@ -140,8 +140,8 @@ function ResumenTab({ agent, onRevoke }: ResumenTabProps) {
 function Row({ label, value }: { label: string; value: React.ReactNode }) {
   return (
     <div className="flex items-start gap-4 px-5 py-3.5">
-      <span className="text-xs font-medium text-gray-400 uppercase tracking-wide w-24 shrink-0 pt-0.5">{label}</span>
-      <div className="text-sm text-gray-800 flex-1 min-w-0">{value}</div>
+      <span className="text-xs font-medium text-subtle uppercase tracking-wide w-24 shrink-0 pt-0.5">{label}</span>
+      <div className="text-sm text-primary flex-1 min-w-0">{value}</div>
     </div>
   )
 }
@@ -157,49 +157,49 @@ interface SkillsTabProps {
 function SkillsTab({ agentId, skills, onDeactivate }: SkillsTabProps) {
   if (skills.length === 0) {
     return (
-      <div className="text-center py-16 border border-dashed border-gray-200 rounded-xl">
-        <Zap size={28} className="mx-auto text-gray-300 mb-3" />
-        <p className="text-sm text-gray-500 font-medium mb-1">Este agente aún no ha declarado skills.</p>
-        <p className="text-xs text-gray-400">
-          Usa{' '}
-          <code className="bg-gray-100 px-1 rounded">POST /agents/{agentId}/skills</code>{' '}
-          desde el SDK o el plugin de Cowork.
+      <div className="text-center py-16 border border-dashed border-edge rounded-xl">
+        <Zap size={28} className="mx-auto text-subtle mb-3" />
+        <p className="text-sm text-muted font-medium mb-1">This agent hasn't declared any skills yet.</p>
+        <p className="text-xs text-subtle">
+          Use{' '}
+          <code className="bg-elevated px-1 rounded">POST /agents/{agentId}/skills</code>{' '}
+          from the SDK or Cowork plugin.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+    <div className="bg-card border border-edge rounded-xl overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-50 text-xs font-medium text-gray-400 uppercase tracking-wide">
+          <tr className="border-b border-edge-subtle text-xs font-medium text-subtle uppercase tracking-wide">
             <th className="text-left px-4 py-3">Skill</th>
-            <th className="text-left px-4 py-3">Fuente</th>
-            <th className="text-left px-4 py-3 hidden sm:table-cell">Versión</th>
-            <th className="text-left px-4 py-3 hidden md:table-cell">Último uso</th>
+            <th className="text-left px-4 py-3">Source</th>
+            <th className="text-left px-4 py-3 hidden sm:table-cell">Version</th>
+            <th className="text-left px-4 py-3 hidden md:table-cell">Last used</th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-edge-subtle">
           {skills.map(s => (
-            <tr key={s.id} className={s.is_active ? '' : 'opacity-40 bg-gray-50'}>
+            <tr key={s.id} className={s.is_active ? '' : 'opacity-40 bg-surface'}>
               <td className="px-4 py-3">
-                <span className="font-medium text-gray-800">{s.skill_name}</span>
-                {!s.is_active && <span className="ml-2 text-xs text-gray-400">inactivo</span>}
-                {s.description && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{s.description}</p>}
+                <span className="font-medium text-primary">{s.skill_name}</span>
+                {!s.is_active && <span className="ml-2 text-xs text-subtle">inactive</span>}
+                {s.description && <p className="text-xs text-subtle mt-0.5 truncate max-w-xs">{s.description}</p>}
               </td>
               <td className="px-4 py-3"><SourceBadge source={s.source} /></td>
-              <td className="px-4 py-3 text-gray-500 text-xs hidden sm:table-cell">{s.version ?? '—'}</td>
-              <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(s.last_seen_at)}</td>
+              <td className="px-4 py-3 text-muted text-xs hidden sm:table-cell">{s.version ?? '—'}</td>
+              <td className="px-4 py-3 text-subtle text-xs hidden md:table-cell">{fmtDate(s.last_seen_at)}</td>
               <td className="px-4 py-3 text-right">
                 {s.is_active && (
                   <button
                     onClick={() => onDeactivate(s.id)}
-                    className="text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                    title="Desactivar"
+                    className="text-xs text-subtle hover:text-red-500 hover:bg-red-light px-2 py-1 rounded transition-colors"
+                    title="Deactivate"
                   >
-                    Desactivar
+                    Deactivate
                   </button>
                 )}
               </td>
@@ -222,47 +222,47 @@ interface ToolsTabProps {
 function ToolsTab({ agentId, tools, onDeactivate }: ToolsTabProps) {
   if (tools.length === 0) {
     return (
-      <div className="text-center py-16 border border-dashed border-gray-200 rounded-xl">
-        <Wrench size={28} className="mx-auto text-gray-300 mb-3" />
-        <p className="text-sm text-gray-500 font-medium mb-1">Este agente aún no ha declarado tools.</p>
-        <p className="text-xs text-gray-400">
-          Usa{' '}
-          <code className="bg-gray-100 px-1 rounded">POST /agents/{agentId}/tools</code>{' '}
-          desde el SDK o el plugin de Cowork.
+      <div className="text-center py-16 border border-dashed border-edge rounded-xl">
+        <Wrench size={28} className="mx-auto text-subtle mb-3" />
+        <p className="text-sm text-muted font-medium mb-1">This agent hasn't declared any tools yet.</p>
+        <p className="text-xs text-subtle">
+          Use{' '}
+          <code className="bg-elevated px-1 rounded">POST /agents/{agentId}/tools</code>{' '}
+          from the SDK or Cowork plugin.
         </p>
       </div>
     )
   }
 
   return (
-    <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+    <div className="bg-card border border-edge rounded-xl overflow-hidden">
       <table className="w-full text-sm">
         <thead>
-          <tr className="border-b border-gray-50 text-xs font-medium text-gray-400 uppercase tracking-wide">
+          <tr className="border-b border-edge-subtle text-xs font-medium text-subtle uppercase tracking-wide">
             <th className="text-left px-4 py-3">Tool</th>
             <th className="text-left px-4 py-3">Tipo</th>
-            <th className="text-left px-4 py-3 hidden md:table-cell">Último uso</th>
+            <th className="text-left px-4 py-3 hidden md:table-cell">Last used</th>
             <th className="px-4 py-3" />
           </tr>
         </thead>
-        <tbody className="divide-y divide-gray-50">
+        <tbody className="divide-y divide-edge-subtle">
           {tools.map(t => (
-            <tr key={t.id} className={t.is_active ? '' : 'opacity-40 bg-gray-50'}>
+            <tr key={t.id} className={t.is_active ? '' : 'opacity-40 bg-surface'}>
               <td className="px-4 py-3">
-                <span className="font-medium text-gray-800">{t.tool_name}</span>
-                {!t.is_active && <span className="ml-2 text-xs text-gray-400">inactivo</span>}
-                {t.description && <p className="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{t.description}</p>}
+                <span className="font-medium text-primary">{t.tool_name}</span>
+                {!t.is_active && <span className="ml-2 text-xs text-subtle">inactive</span>}
+                {t.description && <p className="text-xs text-subtle mt-0.5 truncate max-w-xs">{t.description}</p>}
               </td>
               <td className="px-4 py-3"><TypeBadge type={t.tool_type} /></td>
-              <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(t.last_seen_at)}</td>
+              <td className="px-4 py-3 text-subtle text-xs hidden md:table-cell">{fmtDate(t.last_seen_at)}</td>
               <td className="px-4 py-3 text-right">
                 {t.is_active && (
                   <button
                     onClick={() => onDeactivate(t.id)}
-                    className="text-xs text-gray-400 hover:text-red-500 hover:bg-red-50 px-2 py-1 rounded transition-colors"
-                    title="Desactivar"
+                    className="text-xs text-subtle hover:text-red-500 hover:bg-red-light px-2 py-1 rounded transition-colors"
+                    title="Deactivate"
                   >
-                    Desactivar
+                    Deactivate
                   </button>
                 )}
               </td>
@@ -283,7 +283,7 @@ export function AgentDetail() {
   const [agent, setAgent]   = useState<AgentDetail | null>(null)
   const [skills, setSkills] = useState<AgentSkill[]>([])
   const [tools, setTools]   = useState<AgentTool[]>([])
-  const [tab, setTab]       = useState<TabId>('resumen')
+  const [tab, setTab]       = useState<TabId>('overview')
   const [loading, setLoading] = useState(true)
   const [error, setError]   = useState<string | null>(null)
 
@@ -297,12 +297,12 @@ export function AgentDetail() {
         api.agents.tools.list(id),
       ])
       const found = agentList.find(a => a.id === id)
-      if (!found) { setError('Agente no encontrado'); return }
+      if (!found) { setError('Agent not found'); return }
       setAgent(found)
       setSkills(skillsList)
       setTools(toolsList)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error cargando el agente')
+      setError(e instanceof Error ? e.message : 'Error loading agent')
     } finally {
       setLoading(false)
     }
@@ -312,7 +312,7 @@ export function AgentDetail() {
 
   async function handleRevokeAgent() {
     if (!agent) return
-    if (!confirm(`¿Revocar el token de "${agent.agent_name}"? No se puede deshacer.`)) return
+    if (!confirm(`Revoke token for "${agent.agent_name}"? This cannot be undone.`)) return
     await api.me.revokeAgent(agent.id)
     setAgent(prev => prev ? { ...prev, is_active: false } : prev)
   }
@@ -345,14 +345,14 @@ export function AgentDetail() {
         {/* Back link */}
         <button
           onClick={() => navigate('/agents')}
-          className="flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 mb-5 transition-colors"
+          className="flex items-center gap-1.5 text-sm text-muted hover:text-primary mb-5 transition-colors"
         >
-          <ChevronLeft size={15} /> Todos los agentes
+          <ChevronLeft size={15} /> All agents
         </button>
 
         {loading && (
-          <div className="flex items-center gap-2 text-gray-400 text-sm py-12">
-            <Loader2 size={16} className="animate-spin" /> Cargando agente…
+          <div className="flex items-center gap-2 text-subtle text-sm py-12">
+            <Loader2 size={16} className="animate-spin" /> Loading agent…
           </div>
         )}
 
@@ -366,15 +366,15 @@ export function AgentDetail() {
           <>
             {/* Header */}
             <div className="flex items-center gap-3 mb-6">
-              <div className="w-10 h-10 bg-indigo-50 rounded-xl flex items-center justify-center shrink-0">
-                <Bot size={20} className="text-indigo-600" />
+              <div className="w-10 h-10 bg-accent-light rounded-xl flex items-center justify-center shrink-0">
+                <Bot size={20} className="text-accent" />
               </div>
               <div>
-                <h1 className="text-xl font-bold text-gray-900">{agent.agent_name}</h1>
-                {agent.description && <p className="text-sm text-gray-500">{agent.description}</p>}
+                <h1 className="text-xl font-bold text-primary">{agent.agent_name}</h1>
+                {agent.description && <p className="text-sm text-muted">{agent.description}</p>}
               </div>
               {!agent.is_active && (
-                <span className="ml-auto text-xs bg-red-50 text-red-500 border border-red-100 px-2 py-1 rounded-lg">Revocado</span>
+                <span className="ml-auto text-xs bg-red-50 text-red-500 border border-red-100 px-2 py-1 rounded-lg">Revoked</span>
               )}
             </div>
 
@@ -385,8 +385,8 @@ export function AgentDetail() {
               toolCount={activeTools.length}
             />
 
-            {tab === 'resumen' && (
-              <ResumenTab agent={agent} onRevoke={handleRevokeAgent} />
+            {tab === 'overview' && (
+              <OverviewTab agent={agent} onRevoke={handleRevokeAgent} />
             )}
             {tab === 'skills' && (
               <SkillsTab agentId={id!} skills={skills} onDeactivate={handleDeactivateSkill} />

@@ -1,27 +1,82 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss/base";
+@import "tailwindcss/components";
+@import "tailwindcss/utilities";
 
-@layer base {
-  *, *::before, *::after {
-    box-sizing: border-box;
-  }
-
-  body {
-    @apply font-sans text-slate-900 antialiased;
-  }
-
-  /* Smooth scrolling */
-  html {
-    scroll-behavior: smooth;
-  }
+/* ── Global font settings ───────────────────────────────────────────── */
+:root {
+  font-family: 'Inter', 'SF Pro Display', -apple-system, system-ui, 'Segoe UI', Roboto, sans-serif;
+  font-feature-settings: 'cv01', 'ss03';
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
 }
 
-@layer utilities {
-  .line-clamp-2 {
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
+/* ── Light mode tokens ──────────────────────────────────────────────── */
+:root {
+  /* Backgrounds */
+  --bg-page:       #f7f8f8;
+  --bg-panel:      #ffffff;
+  --bg-surface:    #f3f4f5;
+  --bg-elevated:   #f5f6f7;
+  --bg-hover:      #ececee;
+  --bg-card:       #ffffff;
+
+  /* Text */
+  --text-primary:   #0f1011;
+  --text-secondary: #3e3e44;
+  --text-muted:     #62666d;
+  --text-subtle:    #8a8f98;
+
+  /* Borders */
+  --border:        #e6e6e6;
+  --border-subtle: #d0d6e0;
+  --divide:        #f0f0f2;
+
+  /* Brand / Accent */
+  --accent:        #5e6ad2;
+  --accent-hover:  #7170ff;
+  --accent-light:  #eef0fb;
+
+  /* Status */
+  --green:         #27a644;
+  --green-light:   #d1fae5;
+  --red:           #dc2626;
+  --red-light:     #fee2e2;
+  --amber:         #d97706;
+  --amber-light:   #fef3c7;
+}
+
+/* ── Dark mode tokens ───────────────────────────────────────────────── */
+.dark {
+  /* Backgrounds — luminance stacking (Linear) */
+  --bg-page:       #08090a;
+  --bg-panel:      #0f1011;
+  --bg-surface:    #191a1b;
+  --bg-elevated:   #28282c;
+  --bg-hover:      rgba(255,255,255,0.04);
+  --bg-card:       rgba(255,255,255,0.02);
+
+  /* Text */
+  --text-primary:   #f7f8f8;
+  --text-secondary: #d0d6e0;
+  --text-muted:     #8a8f98;
+  --text-subtle:    #62666d;
+
+  /* Borders — semi-transparent white (Linear approach) */
+  --border:        rgba(255,255,255,0.08);
+  --border-subtle: rgba(255,255,255,0.05);
+  --divide:        rgba(255,255,255,0.05);
+
+  /* Brand / Accent */
+  --accent:        #5e6ad2;
+  --accent-hover:  #828fff;
+  --accent-light:  rgba(94,106,210,0.15);
+
+  /* Status */
+  --green:         #10b981;
+  --green-light:   rgba(16,185,129,0.15);
+  --red:           #f87171;
+  --red-light:     rgba(248,113,113,0.15);
+  --amber:         #fbbf24;
+  --amber-light:   rgba(251,191,36,0.15);
 }

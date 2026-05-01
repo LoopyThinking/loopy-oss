@@ -108,6 +108,23 @@ export interface AdminLoopsResponse {
   offset: number
 }
 
+export interface LlmConfigPublic {
+  id: string
+  org_id: string
+  provider: string
+  display_name: string
+  model: string
+  base_url: string | null
+  api_key_last4: string
+  is_default: boolean
+  is_active: boolean
+  last_tested_at: string | null
+  last_test_ok: boolean | null
+  last_test_error: string | null
+  created_at: string
+  updated_at: string
+}
+
 export interface AdminAgent {
   id: string
   agent_name: string
@@ -258,6 +275,56 @@ export const api = {
 
     revokeInvite: (orgId: string, inviteId: string) =>
       request<void>(`/orgs/${orgId}/invites/${inviteId}`, { method: 'DELETE' }, true),
+
+    updateSettings: (orgId: string, data: { hourly_rate_usd?: number }) =>
+      request<{ id: string; hourly_rate_usd: string; role: string }>(`/orgs/${orgId}`, {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+      }, true),
+  },
+
+  // ── LLM configs ────────────────────────────────────────────────────────────
+
+  llm: {
+    list: (orgId: string) =>
+      request<LlmConfigPublic[]>(`/orgs/${orgId}/llm-configs`, {}, true),
+
+    create: (orgId: string, data: {
+      provider: string
+      display_name: string
+      model: string
+      base_url?: string
+      api_key: string
+      is_default?: boolean
+    }) => request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true),
+
+    update: (orgId: string, configId: string, data: {
+      display_name?: string
+      model?: string
+      base_url?: string
+      is_default?: boolean
+      is_active?: boolean
+    }) => request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}`, {
+      method: 'PATCH',
+      body: JSON.stringify(data),
+    }, true),
+
+    rotate: (orgId: string, configId: string, apiKey: string) =>
+      request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}/rotate`, {
+        method: 'POST',
+        body: JSON.stringify({ api_key: apiKey }),
+      }, true),
+
+    test: (orgId: string, configId: string) =>
+      request<LlmConfigPublic>(`/orgs/${orgId}/llm-configs/${configId}/test`, {
+        method: 'POST',
+      }, true),
+
+    remove: (orgId: string, configId: string) =>
+      request<void>(`/orgs/${orgId}/llm-configs/${configId}`, { method: 'DELETE' }, true),
   },
 
   // ── Agent capabilities ─────────────────────────────────────────────────────
@@ -356,5 +423,152 @@ export const api = {
       }>('/invites/accept', { method: 'POST', body: JSON.stringify({ token }) }),
   },
 
+  // ── Registry ──────────────────────────────────────────────────────────────
+
+  registry: {
+    list: (params?: { type?: string; parentKey?: string; status?: string }) => {
+      const qs = new URLSearchParams()
+      if (params?.type)      qs.set('type', params.type)
+      if (params?.parentKey) qs.set('parentKey', params.parentKey)
+      if (params?.status)    qs.set('status', params.status)
+      const q = qs.toString()
+      return request<Array<{
+        id: string
+        agent_key: string
+        type: string
+        name: string
+        role: string | null
+        emoji: string | null
+        parent_key: string | null
+        status: string
+        created_at: string
+        last_seen_at: string | null
+        registered_by_name: string | null
+        children_count: number
+      }>>(`/registry${q ? `?${q}` : ''}`, {}, true)
+    },
+
+    summary: () =>
+      request<{
+        total: number
+        by_type: { agent: number; skill: number; tool: number; workflow: number }
+        active_users: number
+        last_registered_at: string | null
+        most_common_specializations: string[]
+        org_name: string
+      }>('/registry/summary', {}, true),
+
+    get: (agentKey: string) =>
+      request<{
+        id: string
+        agent_key: string
+        type: string
+        name: string
+        role: string | null
+        emoji: string | null
+        parent_key: string | null
+        status: string
+        responsibilities: string[] | null
+        technical_specialization: string[] | null
+        vibe: string | null
+        strategic_priorities: string[] | null
+        team_contacts: string[] | null
+        created_at: string
+        updated_at: string
+        last_seen_at: string | null
+        registered_by_name: string | null
+        children: Array<{
+          id: string
+          agent_key: string
+          type: string
+          name: string
+          role: string | null
+          emoji: string | null
+          parent_key: string | null
+          status: string
+          created_at: string
+          last_seen_at: string | null
+        }>
+      }>(`/registry/${encodeURIComponent(agentKey)}`, {}, true),
+  },
+
   health: () => request<{ status: string; version: string }>('/health'),
+
+  // ── Analytics ──────────────────────────────────────────────────────────────
+
+  analytics: {
+    templates: {
+      list: () =>
+        request<Array<{
+          key: string; name: string; description: string; category: string
+          default_period: string; has_custom_prompt: boolean
+        }>>('/analytics/templates', {}, true),
+
+      get: (key: string) =>
+        request<{
+          key: string; name: string; description: string; category: string
+          default_period: string; default_prompt: string; org_prompt: string | null
+          output_schema: Record<string, unknown>
+        }>(`/analytics/templates/${key}`, {}, true),
+
+      savePrompt: (key: string, prompt: string) =>
+        request<{ ok: boolean }>(`/analytics/templates/${key}/prompt`, {
+          method: 'PUT',
+          body: JSON.stringify({ prompt }),
+        }, true),
+
+      resetPrompt: (key: string) =>
+        request<void>(`/analytics/templates/${key}/prompt`, { method: 'DELETE' }, true),
+    },
+
+    run: (data: {
+      template_key: string; period?: string; llm_config_id?: string | null; prompt_override?: string
+    }) => request<{ analysis_id: string }>('/analytics/run', {
+      method: 'POST', body: JSON.stringify(data),
+    }, true),
+
+    listAnalyses: (params?: { template_key?: string; limit?: number; offset?: number }) => {
+      const qs = new URLSearchParams()
+      if (params?.template_key) qs.set('template_key', params.template_key)
+      if (params?.limit) qs.set('limit', String(params.limit))
+      if (params?.offset) qs.set('offset', String(params.offset))
+      const q = qs.toString()
+      return request<Array<{
+        id: string; template_key: string; period_label: string; status: string
+        llm_provider: string | null; llm_model: string | null; error: string | null
+        scheduled: boolean; created_at: string; completed_at: string | null
+      }>>(`/analytics/analyses${q ? `?${q}` : ''}`, {}, true)
+    },
+
+    getAnalysis: (id: string) =>
+      request<{
+        id: string; template_key: string; period_label: string; prompt_used: string
+        data_inputs: Record<string, unknown>; result: Record<string, unknown> | null
+        llm_provider: string | null; llm_model: string | null
+        status: string; error: string | null; created_at: string; completed_at: string | null
+      }>(`/analytics/analyses/${id}`, {}, true),
+
+    markdownUrl: (id: string) => `${BASE_URL}/analytics/analyses/${id}/markdown`,
+
+    schedules: {
+      list: () =>
+        request<Array<{
+          id: string; template_key: string; period: string; cadence: string
+          hour: number; timezone: string; is_active: boolean
+          last_run_at: string | null; next_run_at: string
+        }>>('/analytics/schedules', {}, true),
+
+      create: (data: {
+        template_key: string; period?: string; cadence: string
+        hour?: number; timezone?: string; llm_config_id?: string
+      }) => request<any>('/analytics/schedules', { method: 'POST', body: JSON.stringify(data) }, true),
+
+      update: (id: string, data: {
+        is_active?: boolean; cadence?: string; hour?: number; period?: string
+      }) => request<any>(`/analytics/schedules/${id}`, { method: 'PATCH', body: JSON.stringify(data) }, true),
+
+      remove: (id: string) =>
+        request<void>(`/analytics/schedules/${id}`, { method: 'DELETE' }, true),
+    },
+  },
 }

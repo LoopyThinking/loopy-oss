@@ -77,10 +77,11 @@ signals.post('/', async (c) => {
   }
 
   const [signal] = await sql<WorkSignal[]>`
-    INSERT INTO work_signals (loop_id, user_id, type, content, source, estimated_human_minutes, metadata)
+    INSERT INTO work_signals (loop_id, user_id, org_id, type, content, source, estimated_human_minutes, metadata)
     VALUES (
       ${body.loopId},
       ${userId},
+      (SELECT org_id FROM loops WHERE id = ${body.loopId}),
       ${body.type},
       ${body.content.trim()},
       ${source},

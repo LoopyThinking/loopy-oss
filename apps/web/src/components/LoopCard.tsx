@@ -30,19 +30,19 @@ export function LoopCard({ loop, showOwner }: LoopCardProps) {
   return (
     <Link
       to={`/loops/${loop.id}`}
-      className="block rounded-xl border border-slate-200 bg-white p-5 shadow-sm
-                 hover:border-loopy-300 hover:shadow-md transition-all duration-150"
+      className="block rounded-xl border border-edge bg-card p-5 shadow-sm
+                 hover:border-accent/30 hover:shadow-md transition-all duration-150"
     >
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0 flex-1">
-          <h3 className="truncate font-semibold text-slate-900 text-base leading-tight">
+          <h3 className="truncate font-semibold text-primary text-base leading-tight">
             {loop.title}
           </h3>
           {showOwner && ownerLabel && (
-            <p className="mt-0.5 text-xs text-indigo-500 font-medium">{ownerLabel}</p>
+            <p className="mt-0.5 text-xs text-accent font-medium">{ownerLabel}</p>
           )}
           {loop.hypothesis && (
-            <p className="mt-1 text-sm text-slate-500 line-clamp-2 leading-snug">
+            <p className="mt-1 text-sm text-muted line-clamp-2 leading-snug">
               {loop.hypothesis}
             </p>
           )}
@@ -53,7 +53,7 @@ export function LoopCard({ loop, showOwner }: LoopCardProps) {
         </div>
       </div>
 
-      <div className="mt-4 flex items-center gap-3 text-xs text-slate-400">
+      <div className="mt-4 flex items-center gap-3 text-xs text-subtle">
         <span
           className={`rounded-full border px-2 py-0.5 font-medium capitalize ${STATUS_STYLES[loop.status]}`}
         >

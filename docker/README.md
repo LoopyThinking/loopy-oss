@@ -22,7 +22,7 @@ cd loopy-oss
 cp .env.example .env
 ```
 
-Open `.env` and set two required values:
+Open `.env` and set these required values:
 
 ```bash
 # A random password for PostgreSQL
@@ -31,6 +31,10 @@ POSTGRES_PASSWORD=your_secure_db_password
 # A 32-byte hex secret for signing JWTs
 # Generate one with: openssl rand -hex 32
 JWT_SECRET=your_64_char_hex_secret
+
+# A 32-byte base64 key for encrypting LLM provider API keys (v0.5.0+)
+# Generate one with: openssl rand -base64 32
+LOOPY_ENCRYPTION_KEY=your_44_char_base64_key
 ```
 
 ### 3. Start the stack
@@ -43,7 +47,7 @@ docker compose up -d
 This will:
 - Pull `postgres:16-alpine`
 - Build the Hono API from source
-- Run all 4 migrations automatically on first startup
+- Run all 5 migrations (001–010) automatically on first startup
 - Expose the API on `http://localhost:3001`
 
 ### 4. Verify it's running
@@ -132,10 +136,12 @@ DATABASE_URL=postgresql://loopy:${POSTGRES_PASSWORD}@localhost:5432/loopy \
 |----------|----------|-------------|
 | `POSTGRES_PASSWORD` | ✅ | PostgreSQL password |
 | `JWT_SECRET` | ✅ | 32-byte hex secret for JWT signing |
+| `LOOPY_ENCRYPTION_KEY` | ✅ (v0.5.0+) | 32-byte base64 AES-256-GCM key for LLM provider API keys |
 | `PORT` | — | API port (default: `3001`) |
 | `CORS_ORIGIN` | — | Allowed CORS origin (default: `*`) |
 | `SUPABASE_URL` | — | Set to use Supabase JWT verification instead of `JWT_SECRET` |
 | `VITE_API_URL` | — | Frontend API URL (used when web service is enabled) |
+| `LOOPY_DISABLE_CRON` | — | Set to `1` to disable scheduled analytics cron |
 
 ---
 
