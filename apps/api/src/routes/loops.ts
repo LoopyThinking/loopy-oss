@@ -130,8 +130,14 @@ loops.post('/', async (c) => {
   }
 
   const [loop] = await sql<Loop[]>`
-    INSERT INTO loops (user_id, title, hypothesis, scope)
-    VALUES (${userId}, ${body.title.trim()}, ${body.hypothesis ?? null}, ${scope})
+    INSERT INTO loops (user_id, org_id, title, hypothesis, scope)
+    VALUES (
+      ${userId},
+      (SELECT org_id FROM org_members WHERE user_id = ${userId} ORDER BY joined_at ASC LIMIT 1),
+      ${body.title.trim()},
+      ${body.hypothesis ?? null},
+      ${scope}
+    )
     RETURNING *
   `
 

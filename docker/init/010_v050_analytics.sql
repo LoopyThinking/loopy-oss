@@ -5,7 +5,7 @@
 -- All changes are additive — no breaking changes.
 
 -- (a) Org tariff for ROI calculation
-ALTER TABLE orgs
+ALTER TABLE organizations
   ADD COLUMN IF NOT EXISTS hourly_rate_usd NUMERIC(10,2) DEFAULT 50.00;
 
 -- (b) Helper column on loops for stuck-loop detection
@@ -28,11 +28,18 @@ CREATE TRIGGER trg_update_loop_last_signal
   AFTER INSERT ON work_signals
   FOR EACH ROW EXECUTE FUNCTION update_loop_last_signal_at();
 
+-- (b2) Add agent_id to work_signals for agent-to-signal attribution
+ALTER TABLE work_signals
+  ADD COLUMN IF NOT EXISTS agent_id UUID REFERENCES agent_registry(id);
+
+CREATE INDEX IF NOT EXISTS idx_work_signals_agent_id
+  ON work_signals (agent_id);
+
 -- (c) LLM provider configs (BYOK)
 CREATE TABLE IF NOT EXISTS org_llm_configs (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id          UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
-  provider        TEXT NOT NULL CHECK (provider IN ('anthropic','openai','google','openai_compatible')),
+  org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  provider        TEXT NOT NULL CHECK (provider IN ('anthropic','openai','google','openai_compatible','deepseek')),
   display_name    TEXT NOT NULL,
   model           TEXT NOT NULL,
   base_url        TEXT,
@@ -57,7 +64,7 @@ CREATE INDEX IF NOT EXISTS idx_org_llm_active
 -- (d) Analysis template prompt overrides (org-level)
 CREATE TABLE IF NOT EXISTS analysis_templates (
   id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id        UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  org_id        UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   template_key  TEXT NOT NULL,
   prompt        TEXT NOT NULL,
   updated_by    UUID NOT NULL REFERENCES users(id),
@@ -68,7 +75,7 @@ CREATE TABLE IF NOT EXISTS analysis_templates (
 -- (e) Analysis run history
 CREATE TABLE IF NOT EXISTS analyses (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id          UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   template_key    TEXT NOT NULL,
   period_label    TEXT NOT NULL,
   prompt_used     TEXT NOT NULL,
@@ -91,7 +98,7 @@ CREATE INDEX IF NOT EXISTS idx_analyses_org_recent
 -- (f) Scheduled analysis configs
 CREATE TABLE IF NOT EXISTS analysis_schedules (
   id              UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  org_id          UUID NOT NULL REFERENCES orgs(id) ON DELETE CASCADE,
+  org_id          UUID NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
   template_key    TEXT NOT NULL,
   period          TEXT NOT NULL,
   cadence         TEXT NOT NULL CHECK (cadence IN ('weekly','monthly')),

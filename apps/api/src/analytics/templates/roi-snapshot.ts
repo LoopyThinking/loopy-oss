@@ -11,23 +11,25 @@ export const template: AnalysisTemplate = {
     const inputs = await getRoiInputs(orgId, period ?? resolvePeriod('last_30d'))
     return inputs as unknown as Record<string, unknown>
   },
-  defaultPrompt: `Eres un analista de productividad. Analiza estos datos de ROI de Loopy para la organización {{org_name}} en el período {{period_label}}.
-
-Datos:
-- Horas IPL totales: {{ipl_hours}}
-- Tarifa horaria: ${{hourly_rate}}/h
-- Ahorro estimado: ${{savings_usd}}
-- Loops cerrados: {{loops_closed}}
-- Usuarios activos: {{active_users}}
-- Top agentes:
-{{top_agents_md}}
-
-Genera un análisis estructurado con:
-1. headline_summary: resumen ejecutivo de una línea (máx 200 caracteres)
-2. savings_estimate_usd: el ahorro estimado en USD
-3. key_drivers: los 2-3 factores principales que impulsan el ROI
-4. recommendations: 2-3 recomendaciones accionables
-5. narrative_md: narración en markdown (máx 800 caracteres)`,
+  defaultPrompt: [
+    'Eres un analista de productividad. Analiza estos datos de ROI de Loopy para la organización {{org_name}} en el período {{period_label}}.',
+    '',
+    'Datos:',
+    '- Horas IPL totales: {{ipl_hours}}',
+    '- Tarifa horaria: ${{hourly_rate}}/h',
+    '- Ahorro estimado: ${{savings_usd}}',
+    '- Loops cerrados: {{loops_closed}}',
+    '- Usuarios activos: {{active_users}}',
+    '- Top agentes:',
+    '{{top_agents_md}}',
+    '',
+    'Genera un análisis estructurado con:',
+    '1. headline_summary: resumen ejecutivo de una línea (máx 200 caracteres)',
+    '2. savings_estimate_usd: el ahorro estimado en USD',
+    '3. key_drivers: los 2-3 factores principales que impulsan el ROI',
+    '4. recommendations: 2-3 recomendaciones accionables',
+    '5. narrative_md: narración en markdown (máx 800 caracteres)',
+  ].join('\n'),
   outputSchema: {
     type: 'object',
     properties: {

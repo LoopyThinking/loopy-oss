@@ -2,7 +2,7 @@
 // Polls every 15 minutes for due schedules and executes them.
 // Guard with LOOPY_DISABLE_CRON=1 to disable in tests.
 
-import sql from '../db/client.js'
+import sql from './db/client.js'
 
 export function startCron() {
   if (process.env.LOOPY_DISABLE_CRON === '1') {

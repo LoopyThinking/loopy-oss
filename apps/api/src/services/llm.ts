@@ -92,10 +92,10 @@ class AnthropicProvider implements LLMProvider {
 }
 
 class OpenAIProvider implements LLMProvider {
-  readonly provider = 'openai'
-  private apiKey: string
-  private model: string
-  private baseUrl: string
+  readonly provider: string = 'openai'
+  protected apiKey: string
+  protected model: string
+  protected baseUrl: string
 
   constructor(apiKey: string, model: string, baseUrl = 'https://api.openai.com/v1') {
     this.apiKey = apiKey
@@ -165,6 +165,72 @@ class OpenAICompatibleProvider extends OpenAIProvider {
   readonly provider = 'openai_compatible'
 }
 
+// DeepSeek provider — OpenAI-compatible, but doesn't support json_schema response_format.
+// Uses json_object mode + JSON parsing from prompt instructions instead.
+class DeepSeekProvider extends OpenAIProvider {
+  readonly provider = 'deepseek'
+  constructor(apiKey: string, model: string) {
+    super(apiKey, model, 'https://api.deepseek.com/v1')
+  }
+
+  async complete(opts: LLMCompleteOpts): Promise<LLMResult> {
+    const messages: Array<{ role: string; content: string }> = []
+    if (opts.systemPrompt) messages.push({ role: 'system', content: opts.systemPrompt })
+    messages.push({ role: 'user', content: opts.userPrompt })
+
+    const body: Record<string, unknown> = {
+      model: this.model,
+      max_tokens: 4096,
+      messages,
+    }
+
+    // DeepSeek doesn't support json_schema — use json_object instead
+    if (opts.schema) {
+      body.response_format = { type: 'json_object' }
+      // json_object mode requires the word "json" in the prompt somewhere
+      const sysIdx = messages.findIndex(m => m.role === 'system')
+      const targetIdx = sysIdx !== -1 ? sysIdx : messages.length - 1
+      messages[targetIdx] = {
+        ...messages[targetIdx],
+        content: messages[targetIdx].content + '\n\nRespond in valid JSON format.',
+      }
+    }
+
+    if (opts.temperature !== undefined) body.temperature = opts.temperature
+
+    const res = await fetch(`${this.baseUrl}/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${this.apiKey}`,
+      },
+      body: JSON.stringify(body),
+    })
+
+    if (!res.ok) {
+      const err = await res.text().catch(() => 'unknown')
+      throw new Error(`OpenAI API error ${res.status}: ${err}`)
+    }
+
+    const json = await res.json() as {
+      choices: Array<{ message: { content: string | null } }>
+      usage: { prompt_tokens: number; completion_tokens: number }
+    }
+
+    const raw = json.choices[0]?.message?.content ?? ''
+    let structured: Record<string, unknown> | undefined
+    if (opts.schema) {
+      try { structured = JSON.parse(raw) as Record<string, unknown> } catch { /* use as plain text */ }
+    }
+
+    return {
+      content: raw,
+      structured,
+      usage: { input_tokens: json.usage.prompt_tokens, output_tokens: json.usage.completion_tokens },
+    }
+  }
+}
+
 // Google Gemini provider
 class GoogleProvider implements LLMProvider {
   readonly provider = 'google'
@@ -193,8 +259,9 @@ class GoogleProvider implements LLMProvider {
     }
 
     if (opts.schema) {
-      body.generationConfig.responseMimeType = 'application/json'
-      body.generationConfig.responseSchema = opts.schema
+      const gc = body.generationConfig as Record<string, unknown>
+      gc.responseMimeType = 'application/json'
+      gc.responseSchema = opts.schema
     }
 
     const res = await fetch(
@@ -241,6 +308,8 @@ export function getProvider(config: OrgLlmConfig): LLMProvider {
       return new OpenAIProvider(apiKey, config.model)
     case 'google':
       return new GoogleProvider(apiKey, config.model)
+    case 'deepseek':
+      return new DeepSeekProvider(apiKey, config.model)
     case 'openai_compatible':
       return new OpenAICompatibleProvider(apiKey, config.model, config.base_url ?? undefined)
     default:

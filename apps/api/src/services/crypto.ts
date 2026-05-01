@@ -1,6 +1,8 @@
 // AES-256-GCM encryption for API keys at rest.
 // Uses LOOPY_ENCRYPTION_KEY (32-byte base64) from env.
 
+import * as crypto from 'node:crypto'
+
 const ALGO = 'aes-256-gcm'
 const IV_LENGTH = 12
 const TAG_LENGTH = 16
@@ -24,8 +26,8 @@ function getKey(): Buffer {
 
 export function encrypt(plaintext: string): string {
   const key = getKey()
-  const iv = require('crypto').randomBytes(IV_LENGTH)
-  const cipher = require('crypto').createCipheriv(ALGO, key, iv)
+  const iv = crypto.randomBytes(IV_LENGTH)
+  const cipher = crypto.createCipheriv(ALGO, key, iv)
   const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
   const tag = cipher.getAuthTag()
   // Format: base64(iv || ciphertext || tag)
@@ -38,7 +40,7 @@ export function decrypt(ciphertext: string): string {
   const iv = buf.subarray(0, IV_LENGTH)
   const tag = buf.subarray(buf.length - TAG_LENGTH)
   const data = buf.subarray(IV_LENGTH, buf.length - TAG_LENGTH)
-  const decipher = require('crypto').createDecipheriv(ALGO, key, iv)
+  const decipher = crypto.createDecipheriv(ALGO, key, iv)
   decipher.setAuthTag(tag)
   return decipher.update(data) + decipher.final('utf8')
 }

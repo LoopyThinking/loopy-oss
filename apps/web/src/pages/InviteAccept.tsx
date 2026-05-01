@@ -12,10 +12,10 @@ type InviteState =
   | { status: 'expired' }
 
 const ROLE_LABEL: Record<string, string> = {
-  viewer: 'Solo lectura',
-  member: 'Miembro',
-  admin:  'Administrador',
-  owner:  'Propietario',
+  viewer: 'Read-only',
+  member: 'Member',
+  admin:  'Admin',
+  owner:  'Owner',
 }
 
 export function InviteAccept() {
@@ -27,7 +27,7 @@ export function InviteAccept() {
   // 1. Fetch invite details on mount
   useEffect(() => {
     if (!token) {
-      setState({ status: 'error', message: 'Token de invitación no encontrado en la URL.' })
+      setState({ status: 'error', message: 'Invite token not found in URL.' })
       return
     }
 
@@ -45,9 +45,9 @@ export function InviteAccept() {
         if (err.status === 410) {
           setState({ status: 'expired' })
         } else if (err.status === 404) {
-          setState({ status: 'error', message: 'Esta invitación no existe o ya fue usada.' })
+          setState({ status: 'error', message: 'This invitation does not exist or was already used.' })
         } else {
-          setState({ status: 'error', message: err.message ?? 'Error al cargar la invitación.' })
+          setState({ status: 'error', message: err.message ?? 'Error loading invitation.' })
         }
       })
   }, [token])
@@ -68,28 +68,28 @@ export function InviteAccept() {
         setState({ status: 'done', orgName: result.org_name, alreadyMember: result.already_member })
       })
       .catch(err => {
-        setState({ status: 'error', message: err.message ?? 'Error al aceptar la invitación.' })
+        setState({ status: 'error', message: err.message ?? 'Error accepting invitation.' })
       })
   }
 
   // ── Render ────────────────────────────────────────────────────────────────
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
+    <div className="min-h-screen bg-page flex items-center justify-center px-4">
       <div className="w-full max-w-md">
 
         {/* Logo / brand */}
         <div className="text-center mb-8">
-          <span className="text-2xl font-semibold text-gray-900 tracking-tight">Loopy OSS</span>
+          <span className="text-2xl font-semibold text-primary tracking-tight">Loopy OSS</span>
         </div>
 
-        <div className="bg-white border border-gray-100 rounded-2xl shadow-sm p-8">
+        <div className="bg-card border border-edge rounded-2xl shadow-sm p-8">
 
           {/* Loading */}
           {state.status === 'loading' && (
             <div className="flex flex-col items-center gap-3 py-6">
-              <Loader2 size={28} className="text-indigo-400 animate-spin" />
-              <p className="text-sm text-gray-500">Cargando invitación…</p>
+              <Loader2 size={28} className="text-accent/60 animate-spin" />
+              <p className="text-sm text-muted">Loading invitation…</p>
             </div>
           )}
 
@@ -97,13 +97,13 @@ export function InviteAccept() {
           {state.status === 'ready' && (
             <div className="space-y-6">
               <div className="flex flex-col items-center gap-3 text-center">
-                <div className="w-14 h-14 rounded-2xl bg-indigo-50 flex items-center justify-center">
-                  <Building2 size={26} className="text-indigo-600" />
+                <div className="w-14 h-14 rounded-2xl bg-accent-light flex items-center justify-center">
+                  <Building2 size={26} className="text-accent" />
                 </div>
                 <div>
-                  <p className="text-sm text-gray-500 mb-1">Te invitaron a unirte a</p>
-                  <h1 className="text-xl font-semibold text-gray-900">{state.orgName}</h1>
-                  <span className="inline-flex mt-2 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-50 text-indigo-700">
+                  <p className="text-sm text-muted mb-1">You've been invited to join</p>
+                  <h1 className="text-xl font-semibold text-primary">{state.orgName}</h1>
+                  <span className="inline-flex mt-2 items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-accent-light text-accent">
                     Rol: {ROLE_LABEL[state.role] ?? state.role}
                   </span>
                 </div>
@@ -111,19 +111,19 @@ export function InviteAccept() {
 
               {!isLoggedIn && (
                 <div className="bg-amber-50 border border-amber-100 rounded-xl p-3 text-xs text-amber-700 text-center">
-                  Necesitas iniciar sesión antes de aceptar la invitación.
+                  You need to log in before accepting this invitation.
                 </div>
               )}
 
               <button
                 onClick={handleAccept}
-                className="w-full py-2.5 px-4 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+                className="w-full py-2.5 px-4 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors"
               >
-                {isLoggedIn ? `Unirme a ${state.orgName}` : 'Iniciar sesión para aceptar'}
+                {isLoggedIn ? `Join ${state.orgName}` : 'Log in to accept'}
               </button>
 
-              <p className="text-xs text-gray-400 text-center">
-                Expira el {new Date(state.expiresAt).toLocaleDateString('es', { day: '2-digit', month: 'long', year: 'numeric' })}
+              <p className="text-xs text-subtle text-center">
+                Expires {new Date(state.expiresAt).toLocaleDateString('en', { day: '2-digit', month: 'long', year: 'numeric' })}
               </p>
             </div>
           )}
@@ -131,8 +131,8 @@ export function InviteAccept() {
           {/* Joining spinner */}
           {state.status === 'joining' && (
             <div className="flex flex-col items-center gap-3 py-6">
-              <Loader2 size={28} className="text-indigo-400 animate-spin" />
-              <p className="text-sm text-gray-500">Uniéndote a la organización…</p>
+              <Loader2 size={28} className="text-accent/60 animate-spin" />
+              <p className="text-sm text-muted">Joining organization…</p>
             </div>
           )}
 
@@ -143,10 +143,10 @@ export function InviteAccept() {
                 <CheckCircle2 size={28} className="text-green-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-gray-900">
-                  {state.alreadyMember ? 'Ya eres miembro' : '¡Bienvenido!'}
+                <h2 className="text-lg font-semibold text-primary">
+                  {state.alreadyMember ? 'Already a member' : 'Welcome!'}
                 </h2>
-                <p className="text-sm text-gray-500 mt-1">
+                <p className="text-sm text-muted mt-1">
                   {state.alreadyMember
                     ? `Ya pertenecías a ${state.orgName}.`
                     : `Ahora eres miembro de ${state.orgName}.`}
@@ -154,7 +154,7 @@ export function InviteAccept() {
               </div>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="mt-2 py-2.5 px-6 bg-indigo-600 text-white text-sm font-medium rounded-xl hover:bg-indigo-700 transition-colors"
+                className="mt-2 py-2.5 px-6 bg-accent text-white text-sm font-medium rounded-xl hover:bg-accent-hover transition-colors"
               >
                 Ir al dashboard
               </button>
@@ -167,9 +167,9 @@ export function InviteAccept() {
               <div className="w-14 h-14 rounded-2xl bg-amber-50 flex items-center justify-center">
                 <AlertCircle size={28} className="text-amber-500" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Invitación expirada</h2>
-              <p className="text-sm text-gray-500">
-                Esta invitación ya venció o fue usada. Pide al administrador de la organización que genere una nueva.
+              <h2 className="text-lg font-semibold text-primary">Expired invitation</h2>
+              <p className="text-sm text-muted">
+                This invitation has expired or was already used. Ask the organization admin to generate a new one.
               </p>
             </div>
           )}
@@ -180,11 +180,11 @@ export function InviteAccept() {
               <div className="w-14 h-14 rounded-2xl bg-red-50 flex items-center justify-center">
                 <AlertCircle size={28} className="text-red-500" />
               </div>
-              <h2 className="text-lg font-semibold text-gray-900">Algo salió mal</h2>
-              <p className="text-sm text-gray-500">{state.message}</p>
+              <h2 className="text-lg font-semibold text-primary">Algo salió mal</h2>
+              <p className="text-sm text-muted">{state.message}</p>
               <button
                 onClick={() => navigate('/dashboard')}
-                className="mt-2 text-sm text-indigo-600 hover:underline"
+                className="mt-2 text-sm text-accent hover:underline"
               >
                 Volver al dashboard
               </button>

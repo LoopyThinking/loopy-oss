@@ -231,7 +231,7 @@ async function runAnalysisJob(
 
     await sql`
       UPDATE analyses
-      SET result = ${JSON.stringify(result.structured ?? { content: result.content })},
+      SET result = ${JSON.stringify(result.structured ?? { content: result.content })}::jsonb,
           status = 'succeeded',
           completed_at = now()
       WHERE id = ${analysisId}
@@ -404,27 +404,24 @@ analytics.patch('/schedules/:id', async (c) => {
     llm_config_id?: string | null
   }>()
 
-  const sets: string[] = []
-  const vals: (string | number | boolean | null)[] = []
-  let idx = 0
+  const sq = sql as any
+  const setClauses: ReturnType<typeof sql>[] = []
 
-  if (body.is_active !== undefined) { sets.push(`is_active = $${++idx}`); vals.push(body.is_active) }
-  if (body.cadence) { sets.push(`cadence = $${++idx}`); vals.push(body.cadence) }
-  if (body.hour !== undefined) { sets.push(`hour = $${++idx}`); vals.push(body.hour) }
-  if (body.period) { sets.push(`period = $${++idx}`); vals.push(body.period) }
-  if (body.llm_config_id !== undefined) { sets.push(`llm_config_id = $${++idx}`); vals.push(body.llm_config_id) }
+  if (body.is_active !== undefined) setClauses.push(sql`is_active = ${body.is_active}`)
+  if (body.cadence) setClauses.push(sql`cadence = ${body.cadence}`)
+  if (body.hour !== undefined) setClauses.push(sql`hour = ${body.hour}`)
+  if (body.period) setClauses.push(sql`period = ${body.period}`)
+  if (body.llm_config_id !== undefined) setClauses.push(sql`llm_config_id = ${body.llm_config_id}`)
 
-  if (sets.length === 0) {
+  if (setClauses.length === 0) {
     return c.json({ error: 'Bad Request', message: 'No fields to update' }, 400)
   }
 
-  vals.push(orgId, scheduleId)
-
-  const [updated] = await sql.unsafe<Analysis[]>`
-    UPDATE analysis_schedules SET ${sql.unsafe(sets.join(', '))}
+  const [updated] = await sql<Analysis[]>`
+    UPDATE analysis_schedules SET ${sq.join(setClauses, sql`, `)}
     WHERE org_id = ${orgId} AND id = ${scheduleId}
     RETURNING *
-  `.execute(...vals)
+  `
 
   if (!updated) return c.json({ error: 'Not Found' }, 404)
 

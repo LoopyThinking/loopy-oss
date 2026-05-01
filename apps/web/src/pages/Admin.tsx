@@ -32,12 +32,12 @@ function KpiCard({ icon, label, value, sub, color = 'indigo' }: KpiCardProps) {
     violet: 'bg-violet-50 text-violet-600',
   }
   return (
-    <div className="bg-white border border-gray-100 rounded-xl p-5">
+    <div className="bg-card border border-edge rounded-xl p-5">
       <div className="flex items-start justify-between">
         <div>
-          <p className="text-xs font-medium text-gray-500 uppercase tracking-wide mb-1">{label}</p>
-          <p className="text-2xl font-semibold text-gray-900">{value}</p>
-          {sub && <p className="text-xs text-gray-400 mt-0.5">{sub}</p>}
+          <p className="text-xs font-medium text-muted uppercase tracking-wide mb-1">{label}</p>
+          <p className="text-2xl font-semibold text-primary">{value}</p>
+          {sub && <p className="text-xs text-subtle mt-0.5">{sub}</p>}
         </div>
         <div className={`p-2 rounded-lg ${colorMap[color] ?? colorMap.indigo}`}>
           {icon}
@@ -80,7 +80,7 @@ export function Admin() {
         setAgents(ags)
         setError(null)
       })
-      .catch(e => setError(e.message ?? 'Error cargando datos'))
+      .catch(e => setError(e.message ?? 'Error loading data'))
       .finally(() => setLoading(false))
   }, [window_])
 
@@ -136,17 +136,17 @@ export function Admin() {
   }
 
   function SortIcon({ field }: { field: SortField }) {
-    if (sortField !== field) return <ArrowUpDown size={13} className="text-gray-300 ml-1" />
+    if (sortField !== field) return <ArrowUpDown size={13} className="text-subtle ml-1" />
     return sortDir === 'desc'
-      ? <ChevronDown size={13} className="text-indigo-500 ml-1" />
-      : <ChevronUp size={13} className="text-indigo-500 ml-1" />
+      ? <ChevronDown size={13} className="text-accent ml-1" />
+      : <ChevronUp size={13} className="text-accent ml-1" />
   }
 
   if (loading) {
     return (
-      <Layout title="Panel ejecutivo" breadcrumbs={[{ label: 'Panel ejecutivo' }]}>
-        <div className="flex items-center justify-center h-64 text-gray-400 text-sm">
-          Cargando datos…
+      <Layout title="Executive Panel" breadcrumbs={[{ label: 'Executive Panel' }]}>
+        <div className="flex items-center justify-center h-64 text-subtle text-sm">
+          Loading data…
         </div>
       </Layout>
     )
@@ -154,7 +154,7 @@ export function Admin() {
 
   if (error) {
     return (
-      <Layout title="Panel ejecutivo" breadcrumbs={[{ label: 'Panel ejecutivo' }]}>
+      <Layout title="Executive Panel" breadcrumbs={[{ label: 'Executive Panel' }]}>
         <div className="bg-red-50 border border-red-100 rounded-xl p-6 text-red-600 text-sm">
           {error}
         </div>
@@ -164,51 +164,51 @@ export function Admin() {
 
   return (
     <Layout
-      title="Panel ejecutivo"
-      breadcrumbs={[{ label: 'Panel ejecutivo' }]}
+      title="Executive Panel"
+      breadcrumbs={[{ label: 'Executive Panel' }]}
     >
       {/* ── KPI cards ──────────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
         <KpiCard
           icon={<Repeat2 size={18} />}
-          label="Loops activos"
+          label="Active loops"
           value={overview?.active_loops ?? 0}
-          sub={`${overview?.total_loops ?? 0} en total`}
+          sub={`${overview?.total_loops ?? 0} total`}
           color="indigo"
         />
         <KpiCard
           icon={<CheckCircle2 size={18} />}
-          label="Cerrados (30d)"
+          label="Closed (30d)"
           value={overview?.closed_last_30d ?? 0}
           color="green"
         />
         <KpiCard
           icon={<TrendingUp size={18} />}
-          label="Confidence promedio"
+          label="Avg. confidence"
           value={`${overview?.avg_confidence ?? 0}`}
-          sub="índice 0–100"
+          sub="index 0–100"
           color="amber"
         />
         <KpiCard
           icon={<Clock size={18} />}
-          label="IPL acumulado"
+          label="Total IPL"
           value={`${overview?.total_ipl_hours ?? 0}h`}
-          sub="horas liberadas por agentes"
+          sub="hours freed by agents"
           color="violet"
         />
         <KpiCard
           icon={<Crown size={18} />}
           label="Top owner"
           value={topOwner?.name ?? '—'}
-          sub={topOwner ? `${topOwner.count} loops activos` : 'Sin datos'}
+          sub={topOwner ? `${topOwner.count} active loops` : 'No data'}
           color="indigo"
         />
       </div>
 
       {/* ── Activity chart ─────────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-100 rounded-xl p-5 mb-8">
+      <div className="bg-card border border-edge rounded-xl p-5 mb-8">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-sm font-semibold text-gray-800">Señales por día</h2>
+          <h2 className="text-sm font-semibold text-primary">Signals per day</h2>
           <div className="flex gap-1">
             {(['7d', '30d', '90d'] as const).map(w => (
               <button
@@ -216,8 +216,8 @@ export function Admin() {
                 onClick={() => setWindow(w)}
                 className={`px-2.5 py-1 text-xs rounded-lg transition-colors ${
                   window_ === w
-                    ? 'bg-indigo-100 text-indigo-700 font-medium'
-                    : 'text-gray-500 hover:bg-gray-50'
+                    ? 'bg-accent-light text-accent font-medium'
+                    : 'text-muted hover:bg-hover'
                 }`}
               >
                 {w}
@@ -246,8 +246,8 @@ export function Admin() {
             <YAxis tick={{ fontSize: 10, fill: '#9ca3af' }} allowDecimals={false} />
             <Tooltip
               contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e5e7eb' }}
-              labelFormatter={(d: string) => `Fecha: ${d}`}
-              formatter={(v: number) => [v, 'señales']}
+              labelFormatter={(d: string) => `Date: ${d}`}
+              formatter={(v: number) => [v, 'signals']}
             />
             <Area
               type="monotone"
@@ -262,49 +262,49 @@ export function Admin() {
       </div>
 
       {/* ── Loops table ─────────────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-100 rounded-xl mb-8 overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-50 flex items-center justify-between">
-          <h2 className="text-sm font-semibold text-gray-800">Loops</h2>
-          <span className="text-xs text-gray-400">{loopsResp?.total ?? 0} en total</span>
+      <div className="bg-card border border-edge rounded-xl mb-8 overflow-hidden">
+        <div className="px-5 py-4 border-b border-edge flex items-center justify-between">
+          <h2 className="text-sm font-semibold text-primary">Loops</h2>
+          <span className="text-xs text-subtle">{loopsResp?.total ?? 0} total</span>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-50">
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">
-                  Título
+              <tr className="border-b border-edge">
+                <th className="text-left px-5 py-3 text-xs font-medium text-subtle uppercase tracking-wide">
+                  Title
                 </th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">
-                  Estado
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">
+                  Status
                 </th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">
-                  Propietario
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">
+                  Owner
                 </th>
                 <th
-                  className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide cursor-pointer hover:text-gray-600 select-none"
+                  className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide cursor-pointer hover:text-secondary select-none"
                   onClick={() => toggleSort('confidence_index')}
                 >
                   <span className="flex items-center">Confidence <SortIcon field="confidence_index" /></span>
                 </th>
                 <th
-                  className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide cursor-pointer hover:text-gray-600 select-none"
+                  className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide cursor-pointer hover:text-secondary select-none"
                   onClick={() => toggleSort('ipl_minutes')}
                 >
                   <span className="flex items-center">IPL <SortIcon field="ipl_minutes" /></span>
                 </th>
                 <th
-                  className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide cursor-pointer hover:text-gray-600 select-none"
+                  className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide cursor-pointer hover:text-secondary select-none"
                   onClick={() => toggleSort('signal_count')}
                 >
-                  <span className="flex items-center">Señales <SortIcon field="signal_count" /></span>
+                  <span className="flex items-center">Signals <SortIcon field="signal_count" /></span>
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-edge-subtle">
               {sortedLoops.length === 0 && (
                 <tr>
-                  <td colSpan={6} className="px-5 py-8 text-center text-gray-400 text-sm">
-                    No hay loops en esta organización
+                  <td colSpan={6} className="px-5 py-8 text-center text-subtle text-sm">
+                    No loops in this organization
                   </td>
                 </tr>
               )}
@@ -317,27 +317,27 @@ export function Admin() {
                 return (
                   <>
                     {showOwnerHeader && (
-                      <tr key={`owner-${owner}-${idx}`} className="bg-gray-50">
-                        <td colSpan={6} className="px-5 py-2 text-xs font-semibold text-gray-500 uppercase tracking-wide">
+                      <tr key={`owner-${owner}-${idx}`} className="bg-surface">
+                        <td colSpan={6} className="px-5 py-2 text-xs font-semibold text-muted uppercase tracking-wide">
                           {owner}
                         </td>
                       </tr>
                     )}
-                    <tr key={loop.id} className="hover:bg-gray-50/50 transition-colors">
+                    <tr key={loop.id} className="hover:bg-hover transition-colors">
                       <td className="px-5 py-3 max-w-xs">
-                        <p className="font-medium text-gray-800 truncate">{loop.title}</p>
-                        <p className="text-xs text-gray-400">{loop.scope}</p>
+                        <p className="font-medium text-primary truncate">{loop.title}</p>
+                        <p className="text-xs text-subtle">{loop.scope}</p>
                       </td>
                       <td className="px-3 py-3">
                         <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
                           loop.status === 'open'   ? 'bg-green-50 text-green-700'  :
-                          loop.status === 'closed' ? 'bg-gray-100 text-gray-600'   :
+                          loop.status === 'closed' ? 'bg-elevated text-secondary'   :
                           'bg-amber-50 text-amber-700'
                         }`}>
                           {loop.status}
                         </span>
                       </td>
-                      <td className="px-3 py-3 text-xs text-gray-500">
+                      <td className="px-3 py-3 text-xs text-muted">
                         {loop.owner_name ?? loop.owner_email?.split('@')[0]}
                       </td>
                       <td className="px-3 py-3">
@@ -346,7 +346,7 @@ export function Admin() {
                       <td className="px-3 py-3">
                         <IPLBadge minutes={loop.ipl_minutes} />
                       </td>
-                      <td className="px-3 py-3 text-gray-500 text-xs">
+                      <td className="px-3 py-3 text-muted text-xs">
                         {(loop as any).signal_count ?? 0}
                       </td>
                     </tr>
@@ -361,14 +361,14 @@ export function Admin() {
       {/* ── Two-column row: IPL por usuario + Agentes más activos ────────── */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {/* IPL por usuario */}
-        <div className="bg-white border border-gray-100 rounded-xl p-5">
+        <div className="bg-card border border-edge rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
             <Zap size={15} className="text-amber-500" />
-            <h2 className="text-sm font-semibold text-gray-800">IPL por usuario</h2>
-            <span className="text-xs text-gray-400 ml-auto">top 5</span>
+            <h2 className="text-sm font-semibold text-primary">IPL per user</h2>
+            <span className="text-xs text-subtle ml-auto">top 5</span>
           </div>
           {iplByUser.length === 0 ? (
-            <p className="text-xs text-gray-400 py-4 text-center">Sin datos</p>
+            <p className="text-xs text-subtle py-4 text-center">No data</p>
           ) : (
             <div className="space-y-2">
               {iplByUser.map(u => {
@@ -377,10 +377,10 @@ export function Admin() {
                 return (
                   <div key={u.name}>
                     <div className="flex items-center justify-between text-xs mb-0.5">
-                      <span className="text-gray-700 font-medium truncate max-w-[140px]">{u.name}</span>
-                      <span className="text-gray-400 ml-2">{(u.ipl / 60).toFixed(1)}h</span>
+                      <span className="text-secondary font-medium truncate max-w-[140px]">{u.name}</span>
+                      <span className="text-subtle ml-2">{(u.ipl / 60).toFixed(1)}h</span>
                     </div>
-                    <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-1.5 bg-elevated rounded-full overflow-hidden">
                       <div className="h-full bg-amber-400 rounded-full" style={{ width: `${pct}%` }} />
                     </div>
                   </div>
@@ -391,24 +391,24 @@ export function Admin() {
         </div>
 
         {/* Agentes más activos */}
-        <div className="bg-white border border-gray-100 rounded-xl p-5">
+        <div className="bg-card border border-edge rounded-xl p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Bot size={15} className="text-indigo-500" />
-            <h2 className="text-sm font-semibold text-gray-800">Agentes más activos</h2>
-            <span className="text-xs text-gray-400 ml-auto">top 3</span>
+            <Bot size={15} className="text-accent" />
+            <h2 className="text-sm font-semibold text-primary">Most active agents</h2>
+            <span className="text-xs text-subtle ml-auto">top 3</span>
           </div>
           {topAgents.length === 0 ? (
-            <p className="text-xs text-gray-400 py-4 text-center">Sin agentes</p>
+            <p className="text-xs text-subtle py-4 text-center">No agents</p>
           ) : (
             <div className="space-y-3">
               {topAgents.map((ag, i) => (
                 <div key={ag.id} className="flex items-center gap-3">
-                  <span className="text-sm font-bold text-gray-300 w-4">{i + 1}</span>
+                  <span className="text-sm font-bold text-subtle w-4">{i + 1}</span>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-800 truncate">{ag.agent_name}</p>
-                    <p className="text-xs text-gray-400">{ag.owner_name ?? ag.owner_email?.split('@')[0]}</p>
+                    <p className="text-sm font-medium text-primary truncate">{ag.agent_name}</p>
+                    <p className="text-xs text-subtle">{ag.owner_name ?? ag.owner_email?.split('@')[0]}</p>
                   </div>
-                  <span className="text-xs text-gray-500 shrink-0">{ag.total_signals} señales</span>
+                  <span className="text-xs text-muted shrink-0">{ag.total_signals} signals</span>
                 </div>
               ))}
             </div>
@@ -417,52 +417,52 @@ export function Admin() {
       </div>
 
       {/* ── Agents table ────────────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
-        <div className="px-5 py-4 border-b border-gray-50 flex items-center gap-2">
-          <Bot size={15} className="text-gray-400" />
-          <h2 className="text-sm font-semibold text-gray-800">Agentes</h2>
+      <div className="bg-card border border-edge rounded-xl overflow-hidden">
+        <div className="px-5 py-4 border-b border-edge flex items-center gap-2">
+          <Bot size={15} className="text-subtle" />
+          <h2 className="text-sm font-semibold text-primary">Agentes</h2>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-50">
-                <th className="text-left px-5 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">Agente</th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">Propietario</th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">Estado</th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">Señales</th>
-                <th className="text-left px-3 py-3 text-xs font-medium text-gray-400 uppercase tracking-wide">Última actividad</th>
+              <tr className="border-b border-edge">
+                <th className="text-left px-5 py-3 text-xs font-medium text-subtle uppercase tracking-wide">Agent</th>
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">Owner</th>
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">Status</th>
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">Signals</th>
+                <th className="text-left px-3 py-3 text-xs font-medium text-subtle uppercase tracking-wide">Last activity</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-gray-50">
+            <tbody className="divide-y divide-edge-subtle">
               {agents.length === 0 && (
                 <tr>
-                  <td colSpan={5} className="px-5 py-8 text-center text-gray-400 text-sm">
-                    No hay agentes registrados
+                  <td colSpan={5} className="px-5 py-8 text-center text-subtle text-sm">
+                    No registered agents
                   </td>
                 </tr>
               )}
               {agents.map(agent => (
-                <tr key={agent.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={agent.id} className="hover:bg-hover transition-colors">
                   <td className="px-5 py-3">
-                    <p className="font-medium text-gray-800">{agent.agent_name}</p>
+                    <p className="font-medium text-primary">{agent.agent_name}</p>
                     {agent.description && (
-                      <p className="text-xs text-gray-400 truncate max-w-xs">{agent.description}</p>
+                      <p className="text-xs text-subtle truncate max-w-xs">{agent.description}</p>
                     )}
                   </td>
-                  <td className="px-3 py-3 text-xs text-gray-500">
+                  <td className="px-3 py-3 text-xs text-muted">
                     {agent.owner_name ?? agent.owner_email?.split('@')[0]}
                   </td>
                   <td className="px-3 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
-                      agent.is_active ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-500'
+                      agent.is_active ? 'bg-green-50 text-green-700' : 'bg-elevated text-muted'
                     }`}>
-                      {agent.is_active ? 'activo' : 'inactivo'}
+                      {agent.is_active ? 'active' : 'inactive'}
                     </span>
                   </td>
-                  <td className="px-3 py-3 text-xs text-gray-500">{agent.total_signals}</td>
-                  <td className="px-3 py-3 text-xs text-gray-400">
+                  <td className="px-3 py-3 text-xs text-muted">{agent.total_signals}</td>
+                  <td className="px-3 py-3 text-xs text-subtle">
                     {agent.last_seen_at
-                      ? new Date(agent.last_seen_at).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+                      ? new Date(agent.last_seen_at).toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })
                       : '—'}
                   </td>
                 </tr>

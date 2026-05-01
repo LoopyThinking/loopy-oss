@@ -56,7 +56,7 @@ export interface RoiInputs {
 
 export async function getRoiInputs(orgId: string, period: Period): Promise<RoiInputs> {
   const [hourlyRow] = await sql<Array<{ hourly_rate_usd: string }>>`
-    SELECT hourly_rate_usd FROM orgs WHERE id = ${orgId}
+    SELECT hourly_rate_usd FROM organizations WHERE id = ${orgId}
   `
   const hourlyRate = parseFloat(hourlyRow?.hourly_rate_usd ?? '50')
 
@@ -67,7 +67,7 @@ export async function getRoiInputs(orgId: string, period: Period): Promise<RoiIn
     active_users: string
   }>>`
     SELECT
-      COALESCE(SUM(COALESCE(ipl_minutes, 0) FILTER (WHERE created_at >= ${period.startDate.toISOString()} AND created_at <= ${period.endDate.toISOString()}), 0)::text, '0') AS ipl_minutes_total,
+      COALESCE(SUM(COALESCE(ipl_minutes, 0)) FILTER (WHERE created_at >= ${period.startDate.toISOString()} AND created_at <= ${period.endDate.toISOString()}), 0)::text AS ipl_minutes_total,
       COUNT(*) FILTER (WHERE status = 'closed' AND created_at >= ${period.startDate.toISOString()} AND created_at <= ${period.endDate.toISOString()})::text AS loops_closed,
       COUNT(*) FILTER (WHERE created_at >= ${period.startDate.toISOString()} AND created_at <= ${period.endDate.toISOString()})::text AS loops_total,
       COUNT(DISTINCT user_id) FILTER (WHERE created_at >= ${period.startDate.toISOString()} AND created_at <= ${period.endDate.toISOString()})::text AS active_users

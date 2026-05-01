@@ -40,7 +40,7 @@ export function CreateLoopForm() {
       )}
 
       <div>
-        <label htmlFor="title" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor="title" className="block text-sm font-medium text-secondary mb-1.5">
           Title <span className="text-red-500">*</span>
         </label>
         <input
@@ -51,16 +51,16 @@ export function CreateLoopForm() {
           placeholder="What are you working toward?"
           required
           maxLength={255}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm
-                     placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-loopy-400
-                     focus:border-loopy-400 transition"
+          className="w-full rounded-lg border border-edge bg-card px-3.5 py-2.5 text-sm
+                     placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30
+                     focus:border-accent transition"
         />
       </div>
 
       <div>
-        <label htmlFor="hypothesis" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor="hypothesis" className="block text-sm font-medium text-secondary mb-1.5">
           Hypothesis
-          <span className="ml-1.5 text-xs text-slate-400 font-normal">optional</span>
+          <span className="ml-1.5 text-xs text-subtle font-normal">optional</span>
         </label>
         <textarea
           id="hypothesis"
@@ -68,21 +68,21 @@ export function CreateLoopForm() {
           onChange={(e) => setHypothesis(e.target.value)}
           placeholder="What outcome or decision are you testing?"
           rows={3}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm
-                     placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-loopy-400
-                     focus:border-loopy-400 transition resize-none"
+          className="w-full rounded-lg border border-edge bg-card px-3.5 py-2.5 text-sm
+                     placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30
+                     focus:border-accent transition resize-none"
         />
       </div>
 
       <div>
-        <label htmlFor="scope" className="block text-sm font-medium text-slate-700 mb-1.5">
+        <label htmlFor="scope" className="block text-sm font-medium text-secondary mb-1.5">
           Scope
         </label>
         <select
           id="scope"
           value={scope}
           onChange={(e) => setScope(e.target.value as LoopScope)}
-          className="w-full rounded-lg border border-slate-200 bg-white px-3.5 py-2.5 text-sm
+          className="w-full rounded-lg border border-edge bg-card px-3.5 py-2.5 text-sm
                      focus:outline-none focus:ring-2 focus:ring-loopy-400 focus:border-loopy-400
                      transition appearance-none cursor-pointer"
         >
@@ -96,16 +96,16 @@ export function CreateLoopForm() {
         <button
           type="button"
           onClick={() => navigate('/dashboard')}
-          className="flex-1 rounded-lg border border-slate-200 px-4 py-2.5 text-sm font-medium
-                     text-slate-600 hover:bg-slate-50 transition"
+          className="flex-1 rounded-lg border border-edge px-4 py-2.5 text-sm font-medium
+                     text-secondary hover:bg-surface transition"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={loading || !title.trim()}
-          className="flex-1 rounded-lg bg-loopy-600 px-4 py-2.5 text-sm font-semibold text-white
-                     hover:bg-loopy-700 disabled:opacity-50 disabled:cursor-not-allowed transition"
+          className="flex-1 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white
+                     hover:bg-accent-hover disabled:opacity-50 disabled:cursor-not-allowed transition"
         >
           {loading ? 'Creating…' : 'Create Loop'}
         </button>

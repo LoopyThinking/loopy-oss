@@ -10,7 +10,10 @@ import { InviteAccept } from './pages/InviteAccept'
 import { Settings } from './pages/Settings'
 import { Agents } from './pages/Agents'
 import { AgentDetail } from './pages/AgentDetail'
+import { RegistryDetail } from './pages/RegistryDetail'
 import { Team } from './pages/Team'
+import { Analytics } from './pages/Analytics'
+import { AnalyticsResult } from './pages/AnalyticsResult'
 import { getToken } from './lib/api'
 
 function RequireAuth({ children }: { children: React.ReactNode }) {
@@ -32,8 +35,11 @@ export default function App() {
         <Route path="/loops/:id"         element={<RequireAuth><LoopDetail /></RequireAuth>} />
         <Route path="/agents"            element={<RequireAuth><Agents /></RequireAuth>} />
         <Route path="/agents/:id"        element={<RequireAuth><AgentDetail /></RequireAuth>} />
+        <Route path="/registry/:agentKey" element={<RequireAuth><RegistryDetail /></RequireAuth>} />
         <Route path="/admin"             element={<RequireAuth><Admin /></RequireAuth>} />
         <Route path="/admin/team"        element={<RequireAuth><Team /></RequireAuth>} />
+        <Route path="/analytics"         element={<RequireAuth><Analytics /></RequireAuth>} />
+        <Route path="/analytics/runs/:id" element={<RequireAuth><AnalyticsResult /></RequireAuth>} />
         <Route path="/framework"         element={<RequireAuth><Framework /></RequireAuth>} />
         <Route path="/settings"          element={<RequireAuth><Settings /></RequireAuth>} />
         {/* /settings/token → redirect a /settings (token visible en esa misma página) */}

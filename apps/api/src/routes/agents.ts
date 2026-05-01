@@ -35,9 +35,10 @@ agents.post('/', async (c) => {
     const [agent] = await sql<
       Array<{ id: string; agent_name: string; description: string | null; created_at: string }>
     >`
-      INSERT INTO agent_registry (user_id, agent_name, token_hash, description)
+      INSERT INTO agent_registry (user_id, org_id, agent_name, token_hash, description)
       VALUES (
         ${userId},
+        (SELECT org_id FROM org_members WHERE user_id = ${userId} ORDER BY joined_at ASC LIMIT 1),
         ${body.agentName.trim()},
         ${tokenHash},
         ${body.description ?? null}

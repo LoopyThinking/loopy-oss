@@ -21,7 +21,7 @@ interface Member {
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function fmtDate(iso: string): string {
-  return new Date(iso).toLocaleDateString('es', { day: '2-digit', month: 'short', year: 'numeric' })
+  return new Date(iso).toLocaleDateString('en', { day: '2-digit', month: 'short', year: 'numeric' })
 }
 
 function daysUntil(iso: string): number {
@@ -44,8 +44,8 @@ function CopyButton({ text }: { text: string }) {
     navigator.clipboard.writeText(text).then(() => { setCopied(true); setTimeout(() => setCopied(false), 2500) })
   }
   return (
-    <button onClick={copy} className="flex items-center gap-1 text-xs text-indigo-600 hover:text-indigo-800 px-2 py-1 rounded hover:bg-indigo-50 transition-colors" title="Copiar enlace">
-      {copied ? <><Check size={12} className="text-green-500" /> Copiado</> : <><Copy size={12} /> Copiar</>}
+    <button onClick={copy} className="flex items-center gap-1 text-xs text-accent hover:text-accent px-2 py-1 rounded hover:bg-accent-light transition-colors" title="Copy link">
+      {copied ? <><Check size={12} className="text-green-500" /> Copied</> : <><Copy size={12} /> Copy</>}
     </button>
   )
 }
@@ -73,7 +73,7 @@ export function Team() {
   const baseUrl = (import.meta.env.VITE_APP_BASE_URL as string | undefined) ?? window.location.origin
 
   const load = useCallback(async () => {
-    if (!orgId) { setError('No hay organización seleccionada'); setLoading(false); return }
+    if (!orgId) { setError('No organization selected'); setLoading(false); return }
     setLoading(true)
     try {
       const [memberList, inviteList] = await Promise.all([
@@ -83,7 +83,7 @@ export function Team() {
       setMembers(memberList as Member[])
       setInvites(inviteList)
     } catch (e: unknown) {
-      setError(e instanceof Error ? e.message : 'Error cargando el equipo')
+      setError(e instanceof Error ? e.message : 'Error loading team')
     } finally {
       setLoading(false)
     }
@@ -97,13 +97,13 @@ export function Team() {
       await api.orgs.updateMember(orgId, userId, newRole)
       setMembers(prev => prev.map(m => m.user_id === userId ? { ...m, role: newRole } : m))
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error actualizando rol')
+      alert(e instanceof Error ? e.message : 'Error updating role')
     }
   }
 
   async function handleRemoveMember(userId: string, email: string) {
     if (!orgId) return
-    if (!confirm(`¿Eliminar a ${email} de la organización?`)) return
+    if (!confirm(`Remove ${email} from the organization?`)) return
     try {
       await api.orgs.removeMember(orgId, userId)
       setMembers(prev => prev.filter(m => m.user_id !== userId))
@@ -124,7 +124,7 @@ export function Team() {
       setNewInviteExp(res.expires_at)
       await load() // refresh invite list
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error generando invitación')
+      alert(e instanceof Error ? e.message : 'Error creating invite')
     } finally {
       setInviting(false)
     }
@@ -132,25 +132,25 @@ export function Team() {
 
   async function handleRevokeInvite(inviteId: string) {
     if (!orgId) return
-    if (!confirm('¿Revocar esta invitación? No se podrá usar.')) return
+    if (!confirm('Revoke this invite? It won\'t be usable.')) return
     try {
       await api.orgs.revokeInvite(orgId, inviteId)
       setInvites(prev => prev.filter(i => i.id !== inviteId))
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error revocando invitación')
+      alert(e instanceof Error ? e.message : 'Error revoking invite')
     }
   }
 
   return (
     <Layout
-      title="Equipo"
-      breadcrumbs={[{ label: 'Panel ejecutivo', href: '/admin' }, { label: 'Equipo' }]}
+      title="Team"
+      breadcrumbs={[{ label: 'Executive Panel', href: '/admin' }, { label: 'Team' }]}
     >
       <div className="max-w-3xl space-y-8">
 
         {loading && (
-          <div className="flex items-center gap-2 text-gray-400 text-sm py-12">
-            <Loader2 size={16} className="animate-spin" /> Cargando equipo…
+          <div className="flex items-center gap-2 text-subtle text-sm py-12">
+            <Loader2 size={16} className="animate-spin" /> Loading team…
           </div>
         )}
 
@@ -162,31 +162,31 @@ export function Team() {
 
         {!loading && !error && (
           <>
-            {/* ── Miembros activos ─────────────────────────────────────── */}
+            {/* ── Active members ─────────────────────────────────────── */}
             <section>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Users size={16} className="text-gray-400" />
-                  <h2 className="text-base font-semibold text-gray-900">Miembros activos</h2>
-                  <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{members.length}</span>
+                  <Users size={16} className="text-subtle" />
+                  <h2 className="text-base font-semibold text-primary">Active members</h2>
+                  <span className="text-xs bg-elevated text-muted px-2 py-0.5 rounded-full">{members.length}</span>
                 </div>
               </div>
-              <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+              <div className="bg-card border border-edge rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="border-b border-gray-50 text-xs font-medium text-gray-400 uppercase tracking-wide">
-                      <th className="text-left px-4 py-3">Usuario</th>
-                      <th className="text-left px-4 py-3">Rol</th>
-                      <th className="text-left px-4 py-3 hidden md:table-cell">Unido</th>
+                    <tr className="border-b border-edge-subtle text-xs font-medium text-subtle uppercase tracking-wide">
+                      <th className="text-left px-4 py-3">User</th>
+                      <th className="text-left px-4 py-3">Role</th>
+                      <th className="text-left px-4 py-3 hidden md:table-cell">Joined</th>
                       <th className="px-4 py-3" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-gray-50">
+                  <tbody className="divide-y divide-edge-subtle">
                     {members.map(m => (
                       <tr key={m.user_id}>
                         <td className="px-4 py-3">
-                          <p className="font-medium text-gray-800">{m.display_name ?? m.email}</p>
-                          {m.display_name && <p className="text-xs text-gray-400">{m.email}</p>}
+                          <p className="font-medium text-primary">{m.display_name ?? m.email}</p>
+                          {m.display_name && <p className="text-xs text-subtle">{m.email}</p>}
                         </td>
                         <td className="px-4 py-3">
                           {m.role === 'owner' ? (
@@ -198,13 +198,13 @@ export function Team() {
                             />
                           )}
                         </td>
-                        <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(m.joined_at)}</td>
+                        <td className="px-4 py-3 text-subtle text-xs hidden md:table-cell">{fmtDate(m.joined_at)}</td>
                         <td className="px-4 py-3 text-right">
                           {m.role !== 'owner' && (
                             <button
                               onClick={() => handleRemoveMember(m.user_id, m.email)}
-                              className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                              title="Eliminar"
+                              className="p-1.5 text-subtle hover:text-red-500 hover:bg-red-light rounded transition-colors"
+                              title="Remove"
                             >
                               <Trash2 size={13} />
                             </button>
@@ -221,65 +221,65 @@ export function Team() {
             <section>
               <div className="flex items-center justify-between mb-3">
                 <div className="flex items-center gap-2">
-                  <Link2 size={16} className="text-gray-400" />
-                  <h2 className="text-base font-semibold text-gray-900">Invitaciones pendientes</h2>
+                  <Link2 size={16} className="text-subtle" />
+                  <h2 className="text-base font-semibold text-primary">Pending invites</h2>
                   {invites.length > 0 && (
                     <span className="text-xs bg-amber-100 text-amber-700 px-2 py-0.5 rounded-full">{invites.length}</span>
                   )}
                 </div>
                 <button
                   onClick={() => { setShowForm(v => !v); setNewInviteUrl(null) }}
-                  className="flex items-center gap-1.5 text-sm font-medium text-indigo-600 hover:text-indigo-800 transition-colors"
+                  className="flex items-center gap-1.5 text-sm font-medium text-accent hover:text-accent transition-colors"
                 >
-                  <UserPlus size={14} /> Generar invitación
+                  <UserPlus size={14} /> Generate invite
                 </button>
               </div>
 
               {/* New invite form */}
               {showForm && (
-                <form onSubmit={handleCreateInvite} className="bg-indigo-50 border border-indigo-100 rounded-xl p-4 mb-4">
+                <form onSubmit={handleCreateInvite} className="bg-accent-light border border-indigo-100 rounded-xl p-4 mb-4">
                   <div className="flex flex-wrap gap-4 items-end">
                     <div>
-                      <label className="block text-xs font-medium text-indigo-800 mb-1">Rol</label>
+                      <label className="block text-xs font-medium text-accent mb-1">Role</label>
                       <select
                         value={inviteRole}
                         onChange={e => setInviteRole(e.target.value as OrgRole)}
-                        className="px-3 py-2 text-sm bg-white border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        className="px-3 py-2 text-sm bg-card border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
                       >
                         {VALID_ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-indigo-800 mb-1">Validez (días)</label>
+                      <label className="block text-xs font-medium text-accent mb-1">Validity (days)</label>
                       <input
                         type="number" min={1} max={30}
                         value={inviteDays}
                         onChange={e => setInviteDays(Number(e.target.value))}
-                        className="w-20 px-3 py-2 text-sm bg-white border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-300"
+                        className="w-20 px-3 py-2 text-sm bg-card border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
                       />
                     </div>
                     <button
                       type="submit"
                       disabled={inviting}
-                      className="px-4 py-2 text-sm font-medium bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:opacity-50 transition-colors flex items-center gap-2"
+                      className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors flex items-center gap-2"
                     >
                       {inviting ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />}
-                      Generar enlace
+                      Generate link
                     </button>
-                    <button type="button" onClick={() => setShowForm(false)} className="p-2 text-gray-400 hover:text-gray-600">
+                    <button type="button" onClick={() => setShowForm(false)} className="p-2 text-subtle hover:text-secondary">
                       <X size={15} />
                     </button>
                   </div>
 
                   {/* Success card */}
                   {newInviteUrl && (
-                    <div className="mt-4 bg-white border border-indigo-100 rounded-lg p-3">
-                      <p className="text-xs font-medium text-indigo-800 mb-2">
-                        ✅ Enlace generado — compártelo con tu compañero.{' '}
-                        {newInviteExp && `Vence el ${fmtDate(newInviteExp)}.`}
+                    <div className="mt-4 bg-card border border-indigo-100 rounded-lg p-3">
+                      <p className="text-xs font-medium text-accent mb-2">
+                        ✅ Link generated — share it with your teammate.{' '}
+                        {newInviteExp && `Expires ${fmtDate(newInviteExp)}.`}
                       </p>
                       <div className="flex items-center gap-2">
-                        <code className="flex-1 text-xs bg-gray-50 border border-gray-200 rounded px-2 py-1.5 font-mono break-all text-gray-700">
+                        <code className="flex-1 text-xs bg-surface border border-edge rounded px-2 py-1.5 font-mono break-all text-secondary">
                           {newInviteUrl}
                         </code>
                         <CopyButton text={newInviteUrl} />
@@ -290,22 +290,22 @@ export function Team() {
               )}
 
               {invites.length === 0 ? (
-                <div className="text-center py-8 border border-dashed border-gray-200 rounded-xl">
-                  <Link2 size={24} className="mx-auto text-gray-300 mb-2" />
-                  <p className="text-sm text-gray-400">No hay invitaciones pendientes.</p>
+                <div className="text-center py-8 border border-dashed border-edge rounded-xl">
+                  <Link2 size={24} className="mx-auto text-subtle mb-2" />
+                  <p className="text-sm text-subtle">No pending invites.</p>
                 </div>
               ) : (
-                <div className="bg-white border border-gray-100 rounded-xl overflow-hidden">
+                <div className="bg-card border border-edge rounded-xl overflow-hidden">
                   <table className="w-full text-sm">
                     <thead>
-                      <tr className="border-b border-gray-50 text-xs font-medium text-gray-400 uppercase tracking-wide">
-                        <th className="text-left px-4 py-3">Rol</th>
-                        <th className="text-left px-4 py-3">Vence en</th>
-                        <th className="text-left px-4 py-3 hidden md:table-cell">Creada</th>
-                        <th className="px-4 py-3 text-right">Enlace / Revocar</th>
+                      <tr className="border-b border-edge-subtle text-xs font-medium text-subtle uppercase tracking-wide">
+                        <th className="text-left px-4 py-3">Role</th>
+                        <th className="text-left px-4 py-3">Expires in</th>
+                        <th className="text-left px-4 py-3 hidden md:table-cell">Created</th>
+                        <th className="px-4 py-3 text-right">Link / Revoke</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-gray-50">
+                    <tbody className="divide-y divide-edge-subtle">
                       {invites.map(inv => {
                         const days = daysUntil(inv.expires_at)
                         const inviteUrl = `${baseUrl}/invites/accept/${(inv as any).token ?? ''}`
@@ -313,18 +313,18 @@ export function Team() {
                           <tr key={inv.id}>
                             <td className="px-4 py-3"><RoleBadge role={inv.role} /></td>
                             <td className="px-4 py-3">
-                              <span className={`text-sm ${days <= 1 ? 'text-amber-600 font-medium' : 'text-gray-600'}`}>
-                                {days === 0 ? 'Hoy' : `${days}d`}
+                              <span className={`text-sm ${days <= 1 ? 'text-amber-600 font-medium' : 'text-secondary'}`}>
+                                {days === 0 ? 'Today' : `${days}d`}
                               </span>
                             </td>
-                            <td className="px-4 py-3 text-gray-400 text-xs hidden md:table-cell">{fmtDate(inv.created_at)}</td>
+                            <td className="px-4 py-3 text-subtle text-xs hidden md:table-cell">{fmtDate(inv.created_at)}</td>
                             <td className="px-4 py-3 text-right">
                               <div className="flex items-center justify-end gap-1">
                                 <CopyButton text={inviteUrl} />
                                 <button
                                   onClick={() => handleRevokeInvite(inv.id)}
-                                  className="p-1.5 text-gray-300 hover:text-red-500 hover:bg-red-50 rounded transition-colors"
-                                  title="Revocar"
+                                  className="p-1.5 text-subtle hover:text-red-500 hover:bg-red-light rounded transition-colors"
+                                  title="Revoke"
                                 >
                                   <Trash2 size={13} />
                                 </button>
@@ -354,20 +354,20 @@ function RoleDropdown({ current, onChange }: { current: OrgRole; onChange: (r: O
     <div className="relative inline-block" data-dropdown>
       <button
         onClick={() => setOpen(v => !v)}
-        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors"
+        className="flex items-center gap-1 text-xs px-2 py-0.5 rounded-full font-medium bg-elevated text-secondary hover:bg-hover transition-colors"
       >
         {current}
         <ChevronDown size={10} />
       </button>
       {open && (
-        <div className="absolute left-0 mt-1 w-28 bg-white border border-gray-100 rounded-lg shadow-md py-1 z-20">
+        <div className="absolute left-0 mt-1 w-28 bg-card border border-edge rounded-lg shadow-md py-1 z-20">
           {VALID_ROLES.filter(r => r !== current).map(r => (
             <button
               key={r}
               onClick={() => { onChange(r); setOpen(false) }}
-              className="w-full text-left px-3 py-1.5 text-xs text-gray-700 hover:bg-gray-50 flex items-center gap-1.5"
+              className="w-full text-left px-3 py-1.5 text-xs text-secondary hover:bg-hover flex items-center gap-1.5"
             >
-              <Shield size={10} className="text-gray-300" /> {r}
+              <Shield size={10} className="text-subtle" /> {r}
             </button>
           ))}
         </div>

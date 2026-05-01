@@ -11,7 +11,7 @@ llm.use('/*', orgMiddleware)
 
 // ── Helpers ──────────────────────────────────────────────────────────────────────
 
-const VALID_PROVIDERS: LLMProviderType[] = ['anthropic', 'openai', 'google', 'openai_compatible']
+const VALID_PROVIDERS: LLMProviderType[] = ['anthropic', 'openai', 'google', 'openai_compatible', 'deepseek']
 
 function toPublic(config: OrgLlmConfig): OrgLlmConfigPublic {
   return {
@@ -123,37 +123,33 @@ llm.patch('/:configId', async (c) => {
     is_active?: boolean
   }>()
 
-  // Build dynamic SET clauses
-  const sets: string[] = []
-  const vals: (string | number | boolean | null)[] = []
-  let idx = 0
+  // Build dynamic SET clauses using sql.join
+  const sq = sql as any
+  const setClauses: ReturnType<typeof sql>[] = []
 
-  if (body.display_name !== undefined) { sets.push(`display_name = $${++idx}`); vals.push(body.display_name.trim()) }
-  if (body.model !== undefined) { sets.push(`model = $${++idx}`); vals.push(body.model.trim()) }
-  if (body.base_url !== undefined) { sets.push(`base_url = $${++idx}`); vals.push(body.base_url?.trim() ?? null) }
-  if (body.is_active !== undefined) { sets.push(`is_active = $${++idx}`); vals.push(body.is_active) }
+  if (body.display_name !== undefined) setClauses.push(sql`display_name = ${body.display_name.trim()}`)
+  if (body.model !== undefined) setClauses.push(sql`model = ${body.model.trim()}`)
+  if (body.base_url !== undefined) setClauses.push(sql`base_url = ${body.base_url?.trim() ?? null}`)
+  if (body.is_active !== undefined) setClauses.push(sql`is_active = ${body.is_active}`)
 
   if (body.is_default === true) {
     await ensureNoOtherDefault(orgId, configId)
-    sets.push(`is_default = $${++idx}`)
-    vals.push(true)
+    setClauses.push(sql`is_default = TRUE`)
   } else if (body.is_default === false) {
-    sets.push(`is_default = $${++idx}`)
-    vals.push(false)
+    setClauses.push(sql`is_default = FALSE`)
   }
 
-  if (sets.length === 0) {
+  if (setClauses.length === 0) {
     return c.json({ error: 'Bad Request', message: 'No fields to update' }, 400)
   }
 
-  sets.push(`updated_at = now()`)
-  vals.push(orgId, configId)
+  setClauses.push(sql`updated_at = now()`)
 
-  const [config] = await sql.unsafe<OrgLlmConfig[]>`
-    UPDATE org_llm_configs SET ${sql.unsafe(sets.join(', '))}
+  const [config] = await sql<OrgLlmConfig[]>`
+    UPDATE org_llm_configs SET ${sq.join(setClauses, sql`, `)}
     WHERE org_id = ${orgId} AND id = ${configId}
     RETURNING *
-  `.execute(...vals)
+  `
 
   if (!config) return c.json({ error: 'Not Found' }, 404)
 

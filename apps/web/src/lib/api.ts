@@ -423,6 +423,75 @@ export const api = {
       }>('/invites/accept', { method: 'POST', body: JSON.stringify({ token }) }),
   },
 
+  // ── Registry ──────────────────────────────────────────────────────────────
+
+  registry: {
+    list: (params?: { type?: string; parentKey?: string; status?: string }) => {
+      const qs = new URLSearchParams()
+      if (params?.type)      qs.set('type', params.type)
+      if (params?.parentKey) qs.set('parentKey', params.parentKey)
+      if (params?.status)    qs.set('status', params.status)
+      const q = qs.toString()
+      return request<Array<{
+        id: string
+        agent_key: string
+        type: string
+        name: string
+        role: string | null
+        emoji: string | null
+        parent_key: string | null
+        status: string
+        created_at: string
+        last_seen_at: string | null
+        registered_by_name: string | null
+        children_count: number
+      }>>(`/registry${q ? `?${q}` : ''}`, {}, true)
+    },
+
+    summary: () =>
+      request<{
+        total: number
+        by_type: { agent: number; skill: number; tool: number; workflow: number }
+        active_users: number
+        last_registered_at: string | null
+        most_common_specializations: string[]
+        org_name: string
+      }>('/registry/summary', {}, true),
+
+    get: (agentKey: string) =>
+      request<{
+        id: string
+        agent_key: string
+        type: string
+        name: string
+        role: string | null
+        emoji: string | null
+        parent_key: string | null
+        status: string
+        responsibilities: string[] | null
+        technical_specialization: string[] | null
+        vibe: string | null
+        strategic_priorities: string[] | null
+        team_contacts: string[] | null
+        created_at: string
+        updated_at: string
+        last_seen_at: string | null
+        registered_by_name: string | null
+        children: Array<{
+          id: string
+          agent_key: string
+          type: string
+          name: string
+          role: string | null
+          emoji: string | null
+          parent_key: string | null
+          status: string
+          created_at: string
+          last_seen_at: string | null
+        }>
+      }>(`/registry/${encodeURIComponent(agentKey)}`, {}, true),
+  },
+
   health: () => request<{ status: string; version: string }>('/health'),
 
   // ── Analytics ──────────────────────────────────────────────────────────────

@@ -6,6 +6,72 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.6.0] — 2026-04-30
+
+### Added
+
+- **Linear-inspired design system** — token-first color architecture via CSS custom properties (`--bg-page`, `--text-primary`, `--border`, etc.), extended into Tailwind as semantic classes (`bg-card`, `text-muted`, `border-edge`). Inter Variable with `font-feature-settings: 'cv01', 'ss03'` globally. Dark mode uses Linear's near-black canvas (`#08090a` page, `#0f1011` panels, `#191a1b` surfaces) with semi-transparent white borders (`rgba(255,255,255,0.08)`). Light mode uses `#f7f8f8` page background. Brand accent `#5e6ad2` / `#7170ff` throughout both modes.
+- **Dark mode** — persistent light/dark toggle in the sidebar footer. Defaults to system preference (`prefers-color-scheme`), then `localStorage`. Implemented via Tailwind `darkMode: 'class'` + `ThemeContext`.
+- **Sidebar footer** — icon-only footer strip with Framework link and dark/light mode toggle.
+- **Registry entry detail page** (`/registry/:agentKey`) — full detail view for any AI Registry entry: role, vibe, responsibilities, technical specialization, strategic priorities, subordinates list with navigation links, and parent "Reports to" link.
+- **Registry flat listing** — Agents page now renders all registry entries as a flat clickable list regardless of type filter. Replaces the previous tree expand/collapse pattern.
+
+### Changed
+
+- **Full English UI** — all user-visible strings in `apps/web/` translated to English. No i18n library; English-only.
+- **Sidebar nav order** — unified nav array with role-based visibility: Dashboard, Loops, Agents, Executive Panel *(admin+)*, Analytics *(admin+)*, Team *(admin+)*, Settings.
+- **Role-gated nav items** — Executive Panel, Analytics, and Team links are hidden from the sidebar for users without `admin` or `owner` role (previously they appeared and redirected on click).
+- `apps/web/package.json`, `apps/api/package.json`, `packages/sdk/package.json` bumped to `0.6.0`.
+
+---
+
+## [0.5.0] — 2026-04-28
+
+### Added
+
+**LLM Provider Configuration (BYOK)**
+- New `org_llm_configs` table with AES-256-GCM encryption for API keys at rest via `LOOPY_ENCRYPTION_KEY`.
+- Full CRUD API: list, create, update, rotate, test, and soft-delete LLM configs (admin+ only).
+- Provider factory supporting Anthropic, OpenAI, Google, and OpenAI-compatible.
+- Web UI at `/settings` → "Proveedores LLM" with password field, auto-test, set-default, and soft delete.
+- `packages/db/migrations/010_v050_analytics.sql` — additive migration.
+
+**Analytics Engine**
+- 5 SQL-based analytics views: `v_roi_inputs`, `v_adoption_inputs`, `v_agent_optimization_inputs`, `v_stuck_loops_inputs`, `v_team_segmentation_inputs`.
+- 5 analysis templates: ROI Snapshot, Adoption Curve, Agent Tool Optimization, Stuck Loops, Team IPL Segmentation.
+- Template registry with custom prompt support per org.
+- Async analysis execution: fire-and-forget LLM calls with structured JSON output (JSON Schema / tool_use per provider).
+- Configurable hourly_rate_usd for ROI savings calculation (`PATCH /orgs/:id`).
+
+**Analytics UI (`/analytics`)**
+- 4-tab page: Resumen (KPI cards + upcoming schedules), Análisis (template grid + run modal with period/LLM/prompt override), Historial (analyses table), Configuración (hourly rate, LLM configs, prompt overrides, schedules).
+- `AnalyticsResult.tsx` at `/analytics/runs/:id` — auto-polling result view with structured rendering per template type (narrative, tables, lists) and markdown download link.
+- Dashboard banner linking to analytics for admin+ roles.
+- Sidebar "Analítica" nav item added for admin/owner roles.
+
+**Scheduled Weekly Digest**
+- `analysis_schedules` table with cadence, hour, timezone support.
+- `setInterval`-based cron worker (15-min poll) with `FOR UPDATE SKIP LOCKED` for safe concurrent execution.
+- Guarded by `LOOPY_DISABLE_CRON=1` env var.
+
+### Changed
+- `apps/api/package.json`, `apps/web/package.json`, `packages/sdk/package.json` bumped to `0.5.0`.
+- Sidebar footer bumped to `v0.5.0`.
+
+### Database migration
+- Migration 010 is additive and backwards-compatible:
+  - `orgs.hourly_rate_usd` column (default 50, constraint 1–10000).
+  - `loops.last_signal_at` column + trigger `trg_loops_last_signal_at`.
+  - `org_llm_configs` table with encrypted API key storage.
+  - `analysis_templates`, `analyses`, `analysis_schedules` tables.
+  - 5 analytics views (`v_roi_inputs`, `v_adoption_inputs`, `v_agent_optimization_inputs`, `v_stuck_loops_inputs`, `v_team_segmentation_inputs`).
+
+### New env vars
+- `LOOPY_ENCRYPTION_KEY` (required) — 32-byte base64 AES-256-GCM key.
+- `LOOPY_DISABLE_CRON` (optional) — disable scheduled analytics worker.
+
+---
+
 ## [0.4.0] — 2026-04-27
 
 ### Added
@@ -195,6 +261,9 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `.github/workflows/publish.yml` — npm publish on `v*` tag
 - AGPL v3 license, CONTRIBUTING.md, README.md
 
+[0.6.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.5.0...v0.6.0
+[0.5.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.4.0...v0.5.0
+[0.4.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.2.1...v0.3.0
 [0.2.1]: https://github.com/loopy-thinking/loopy-oss/compare/v0.2.0...v0.2.1
 [0.2.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.1.0-beta...v0.2.0

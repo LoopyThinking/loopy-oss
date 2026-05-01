@@ -52,18 +52,18 @@ export function LoopDetail() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
-        <div className="h-8 w-8 rounded-full border-2 border-loopy-400 border-t-transparent animate-spin" />
+      <div className="min-h-screen bg-page flex items-center justify-center">
+        <div className="h-8 w-8 rounded-full border-2 border-accent border-t-transparent animate-spin" />
       </div>
     )
   }
 
   if (error || !loop) {
     return (
-      <div className="min-h-screen bg-slate-50 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-page flex items-center justify-center p-4">
         <div className="text-center">
-          <p className="text-slate-500 text-sm">{error ?? 'Loop not found'}</p>
-          <Link to="/dashboard" className="mt-3 inline-block text-sm text-loopy-600 hover:underline">
+          <p className="text-muted text-sm">{error ?? 'Loop not found'}</p>
+          <Link to="/dashboard" className="mt-3 inline-block text-sm text-accent hover:underline">
             ← Back to dashboard
           </Link>
         </div>
@@ -72,30 +72,30 @@ export function LoopDetail() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="min-h-screen bg-page">
       {/* Header */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-10">
+      <header className="bg-panel border-b border-edge sticky top-0 z-10">
         <div className="max-w-3xl mx-auto px-4 h-14 flex items-center gap-3">
           <button
             onClick={() => navigate('/dashboard')}
-            className="text-slate-400 hover:text-slate-700 transition text-lg leading-none"
+            className="text-subtle hover:text-secondary transition text-lg leading-none"
             aria-label="Back"
           >
             ←
           </button>
-          <span className="font-semibold text-slate-900 truncate">{loop.title}</span>
+          <span className="font-semibold text-primary truncate">{loop.title}</span>
         </div>
       </header>
 
       <main className="max-w-3xl mx-auto px-4 py-8 space-y-8">
 
         {/* Meta card */}
-        <div className="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 space-y-4">
+        <div className="bg-card rounded-2xl border border-edge shadow-sm p-6 space-y-4">
           <div className="flex items-start justify-between gap-4">
             <div>
-              <h1 className="text-xl font-bold text-slate-900 leading-tight">{loop.title}</h1>
+              <h1 className="text-xl font-bold text-primary leading-tight">{loop.title}</h1>
               {loop.hypothesis && (
-                <p className="mt-2 text-sm text-slate-500 leading-relaxed">{loop.hypothesis}</p>
+                <p className="mt-2 text-sm text-muted leading-relaxed">{loop.hypothesis}</p>
               )}
             </div>
             <div className="flex items-center gap-2 shrink-0">
@@ -104,10 +104,10 @@ export function LoopDetail() {
             </div>
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 text-xs text-slate-500 pt-1">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-muted pt-1">
             <span className={`rounded-full border px-2.5 py-1 font-medium capitalize
               ${loop.status === 'open' ? 'bg-blue-50 text-blue-700 border-blue-100' :
-                loop.status === 'closed' ? 'bg-slate-100 text-slate-600 border-slate-200' :
+                loop.status === 'closed' ? 'bg-elevated text-secondary border-edge' :
                 'bg-red-50 text-red-700 border-red-100'}`}>
               {loop.status}
             </span>
@@ -126,8 +126,8 @@ export function LoopDetail() {
           {loop.status === 'open' && !showCloseForm && loop.user_id === currentUserId && (
             <button
               onClick={() => setShowCloseForm(true)}
-              className="w-full rounded-lg border border-slate-200 py-2 text-sm font-medium
-                         text-slate-600 hover:bg-slate-50 transition"
+              className="w-full rounded-lg border border-edge py-2 text-sm font-medium
+                         text-secondary hover:bg-hover transition"
             >
               Close loop
             </button>
@@ -137,9 +137,9 @@ export function LoopDetail() {
           {showCloseForm && (
             <form onSubmit={(e) => void handleClose(e)} className="space-y-3 pt-1">
               <div>
-                <label htmlFor="resolution" className="block text-sm font-medium text-slate-700 mb-1.5">
+                <label htmlFor="resolution" className="block text-sm font-medium text-secondary mb-1.5">
                   Resolution
-                  <span className="ml-1.5 text-xs text-slate-400 font-normal">optional</span>
+                  <span className="ml-1.5 text-xs text-subtle font-normal">optional</span>
                 </label>
                 <textarea
                   id="resolution"
@@ -147,25 +147,25 @@ export function LoopDetail() {
                   onChange={(e) => setResolution(e.target.value)}
                   placeholder="What was the outcome or decision?"
                   rows={2}
-                  className="w-full rounded-lg border border-slate-200 px-3.5 py-2.5 text-sm
-                             placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-loopy-400
-                             focus:border-loopy-400 transition resize-none"
+                  className="w-full rounded-lg border border-edge px-3.5 py-2.5 text-sm
+                             placeholder:text-subtle focus:outline-none focus:ring-2 focus:ring-accent/30
+                             focus:border-accent transition resize-none"
                 />
               </div>
               <div className="flex gap-2">
                 <button
                   type="button"
                   onClick={() => setShowCloseForm(false)}
-                  className="flex-1 rounded-lg border border-slate-200 py-2 text-sm font-medium
-                             text-slate-600 hover:bg-slate-50 transition"
+                  className="flex-1 rounded-lg border border-edge py-2 text-sm font-medium
+                             text-secondary hover:bg-hover transition"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
                   disabled={closing}
-                  className="flex-1 rounded-lg bg-slate-800 py-2 text-sm font-semibold text-white
-                             hover:bg-slate-900 disabled:opacity-50 transition"
+                  className="flex-1 rounded-lg bg-accent py-2 text-sm font-semibold text-white
+                             hover:bg-accent-hover disabled:opacity-50 transition"
                 >
                   {closing ? 'Closing…' : 'Confirm close'}
                 </button>
@@ -176,7 +176,7 @@ export function LoopDetail() {
 
         {/* Signal timeline */}
         <section>
-          <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-4">
+          <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">
             Signal Timeline
           </h2>
           <SignalTimeline signals={loop.signals} />

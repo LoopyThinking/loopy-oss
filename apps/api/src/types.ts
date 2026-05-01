@@ -53,6 +53,32 @@ export interface AgentRegistryEntry {
   last_seen_at: string | null
 }
 
+// ── Agent catalog types ────────────────────────────────────────────────────────
+
+export type CatalogType = 'agent' | 'skill' | 'tool' | 'workflow'
+export type CatalogStatus = 'active' | 'inactive' | 'deprecated'
+
+export interface AgentCatalogEntry {
+  id: string
+  org_id: string
+  registered_by: string
+  agent_key: string
+  type: CatalogType
+  name: string
+  role: string | null
+  emoji: string | null
+  parent_key: string | null
+  responsibilities: string[] | null
+  technical_specialization: string[] | null
+  vibe: string | null
+  strategic_priorities: string[] | null
+  team_contacts: string[] | null
+  status: CatalogStatus
+  created_at: string
+  updated_at: string
+  last_seen_at: string | null
+}
+
 // ── Multi-org types ───────────────────────────────────────────────────────────
 
 export interface User {
@@ -141,7 +167,7 @@ export interface ActivityPoint {
 
 // ── Analytics / LLM types ────────────────────────────────────────────────────────
 
-export type LLMProviderType = 'anthropic' | 'openai' | 'google' | 'openai_compatible'
+export type LLMProviderType = 'anthropic' | 'openai' | 'google' | 'openai_compatible' | 'deepseek'
 
 export interface OrgLlmConfig {
   id: string
