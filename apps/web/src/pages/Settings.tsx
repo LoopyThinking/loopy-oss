@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react'
-import { Check, Copy, Trash2, Loader2, User, Key, Building2, Sparkles } from 'lucide-react'
+import { Check, Copy, Trash2, Loader2, User, Key, Building2, Sparkles, Plus } from 'lucide-react'
 import { Layout } from '../components/Layout'
-import { api, getCurrentOrgId } from '../lib/api'
+import { api, getCurrentOrgId, setCurrentOrgId } from '../lib/api'
 import { LlmConfigSection } from '../components/settings/LlmConfigSection'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -90,6 +90,24 @@ export function Settings() {
   const [saved,    setSaved]    = useState(false)
   const [error,    setError]    = useState<string | null>(null)
 
+  // Agent token generation
+  const [genToken, setGenToken] = useState<string | null>(null)
+  const [genTokenLoading, setGenTokenLoading] = useState(false)
+  const [genTokenError, setGenTokenError] = useState<string | null>(null)
+  const [genTokenCopied, setGenTokenCopied] = useState(false)
+
+  // Create org form
+  const [showCreateForm, setShowCreateForm] = useState(false)
+  const [newOrgName, setNewOrgName] = useState('')
+  const [newOrgSlug, setNewOrgSlug] = useState('')
+  const [creatingOrg, setCreatingOrg] = useState(false)
+  const [createOrgError, setCreateOrgError] = useState<string | null>(null)
+
+  // Auto-generate slug from name
+  useEffect(() => {
+    setNewOrgSlug(newOrgName.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '').slice(0, 60))
+  }, [newOrgName])
+
   useEffect(() => {
     Promise.all([api.me.get(), api.me.agents()])
       .then(([prof, ags]) => {
@@ -120,6 +138,44 @@ export function Settings() {
     api.me.revokeAgent(agentId)
       .then(() => setAgents(prev => prev.map(a => a.id === agentId ? { ...a, is_active: false } : a)))
       .catch(e => setError(e.message))
+  }
+
+  async function handleGenerateToken() {
+    setGenTokenLoading(true)
+    setGenTokenError(null)
+    setGenToken(null)
+    try {
+      const res = await api.me.agentToken()
+      if (res.token) {
+        setGenToken(res.token)
+        setGenTokenCopied(false)
+      } else {
+        setGenTokenError(res.note ?? 'An active token already exists. Revoke it first to generate a new one.')
+      }
+    } catch (e: unknown) {
+      setGenTokenError(e instanceof Error ? e.message : 'Error generating token')
+    } finally {
+      setGenTokenLoading(false)
+    }
+  }
+
+  async function handleCreateOrg() {
+    if (!newOrgName.trim()) return
+    setCreatingOrg(true)
+    setCreateOrgError(null)
+    try {
+      const org = await api.orgs.create({ name: newOrgName.trim(), slug: newOrgSlug || undefined })
+      setCurrentOrgId(org.id)
+      // Refresh profile to get updated org list
+      const prof = await api.me.get()
+      setProfile(prof)
+      setShowCreateForm(false)
+      setNewOrgName('')
+    } catch (e: unknown) {
+      setCreateOrgError(e instanceof Error ? e.message : 'Error creating organization')
+    } finally {
+      setCreatingOrg(false)
+    }
   }
 
   if (loading) {
@@ -242,6 +298,38 @@ export function Settings() {
               ))}
             </div>
           )}
+
+          {/* Generate new token */}
+          <div className="mt-4 pt-4 border-t border-edge-subtle">
+            <button
+              onClick={handleGenerateToken}
+              disabled={genTokenLoading}
+              className="flex items-center gap-2 px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors"
+            >
+              {genTokenLoading ? <Loader2 size={14} className="animate-spin" /> : <Key size={14} />}
+              Generate new token
+            </button>
+
+            {genTokenError && (
+              <div className="mt-3 bg-amber-50 border border-amber-100 rounded-lg p-3 text-sm text-amber-700">
+                {genTokenError}
+              </div>
+            )}
+
+            {genToken && (
+              <div className="mt-3 bg-card border border-indigo-100 rounded-lg p-3">
+                <p className="text-xs font-medium text-accent mb-2">
+                  Copy this token now. You won&apos;t be able to see it again.
+                </p>
+                <div className="flex items-center gap-2">
+                  <code className="flex-1 text-xs bg-surface border border-edge rounded px-2 py-1.5 font-mono break-all text-secondary">
+                    {genToken}
+                  </code>
+                  <CopyButton text={genToken} />
+                </div>
+              </div>
+            )}
+          </div>
         </Section>
 
         {/* ── Organizaciones ──────────────────────────────────────────────── */}
@@ -261,6 +349,63 @@ export function Settings() {
               ))}
             </div>
           )}
+          <div className="mt-4 pt-4 border-t border-edge-subtle">
+            <button
+              onClick={() => setShowCreateForm(v => !v)}
+              className="flex items-center gap-2 text-sm font-medium text-accent hover:text-accent transition-colors"
+            >
+              <Plus size={14} /> Create organization
+            </button>
+
+            {showCreateForm && (
+              <div className="mt-3 bg-accent-light border border-indigo-100 rounded-xl p-4 space-y-3">
+                <div>
+                  <label className="block text-xs font-medium text-accent mb-1">Organization name</label>
+                  <input
+                    type="text"
+                    value={newOrgName}
+                    onChange={e => setNewOrgName(e.target.value)}
+                    placeholder="My Org"
+                    maxLength={120}
+                    className="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-accent mb-1">Slug</label>
+                  <input
+                    type="text"
+                    value={newOrgSlug}
+                    onChange={e => setNewOrgSlug(e.target.value)}
+                    placeholder="my-org"
+                    maxLength={60}
+                    className="w-full px-3 py-2 text-sm border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+                  />
+                  <p className="text-xs text-subtle mt-1">Auto-generated from name. You can edit it.</p>
+                </div>
+                {createOrgError && (
+                  <div className="bg-red-50 border border-red-100 rounded-lg p-3 text-sm text-red-600">
+                    {createOrgError}
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setShowCreateForm(false)}
+                    className="px-4 py-2 text-sm font-medium border border-edge rounded-lg text-secondary hover:bg-hover transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleCreateOrg}
+                    disabled={creatingOrg || !newOrgName.trim()}
+                    className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors"
+                  >
+                    {creatingOrg ? 'Creating…' : 'Create'}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </Section>
 
         {/* ── LLM Providers — only for admin+ ────────────────────────────── */}

@@ -201,7 +201,7 @@ capabilities.delete('/:agentId/skills/:skillId', async (c) => {
 
   const [row] = await sql<Array<{ id: string }>>`
     UPDATE agent_skills
-    SET is_active = false
+    SET is_active = false, deactivated_at = now()
     WHERE id = ${skillId} AND agent_id = ${agentId}
     RETURNING id
   `
@@ -215,7 +215,9 @@ capabilities.delete('/:agentId/skills/:skillId', async (c) => {
 
 /**
  * GET /agents/:agentId/skills
- * List all active skills for an agent.
+ * List skills for an agent. Role-based visibility:
+ * - Org admin/owner: sees all (active + inactive)
+ * - Agent owner / member / viewer: sees only active
  */
 capabilities.get('/:agentId/skills', async (c) => {
   const routeAgentId = c.req.param('agentId')
@@ -229,12 +231,20 @@ capabilities.get('/:agentId/skills', async (c) => {
     return c.json({ error: 'Forbidden', message: 'Agent not found or access denied' }, 403)
   }
 
-  const skills = await sql<AgentSkill[]>`
-    SELECT * FROM agent_skills
-    WHERE agent_id = ${agentId}
-      AND is_active = true
-    ORDER BY skill_name ASC
-  `
+  const orgRole = c.get('orgRole')
+  const isOrgAdmin = orgRole === 'admin' || orgRole === 'owner'
+
+  const skills = isOrgAdmin
+    ? await sql<AgentSkill[]>`
+        SELECT * FROM agent_skills
+        WHERE agent_id = ${agentId}
+        ORDER BY skill_name ASC
+      `
+    : await sql<AgentSkill[]>`
+        SELECT * FROM agent_skills
+        WHERE agent_id = ${agentId} AND is_active = true
+        ORDER BY skill_name ASC
+      `
 
   return c.json(skills)
 })
@@ -393,7 +403,7 @@ capabilities.delete('/:agentId/tools/:toolId', async (c) => {
 
   const [row] = await sql<Array<{ id: string }>>`
     UPDATE agent_tools
-    SET is_active = false
+    SET is_active = false, deactivated_at = now()
     WHERE id = ${toolId} AND agent_id = ${agentId}
     RETURNING id
   `
@@ -407,7 +417,9 @@ capabilities.delete('/:agentId/tools/:toolId', async (c) => {
 
 /**
  * GET /agents/:agentId/tools
- * List all active tools for an agent.
+ * List tools for an agent. Role-based visibility:
+ * - Org admin/owner: sees all (active + inactive)
+ * - Agent owner / member / viewer: sees only active
  */
 capabilities.get('/:agentId/tools', async (c) => {
   const routeAgentId = c.req.param('agentId')
@@ -421,12 +433,20 @@ capabilities.get('/:agentId/tools', async (c) => {
     return c.json({ error: 'Forbidden', message: 'Agent not found or access denied' }, 403)
   }
 
-  const tools = await sql<AgentTool[]>`
-    SELECT * FROM agent_tools
-    WHERE agent_id = ${agentId}
-      AND is_active = true
-    ORDER BY tool_name ASC
-  `
+  const orgRole = c.get('orgRole')
+  const isOrgAdmin = orgRole === 'admin' || orgRole === 'owner'
+
+  const tools = isOrgAdmin
+    ? await sql<AgentTool[]>`
+        SELECT * FROM agent_tools
+        WHERE agent_id = ${agentId}
+        ORDER BY tool_name ASC
+      `
+    : await sql<AgentTool[]>`
+        SELECT * FROM agent_tools
+        WHERE agent_id = ${agentId} AND is_active = true
+        ORDER BY tool_name ASC
+      `
 
   return c.json(tools)
 })

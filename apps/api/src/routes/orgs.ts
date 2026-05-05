@@ -2,6 +2,8 @@ import { Hono } from 'hono'
 import { randomBytes } from 'crypto'
 import sql from '../db/client.js'
 import { orgMiddleware, hasRole, forbiddenRole } from '../middleware/org.js'
+import { getEmailAdapter } from '../services/email.js'
+import { renderInviteHtml, renderInviteText } from '../email/templates/invite.js'
 import type { AuthVariables, Organization, OrgMember, OrgInvite } from '../types.js'
 
 const orgs = new Hono<{ Variables: AuthVariables }>()
@@ -146,7 +148,7 @@ orgs.post('/:id/invites', async (c) => {
     return c.json(forbiddenRole('admin'), 403)
   }
 
-  const body = await c.req.json<{ role?: string; expires_in_days?: number }>()
+  const body = await c.req.json<{ role?: string; expires_in_days?: number; email?: string }>()
   const role = body.role ?? 'member'
   const validRoles = ['viewer', 'member', 'admin']
   if (!validRoles.includes(role)) {
@@ -168,28 +170,55 @@ orgs.post('/:id/invites', async (c) => {
       token       TEXT        NOT NULL UNIQUE,
       role        TEXT        NOT NULL DEFAULT 'member',
       expires_at  TIMESTAMPTZ NOT NULL,
+      invited_email TEXT,
+      email_sent_at TIMESTAMPTZ,
       accepted_at TIMESTAMPTZ,
       created_at  TIMESTAMPTZ NOT NULL DEFAULT now()
     )
   `
 
   const [invite] = await sql<Array<{ id: string; token: string; expires_at: string }>>`
-    INSERT INTO org_invites (org_id, token, role, expires_at)
+    INSERT INTO org_invites (org_id, token, role, expires_at, invited_email)
     VALUES (
       ${orgId},
       ${token},
       ${role},
-      now() + (${expiresInDays} || ' days')::INTERVAL
+      now() + (${expiresInDays} || ' days')::INTERVAL,
+      ${body.email ?? null}
     )
     RETURNING id, token, expires_at
   `
+
+  const baseUrl = process.env.LOOPY_BASE_URL ?? `http://${c.req.header('host') ?? 'localhost:3001'}`
+  const acceptUrl = `${baseUrl}/invites/accept/${invite.token}`
+
+  // Optional email sending
+  let emailSent = false
+  if (body.email) {
+    const adapter = getEmailAdapter()
+    if (!adapter) {
+      return c.json({
+        error: 'Not Implemented',
+        message: 'Email provider not configured. Set LOOPY_EMAIL_PROVIDER in your environment.',
+      }, 501)
+    }
+    const [org] = await sql<Array<{ name: string }>>`SELECT name FROM organizations WHERE id = ${orgId}`
+    await adapter.send(
+      body.email,
+      `You've been invited to join ${org?.name ?? 'an organization'} on Loopy`,
+      renderInviteHtml({ orgName: org?.name ?? 'an organization', role, inviteUrl: acceptUrl, expiresAt: invite.expires_at }),
+      renderInviteText({ orgName: org?.name ?? 'an organization', role, inviteUrl: acceptUrl, expiresAt: invite.expires_at }),
+    )
+    await sql`UPDATE org_invites SET email_sent_at = now() WHERE id = ${invite.id}`
+    emailSent = true
+  }
 
   return c.json({
     invite_token: invite.token,
     expires_at: invite.expires_at,
     role,
-    // Provide a sample accept URL; the web app will implement /invites/accept/:token
-    accept_url: `/invites/accept/${invite.token}`,
+    accept_url: acceptUrl,
+    email_sent: emailSent,
   }, 201)
 })
 

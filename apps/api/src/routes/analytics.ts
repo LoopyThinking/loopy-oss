@@ -32,6 +32,68 @@ async function getOrgPrompt(orgId: string, templateKey: string): Promise<string 
   return row?.prompt ?? null
 }
 
+// ── GET /analytics/kpi — overview KPIs ──────────────────────────────────────────
+
+analytics.get('/kpi', async (c) => {
+  const myRole = c.get('orgRole')
+  if (!hasRole(myRole, 'admin')) return c.json(forbiddenRole('admin'), 403)
+
+  const orgId = c.get('orgId')
+
+  const [monthlyIplRow] = await sql<Array<{ value: number | null }>>`
+    SELECT COALESCE(SUM(ipl_minutes), 0) / 60.0::float8 AS value FROM loops
+    WHERE org_id = ${orgId}
+      AND status = 'closed'
+      AND date_trunc('month', closed_at) = date_trunc('month', NOW())
+  `
+
+  const [closedLoopsRow] = await sql<Array<{ value: number }>>`
+    SELECT COUNT(*)::int AS value FROM loops
+    WHERE org_id = ${orgId}
+      AND status = 'closed'
+      AND date_trunc('month', closed_at) = date_trunc('month', NOW())
+  `
+
+  const [activeUsersRow] = await sql<Array<{ value: number }>>`
+    SELECT COUNT(DISTINCT user_id)::int AS value FROM work_signals
+    WHERE org_id = ${orgId}
+      AND created_at >= NOW() - INTERVAL '7 days'
+  `
+
+  const [topAgentRow] = await sql<Array<{ name: string | null; cnt: number } | undefined>>`
+    SELECT ar.agent_name AS name, COUNT(*)::int AS cnt
+    FROM work_signals ws
+    JOIN agent_registry ar ON ar.id = ws.agent_id
+    WHERE ws.org_id = ${orgId}
+      AND date_trunc('month', ws.created_at) = date_trunc('month', NOW())
+      AND ws.agent_id IS NOT NULL
+    GROUP BY ar.agent_name
+    ORDER BY cnt DESC
+    LIMIT 1
+  `
+
+  return c.json({
+    monthlyIpl: {
+      value: monthlyIplRow?.value ?? null,
+      unit: 'hours',
+      trend: null,
+    },
+    closedLoops: {
+      value: closedLoopsRow?.value ?? 0,
+      period: 'this month',
+    },
+    activeUsers: {
+      value: activeUsersRow?.value ?? 0,
+      period: 'this week',
+    },
+    topAgent: {
+      name: topAgentRow?.name ?? null,
+      signalCount: topAgentRow?.cnt ?? null,
+      period: 'this month',
+    },
+  })
+})
+
 // ── GET /analytics/templates — list available templates ──────────────────────────
 
 analytics.get('/templates', async (c) => {

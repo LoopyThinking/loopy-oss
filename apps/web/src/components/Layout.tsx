@@ -29,6 +29,7 @@ function hasMinRole(userRole: string | null, minRole: string | null): boolean {
 
 const navItems = [
   { to: '/dashboard',  icon: LayoutDashboard, label: 'Dashboard',       minRole: null },
+  { to: '/artifacts',  icon: BookOpen,        label: 'Artifacts',       minRole: null },
   { to: '/loops',      icon: Repeat2,         label: 'Loops',           minRole: null },
   { to: '/agents',     icon: Bot,             label: 'Agents',          minRole: null },
   { to: '/admin',      icon: BarChart2,       label: 'Executive Panel', minRole: 'admin' },
@@ -120,7 +121,7 @@ export function Layout({ children, title, breadcrumbs }: LayoutProps) {
        * at the very bottom of the sidebar.
        */}
       <div className="px-5 py-3 border-t border-edge">
-        <span className="text-xs text-subtle">v0.6.0</span>
+        <span className="text-xs text-subtle">v0.7.0</span>
       </div>
       <div className="border-t border-edge px-4 py-3 flex items-center gap-2">
         <NavLink

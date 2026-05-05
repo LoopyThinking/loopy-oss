@@ -23,7 +23,7 @@ async function canSeeLoop(userId: string, loopId: string): Promise<boolean> {
       )
     ) AS allowed
     FROM loops l
-    WHERE l.id = ${loopId}
+    WHERE l.id = ${loopId} AND l.deleted_at IS NULL
   `
   return !!row?.allowed
 }
@@ -76,14 +76,14 @@ loops.get('/', async (c) => {
           SELECT l.*, u.display_name AS owner_name, u.email AS owner_email
           FROM loops l
           LEFT JOIN users u ON u.id = l.user_id
-          WHERE l.org_id = ${orgId} AND l.status = ${status}
+          WHERE l.org_id = ${orgId} AND l.status = ${status} AND l.deleted_at IS NULL
           ORDER BY l.created_at DESC
         `
       : await sql<Loop[]>`
           SELECT l.*, u.display_name AS owner_name, u.email AS owner_email
           FROM loops l
           LEFT JOIN users u ON u.id = l.user_id
-          WHERE l.org_id = ${orgId}
+          WHERE l.org_id = ${orgId} AND l.deleted_at IS NULL
           ORDER BY l.created_at DESC
         `
 
@@ -94,12 +94,12 @@ loops.get('/', async (c) => {
   const rows = status
     ? await sql<Loop[]>`
         SELECT * FROM loops
-        WHERE user_id = ${userId} AND status = ${status}
+        WHERE user_id = ${userId} AND status = ${status} AND deleted_at IS NULL
         ORDER BY created_at DESC
       `
     : await sql<Loop[]>`
         SELECT * FROM loops
-        WHERE user_id = ${userId}
+        WHERE user_id = ${userId} AND deleted_at IS NULL
         ORDER BY created_at DESC
       `
 
@@ -256,6 +256,34 @@ loops.get('/:id/signals', async (c) => {
             `
 
   return c.json(signals)
+})
+
+// ── DELETE /loops/:id — soft-delete a closed loop (owner only) ────────────────
+
+loops.delete('/:id', async (c) => {
+  const userId = c.get('userId')
+  const { id } = c.req.param()
+
+  const [existing] = await sql<Loop[]>`
+    SELECT * FROM loops WHERE id = ${id} AND user_id = ${userId} AND deleted_at IS NULL
+  `
+
+  if (!existing) {
+    return c.json({ error: 'Not Found', message: 'Loop not found' }, 404)
+  }
+
+  if (existing.status !== 'closed') {
+    return c.json(
+      { error: 'Bad Request', message: 'Only closed loops can be deleted. Close the loop first.' },
+      400
+    )
+  }
+
+  await sql`
+    UPDATE loops SET deleted_at = now() WHERE id = ${id}
+  `
+
+  return c.body(null, 204)
 })
 
 export { recalculateConfidence }

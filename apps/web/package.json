@@ -1,7 +1,7 @@
 {
   "name": "@loopy/web",
-  "version": "0.6.0",
-  "description": "Loopy OSS — minimal web frontend",
+  "version": "0.7.0",
+  "description": "Loopy OSS \u2014 minimal web frontend",
   "license": "AGPL-3.0",
   "private": true,
   "type": "module",

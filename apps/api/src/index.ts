@@ -14,6 +14,8 @@ import me from './routes/me.js'
 import llm from './routes/llm.js'
 import analytics from './routes/analytics.js'
 import registry from './routes/registry.js'
+import download from './routes/download.js'
+import artifacts from './routes/artifacts.js'
 import { startCron } from './cron.js'
 
 const app = new Hono()
@@ -36,6 +38,8 @@ app.use('/admin/*', authMiddleware)
 app.use('/analytics/*', authMiddleware)
 app.use('/me/*', authMiddleware)
 app.use('/registry/*', authMiddleware)
+app.use('/artifacts/*', authMiddleware)
+// /download/plugin is public (serves the .plugin file)
 // /invites/:token is public; /invites/accept requires auth (handled inside route)
 
 app.route('/loops', loops)
@@ -49,6 +53,8 @@ app.route('/me', me)                 // GET/PATCH /me, GET/DELETE /me/agents
 app.route('/orgs/:orgId/llm-configs', llm)  // /orgs/:id/llm-configs/* (admin+)
 app.route('/analytics', analytics)          // /analytics/* (admin+)
 app.route('/registry', registry)            // /registry/*
+app.route('/download', download)            // /download/plugin
+app.route('/artifacts', artifacts)          // /artifacts/*
 
 // ── 404 handler ───────────────────────────────────────────────────────────────
 

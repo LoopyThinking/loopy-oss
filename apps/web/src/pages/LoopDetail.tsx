@@ -27,6 +27,7 @@ export function LoopDetail() {
   const [closing, setClosing] = useState(false)
   const [resolution, setResolution] = useState('')
   const [showCloseForm, setShowCloseForm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   const currentUserId = getCurrentUserId()
 
@@ -47,6 +48,19 @@ export function LoopDetail() {
       setError(err instanceof Error ? err.message : 'Failed to close loop')
     } finally {
       setClosing(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!id) return
+    if (!confirm('Delete this loop? This action cannot be undone.')) return
+    setDeleting(true)
+    try {
+      await api.loops.delete(id)
+      navigate('/loops')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete loop')
+      setDeleting(false)
     }
   }
 
@@ -122,7 +136,7 @@ export function LoopDetail() {
             </div>
           )}
 
-          {/* Close button — only shown to the loop owner */}
+          {/* Close + Delete actions — only shown to the loop owner */}
           {loop.status === 'open' && !showCloseForm && loop.user_id === currentUserId && (
             <button
               onClick={() => setShowCloseForm(true)}
@@ -130,6 +144,17 @@ export function LoopDetail() {
                          text-secondary hover:bg-hover transition"
             >
               Close loop
+            </button>
+          )}
+
+          {loop.status === 'closed' && loop.user_id === currentUserId && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="w-full rounded-lg border border-red-200 py-2 text-sm font-medium
+                         text-red-600 hover:bg-red-light transition disabled:opacity-50"
+            >
+              {deleting ? 'Deleting…' : 'Delete loop'}
             </button>
           )}
 

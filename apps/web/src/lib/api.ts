@@ -58,6 +58,7 @@ export interface AgentSkill {
   source: 'built-in' | 'user' | 'plugin'
   metadata: Record<string, unknown>
   is_active: boolean
+  deactivated_at: string | null
   registered_at: string
   last_seen_at: string
 }
@@ -71,6 +72,7 @@ export interface AgentTool {
   description: string | null
   metadata: Record<string, unknown>
   is_active: boolean
+  deactivated_at: string | null
   registered_at: string
   last_seen_at: string
 }
@@ -81,6 +83,8 @@ export interface OrgInvite {
   expires_at: string
   created_at: string
   revoked_at: string | null
+  invited_email?: string | null
+  email_sent_at?: string | null
 }
 
 export interface AdminOverview {
@@ -227,6 +231,9 @@ export const api = {
 
     signals: (id: string) =>
       request<WorkSignal[]>(`/loops/${id}/signals`, {}, true),
+
+    delete: (loopId: string) =>
+      request<void>(`/loops/${loopId}`, { method: 'DELETE' }, true),
   },
 
   signals: {
@@ -266,8 +273,8 @@ export const api = {
     listInvites: (orgId: string) =>
       request<OrgInvite[]>(`/orgs/${orgId}/invites`, {}, true),
 
-    createInvite: (orgId: string, data: { role: OrgRole; expires_in_days?: number }) =>
-      request<{ invite_token: string; expires_at: string; role: string; accept_url: string }>(
+    createInvite: (orgId: string, data: { role: OrgRole; expires_in_days?: number; email?: string }) =>
+      request<{ invite_token: string; expires_at: string; role: string; accept_url: string; email_sent?: boolean }>(
         `/orgs/${orgId}/invites`,
         { method: 'POST', body: JSON.stringify(data) },
         true
@@ -378,12 +385,13 @@ export const api = {
         id: string
         email: string
         display_name: string | null
+        onboarded_at: string | null
         created_at: string
         orgs: Array<{ id: string; name: string; slug: string; role: OrgRole }>
       }>('/me'),
 
-    update: (data: { display_name: string }) =>
-      request<{ id: string; email: string; display_name: string | null }>('/me', {
+    update: (data: { display_name?: string; onboarded?: boolean }) =>
+      request<{ id: string; email: string; display_name: string | null; onboarded_at: string | null }>('/me', {
         method: 'PATCH',
         body: JSON.stringify(data),
       }),
@@ -400,6 +408,11 @@ export const api = {
 
     revokeAgent: (agentId: string) =>
       request<void>(`/me/agents/${agentId}`, { method: 'DELETE' }),
+
+    agentToken: () =>
+      request<{ token?: string; agent_id: string; created: boolean; note?: string }>(
+        '/me/agent-token', { method: 'POST' }, true
+      ),
   },
 
   // ── Invites ────────────────────────────────────────────────────────────────
@@ -548,6 +561,14 @@ export const api = {
         status: string; error: string | null; created_at: string; completed_at: string | null
       }>(`/analytics/analyses/${id}`, {}, true),
 
+    kpi: () =>
+      request<{
+        monthlyIpl: { value: number | null; unit: string; trend: number | null }
+        closedLoops: { value: number; period: string }
+        activeUsers: { value: number; period: string }
+        topAgent: { name: string | null; signalCount: number | null; period: string }
+      }>('/analytics/kpi', {}, true),
+
     markdownUrl: (id: string) => `${BASE_URL}/analytics/analyses/${id}/markdown`,
 
     schedules: {
@@ -570,5 +591,31 @@ export const api = {
       remove: (id: string) =>
         request<void>(`/analytics/schedules/${id}`, { method: 'DELETE' }, true),
     },
+  },
+
+  // ── Artifacts ──────────────────────────────────────────────────────────────
+
+  artifacts: {
+    summary: () =>
+      request<Record<string, number>>('/artifacts/summary', {}, true),
+
+    list: (layer: string) =>
+      request<Array<{
+        loop_id: string
+        title: string
+        hypothesis: string | null
+        status: string
+        scope: string
+        created_at: string
+        owner_name?: string | null
+        owner_email?: string
+        signal_count: number
+        signals: Array<{
+          id: string
+          content: string
+          source: string
+          created_at: string
+        }>
+      }>>(`/artifacts/${encodeURIComponent(layer)}`, {}, true),
   },
 }

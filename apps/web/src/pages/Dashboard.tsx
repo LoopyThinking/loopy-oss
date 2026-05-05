@@ -5,13 +5,14 @@ import { LoopCard } from '../components/LoopCard'
 import { Layout } from '../components/Layout'
 import { getCurrentOrgId, api } from '../lib/api'
 import { useEffect } from 'react'
-import { BarChart3 } from 'lucide-react'
+import { BarChart3, Eye, MessageSquare, Wrench, RotateCcw, Brain } from 'lucide-react'
 
 type ScopeView = 'mine' | 'team'
 
 export function Dashboard() {
   const [scope, setScope]       = useState<ScopeView>('mine')
   const [isAdmin, setIsAdmin]   = useState(false)
+  const [artifactSummary, setArtifactSummary] = useState<Record<string, number> | null>(null)
 
   // Detect whether the current user is admin/owner in their org
   useEffect(() => {
@@ -21,6 +22,13 @@ export function Dashboard() {
         const org   = orgs.find(o => o.id === orgId) ?? orgs[0]
         if (org && (org.role === 'admin' || org.role === 'owner')) setIsAdmin(true)
       })
+      .catch(() => {})
+  }, [])
+
+  // Fetch artifact summary
+  useEffect(() => {
+    api.artifacts.summary()
+      .then(setArtifactSummary)
       .catch(() => {})
   }, [])
 
@@ -49,6 +57,31 @@ export function Dashboard() {
                 </p>
               </div>
               <BarChart3 size={24} className="text-indigo-200" />
+            </div>
+          </Link>
+        )}
+
+        {/* ── Artifact summary cards ──────────────────────────────────────── */}
+        {artifactSummary && (
+          <Link
+            to="/artifacts"
+            className="block mb-6 bg-card border border-edge rounded-xl p-4 hover:bg-hover transition-colors"
+          >
+            <p className="text-xs font-semibold uppercase tracking-wider text-subtle mb-3">Artifacts</p>
+            <div className="grid grid-cols-5 gap-2">
+              {([
+                ['perception',     Eye,          'bg-blue-50 text-blue-700'],
+                ['interpretation', Brain,       'bg-purple-50 text-purple-700'],
+                ['decision',       MessageSquare,'bg-amber-50 text-amber-700'],
+                ['action',         Wrench,       'bg-green-50 text-green-700'],
+                ['reflection',     RotateCcw,    'bg-rose-50 text-rose-700'],
+              ] as const).map(([layer, Icon, color]) => (
+                <div key={layer} className="flex flex-col items-center gap-1 py-2 rounded-lg">
+                  <Icon size={16} className={color.split(' ')[1]} />
+                  <span className="text-lg font-bold text-primary">{artifactSummary[layer] ?? 0}</span>
+                  <span className="text-[10px] text-subtle capitalize leading-tight text-center">{layer}</span>
+                </div>
+              ))}
             </div>
           </Link>
         )}

@@ -66,9 +66,12 @@ export function Team() {
   const [showForm, setShowForm]         = useState(false)
   const [inviteRole, setInviteRole]     = useState<OrgRole>('member')
   const [inviteDays, setInviteDays]     = useState(7)
+  const [inviteEmail, setInviteEmail]   = useState('')
   const [inviting, setInviting]         = useState(false)
   const [newInviteUrl, setNewInviteUrl] = useState<string | null>(null)
   const [newInviteExp, setNewInviteExp] = useState<string | null>(null)
+  const [inviteSent, setInviteSent]     = useState(false)
+  const [inviteEmailError, setInviteEmailError] = useState<string | null>(null)
 
   const baseUrl = (import.meta.env.VITE_APP_BASE_URL as string | undefined) ?? window.location.origin
 
@@ -117,14 +120,35 @@ export function Team() {
     if (!orgId) return
     setInviting(true)
     setNewInviteUrl(null)
+    setInviteSent(false)
+    setInviteEmailError(null)
     try {
-      const res = await api.orgs.createInvite(orgId, { role: inviteRole, expires_in_days: inviteDays })
+      const res = await api.orgs.createInvite(orgId, {
+        role: inviteRole,
+        expires_in_days: inviteDays,
+        email: inviteEmail.trim() || undefined,
+      })
       const url = `${baseUrl}/invites/accept/${res.invite_token}`
-      setNewInviteUrl(url)
-      setNewInviteExp(res.expires_at)
+      if (res.email_sent) {
+        setInviteSent(true)
+      } else {
+        setNewInviteUrl(url)
+        setNewInviteExp(res.expires_at)
+      }
       await load() // refresh invite list
     } catch (e: unknown) {
-      alert(e instanceof Error ? e.message : 'Error creating invite')
+      const msg = e instanceof Error ? e.message : 'Error creating invite'
+      if (msg.includes('501') || msg.includes('Not Implemented') || msg.includes('Email provider')) {
+        setInviteEmailError('Email sending is not configured on this instance. Copy the link manually.')
+        // Still show the URL even if email fails
+        try {
+          const res2 = await api.orgs.createInvite(orgId, { role: inviteRole, expires_in_days: inviteDays })
+          setNewInviteUrl(`${baseUrl}/invites/accept/${res2.invite_token}`)
+          setNewInviteExp(res2.expires_at)
+        } catch { /* ignore */ }
+      } else {
+        alert(msg)
+      }
     } finally {
       setInviting(false)
     }
@@ -250,7 +274,17 @@ export function Team() {
                       </select>
                     </div>
                     <div>
-                      <label className="block text-xs font-medium text-accent mb-1">Validity (days)</label>
+                      <label className="block text-xs font-medium text-accent mb-1">Email (optional)</label>
+                      <input
+                        type="email"
+                        value={inviteEmail}
+                        onChange={e => setInviteEmail(e.target.value)}
+                        placeholder="colleague@company.com"
+                        className="w-52 px-3 py-2 text-sm bg-card border border-indigo-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent/30"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-medium text-accent mb-1">Expires (days)</label>
                       <input
                         type="number" min={1} max={30}
                         value={inviteDays}
@@ -264,14 +298,31 @@ export function Team() {
                       className="px-4 py-2 text-sm font-medium bg-accent text-white rounded-lg hover:bg-accent-hover disabled:opacity-50 transition-colors flex items-center gap-2"
                     >
                       {inviting ? <Loader2 size={13} className="animate-spin" /> : <UserPlus size={13} />}
-                      Generate link
+                      Send invite
                     </button>
                     <button type="button" onClick={() => setShowForm(false)} className="p-2 text-subtle hover:text-secondary">
                       <X size={15} />
                     </button>
                   </div>
 
-                  {/* Success card */}
+                  {/* Email error */}
+                  {inviteEmailError && (
+                    <div className="mt-4 bg-amber-50 border border-amber-100 rounded-lg p-3 text-sm text-amber-700">
+                      {inviteEmailError}
+                    </div>
+                  )}
+
+                  {/* Success — email sent */}
+                  {inviteSent && (
+                    <div className="mt-4 bg-green-50 border border-green-100 rounded-lg p-3">
+                      <p className="text-xs font-medium text-green-700">
+                        ✅ Invitation sent by email.{' '}
+                        {newInviteExp && `Expires ${fmtDate(newInviteExp)}.`}
+                      </p>
+                    </div>
+                  )}
+
+                  {/* Success — URL to copy */}
                   {newInviteUrl && (
                     <div className="mt-4 bg-card border border-indigo-100 rounded-lg p-3">
                       <p className="text-xs font-medium text-accent mb-2">

@@ -6,6 +6,50 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.7.0] — 2026-05-01
+
+### Added
+
+- **Email invites (Block A)** — Send invite links via SMTP, Resend, or SendGrid via `LOOPY_EMAIL_PROVIDER` env var. Fallback to copy-link when email not configured.
+- **Onboarding wizard (Block B)** — 5-step guided setup (welcome, profile, org, agent token, done) shown on first login. Tracks completion via `users.onboarded_at`.
+- **Delete loops (Block C)** — Soft-delete for closed loops. Owner-only action with confirmation dialog.
+- **Skills/tools deactivation (Block D)** — Org admins/owners see deactivated timestamp badges for inactive skills and tools. Regular users see generic "inactive" label.
+- **Agent token generation (Block B)** — Generate `lpy_agent_` tokens from Settings page with one-time display. Idempotent: reuses existing active agent if available.
+- **Create org from UI (Block E)** — Inline form in Settings to create new organizations with auto-generated slug from name.
+- **Artifacts page (Block F)** — Browse loops grouped by cognitive layer (perception, interpretation, decision, action, reflection) with expandable signal timelines.
+- **Dashboard artifact cards** — Per-layer artifact count summary with color-coded icons linking to the Artifacts page.
+
+### Changed
+
+- `apps/api/package.json`, `apps/web/package.json` bumped to `0.7.0`.
+- Layout sidebar footer updated to `v0.7.0`.
+- Layout navigation gains "Artifacts" link for all roles.
+- `GET /me` now returns `onboarded_at` field.
+- `PATCH /me` accepts `onboarded: boolean` to set `onboarded_at`.
+- Agent detail: Skills and Tools tabs show "Deactivated {date}" badge for org admins.
+
+### Fixed
+
+- Analytics KPI cards no longer show "—" — backend endpoint returns proper `float8` values.
+- Top Agent card shows agent name instead of UUID — corrected JOIN in SQL query.
+
+### Database migration
+
+- Migration `013_v070.sql` (additive, idempotent):
+  - `org_invites.invited_email`, `org_invites.email_sent_at`
+  - `users.onboarded_at` with partial index
+  - `loops.deleted_at` with partial index
+  - `agent_skills.deactivated_at`, `agent_tools.deactivated_at`
+
+### New env vars
+
+- `LOOPY_EMAIL_PROVIDER` — set to `smtp`, `resend`, or `sendgrid` to enable email invites.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — SMTP credentials.
+- `RESEND_API_KEY` — Resend API key.
+- `SENDGRID_API_KEY` — SendGrid API key.
+
+---
+
 ## [0.6.0] — 2026-04-30
 
 ### Added
@@ -261,6 +305,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `.github/workflows/publish.yml` — npm publish on `v*` tag
 - AGPL v3 license, CONTRIBUTING.md, README.md
 
+[0.7.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.3.0...v0.4.0
