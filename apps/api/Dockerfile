@@ -1,5 +1,5 @@
 # ── Build stage ───────────────────────────────────────────────────────────────
-FROM node:20-alpine AS builder
+FROM node:20 AS builder
 
 WORKDIR /app
 
@@ -15,11 +15,22 @@ COPY apps/api/ ./apps/api/
 RUN npm run build --workspace apps/api
 
 # ── Runtime stage ─────────────────────────────────────────────────────────────
-FROM node:20-alpine AS runner
+FROM node:20 AS runner
 
 WORKDIR /app
 
 ENV NODE_ENV=production
+ENV PUPPETEER_SKIP_DOWNLOAD=true
+
+# Install Chromium and dependencies directly via apt
+RUN apt-get update && apt-get install -y \
+    chromium \
+    chromium-sandbox \
+    fonts-liberation \
+    fonts-noto-color-emoji \
+    && rm -rf /var/lib/apt/lists/*
+
+ENV PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium
 
 # Copy only production dependencies
 COPY --from=builder /app/package.json /app/package-lock.json ./

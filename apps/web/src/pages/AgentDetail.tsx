@@ -5,7 +5,7 @@ import {
   CheckCircle2, XCircle, Calendar, Clock, Zap, Trash2,
 } from 'lucide-react'
 import { Layout } from '../components/Layout'
-import { api, type AgentSkill, type AgentTool } from '../lib/api'
+import { api, getCurrentOrgId, type AgentSkill, type AgentTool } from '../lib/api'
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -152,9 +152,10 @@ interface SkillsTabProps {
   agentId: string
   skills: AgentSkill[]
   onDeactivate: (skillId: string) => void
+  isOrgAdmin?: boolean
 }
 
-function SkillsTab({ agentId, skills, onDeactivate }: SkillsTabProps) {
+function SkillsTab({ agentId, skills, onDeactivate, isOrgAdmin }: SkillsTabProps) {
   if (skills.length === 0) {
     return (
       <div className="text-center py-16 border border-dashed border-edge rounded-xl">
@@ -183,10 +184,16 @@ function SkillsTab({ agentId, skills, onDeactivate }: SkillsTabProps) {
         </thead>
         <tbody className="divide-y divide-edge-subtle">
           {skills.map(s => (
-            <tr key={s.id} className={s.is_active ? '' : 'opacity-40 bg-surface'}>
+            <tr key={s.id} className={!s.is_active && isOrgAdmin ? 'bg-surface' : s.is_active ? '' : 'opacity-40 bg-surface'}>
               <td className="px-4 py-3">
                 <span className="font-medium text-primary">{s.skill_name}</span>
-                {!s.is_active && <span className="ml-2 text-xs text-subtle">inactive</span>}
+                {!s.is_active && isOrgAdmin ? (
+                  <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                    Deactivated {s.deactivated_at ? fmtDateTime(s.deactivated_at) : ''}
+                  </span>
+                ) : !s.is_active ? (
+                  <span className="ml-2 text-xs text-subtle">inactive</span>
+                ) : null}
                 {s.description && <p className="text-xs text-subtle mt-0.5 truncate max-w-xs">{s.description}</p>}
               </td>
               <td className="px-4 py-3"><SourceBadge source={s.source} /></td>
@@ -217,9 +224,10 @@ interface ToolsTabProps {
   agentId: string
   tools: AgentTool[]
   onDeactivate: (toolId: string) => void
+  isOrgAdmin?: boolean
 }
 
-function ToolsTab({ agentId, tools, onDeactivate }: ToolsTabProps) {
+function ToolsTab({ agentId, tools, onDeactivate, isOrgAdmin }: ToolsTabProps) {
   if (tools.length === 0) {
     return (
       <div className="text-center py-16 border border-dashed border-edge rounded-xl">
@@ -247,10 +255,16 @@ function ToolsTab({ agentId, tools, onDeactivate }: ToolsTabProps) {
         </thead>
         <tbody className="divide-y divide-edge-subtle">
           {tools.map(t => (
-            <tr key={t.id} className={t.is_active ? '' : 'opacity-40 bg-surface'}>
+            <tr key={t.id} className={!t.is_active && isOrgAdmin ? 'bg-surface' : t.is_active ? '' : 'opacity-40 bg-surface'}>
               <td className="px-4 py-3">
                 <span className="font-medium text-primary">{t.tool_name}</span>
-                {!t.is_active && <span className="ml-2 text-xs text-subtle">inactive</span>}
+                {!t.is_active && isOrgAdmin ? (
+                  <span className="ml-2 text-xs px-2 py-0.5 rounded-full bg-red-50 text-red-600 border border-red-200">
+                    Deactivated {t.deactivated_at ? fmtDateTime(t.deactivated_at) : ''}
+                  </span>
+                ) : !t.is_active ? (
+                  <span className="ml-2 text-xs text-subtle">inactive</span>
+                ) : null}
                 {t.description && <p className="text-xs text-subtle mt-0.5 truncate max-w-xs">{t.description}</p>}
               </td>
               <td className="px-4 py-3"><TypeBadge type={t.tool_type} /></td>
@@ -286,6 +300,14 @@ export function AgentDetail() {
   const [tab, setTab]       = useState<TabId>('overview')
   const [loading, setLoading] = useState(true)
   const [error, setError]   = useState<string | null>(null)
+  const [isOrgAdmin, setIsOrgAdmin] = useState(false)
+
+  useEffect(() => {
+    api.orgs.list().then(orgs => {
+      const org = orgs.find(o => o.id === getCurrentOrgId())
+      if (org && (org.role === 'admin' || org.role === 'owner')) setIsOrgAdmin(true)
+    }).catch(() => {})
+  }, [])
 
   const load = useCallback(async () => {
     if (!id) return
@@ -389,10 +411,10 @@ export function AgentDetail() {
               <OverviewTab agent={agent} onRevoke={handleRevokeAgent} />
             )}
             {tab === 'skills' && (
-              <SkillsTab agentId={id!} skills={skills} onDeactivate={handleDeactivateSkill} />
+              <SkillsTab agentId={id!} skills={skills} onDeactivate={handleDeactivateSkill} isOrgAdmin={isOrgAdmin} />
             )}
             {tab === 'tools' && (
-              <ToolsTab agentId={id!} tools={tools} onDeactivate={handleDeactivateTool} />
+              <ToolsTab agentId={id!} tools={tools} onDeactivate={handleDeactivateTool} isOrgAdmin={isOrgAdmin} />
             )}
           </>
         )}

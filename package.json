@@ -1,8 +1,8 @@
 {
   "name": "loopy-oss",
-  "version": "0.0.1",
+  "version": "0.7.0",
   "private": true,
-  "description": "The open-source core of Loopy Thinking — agent work signals, loops, and productivity metrics",
+  "description": "The open-source core of Loopy Thinking \u2014 agent work signals, loops, and productivity metrics",
   "license": "AGPL-3.0",
   "workspaces": [
     "packages/*",

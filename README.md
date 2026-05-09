@@ -69,6 +69,22 @@ docker compose up
 
 Open `http://localhost:3000`. The API runs at `http://localhost:3001`.
 
+### Updating an existing installation
+
+Docker only auto-applies SQL files in `docker/init/` on the **first** creation of the database volume. If you already have Loopy running and pull a newer version with new migrations, the new SQL files won't run automatically — you need to apply them manually:
+
+```bash
+docker exec -i $(docker ps -qf "name=db") psql -U loopy -d loopy < packages/db/migrations/<new-migration>.sql
+```
+
+To verify a migration was applied, check that its tables/columns exist:
+
+```bash
+docker exec $(docker ps -qf "name=db") psql -U loopy -d loopy -c "\d <table_name>"
+```
+
+If you want a clean slate, you can also stop containers, remove the volume, and start fresh — but you'll lose your data.
+
 ### SDK
 
 ```bash
@@ -195,6 +211,7 @@ This metric answers: *how much of this work did the machine do?* — not as a re
 | **v0.2.1** | ✅ shipped | Multi-org, panel ejecutivo, sidebar, `/framework`, `@loopythinking/skills` |
 | **v0.3.0** | ✅ shipped | Invite accept flow, Settings page, IPL env var config |
 | **v1.0 — `@loopythinking/mcp`** | ✅ shipped | MCP server — 7 tools for Claude Desktop, Cursor, VS Code |
+| **v0.8.0** | ✅ shipped | Brief Generator (bimodal Project Brief, sponsor attestation, bimodal IPL); Second Brain plugin (Obsidian/vault integration); Artifacts page label refresh |
 | **v1.1** | 🔜 next | IPL weight calibration with real data, email invite flow, onboarding wizard |
 
 The full roadmap lives in [GitHub Projects →](https://github.com/loopy-thinking/loopy-oss/projects).

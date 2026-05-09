@@ -1,4 +1,6 @@
 import { Hono } from 'hono'
+import { randomBytes } from 'crypto'
+import { createHash } from 'crypto'
 import sql from '../db/client.js'
 import type { AuthVariables, User } from '../types.js'
 
@@ -23,7 +25,7 @@ me.get('/', async (c) => {
   `
 
   const [user] = await sql<User[]>`
-    SELECT id, email, display_name, created_at
+    SELECT id, email, display_name, onboarded_at, created_at
     FROM users
     WHERE id = ${userId}
   `
@@ -44,7 +46,7 @@ me.get('/', async (c) => {
 
 me.patch('/', async (c) => {
   const userId = c.get('userId')
-  const body   = await c.req.json<{ display_name?: string }>()
+  const body   = await c.req.json<{ display_name?: string; onboarded?: boolean }>()
 
   const displayName = body.display_name?.trim() ?? null
 
@@ -52,11 +54,19 @@ me.patch('/', async (c) => {
     return c.json({ error: 'Bad Request', message: 'display_name must be ≤ 120 characters' }, 400)
   }
 
+  const sets: string[] = []
+  if (body.display_name !== undefined) sets.push(`display_name = ${displayName === null ? 'NULL' : `'${displayName.replace(/'/g, "''")}'`}`)
+  if (body.onboarded === true) sets.push(`onboarded_at = now()`)
+
+  if (sets.length === 0) {
+    return c.json({ error: 'Bad Request', message: 'No fields to update' }, 400)
+  }
+
   const [user] = await sql<User[]>`
     UPDATE users
-    SET display_name = ${displayName}
+    SET ${sql.unsafe(sets.join(', '))}
     WHERE id = ${userId}
-    RETURNING id, email, display_name, created_at
+    RETURNING id, email, display_name, onboarded_at, created_at
   `
 
   if (!user) {
@@ -88,6 +98,48 @@ me.get('/agents', async (c) => {
   `
 
   return c.json(agents)
+})
+
+// ── POST /me/agent-token — get or create an agent token for the current user ──
+// Idempotent: reuses existing active agent if one exists.
+
+me.post('/agent-token', async (c) => {
+  const userId = c.get('userId')
+  const orgId = c.get('orgId')
+
+  // Check for an existing active agent
+  const [existing] = await sql<Array<{ id: string; token_hash: string }>>`
+    SELECT id, token_hash FROM agent_registry
+    WHERE user_id = ${userId} AND org_id = ${orgId} AND is_active = true
+    ORDER BY created_at DESC
+    LIMIT 1
+  `
+
+  if (existing) {
+    // We can't return the original token (only the hash is stored).
+    // The user already has it from creation; for the wizard / settings
+    // they can generate a new one if lost.
+    return c.json({
+      agent_id: existing.id,
+      created: false,
+      note: 'Active agent already exists. Revoke it first to generate a new token.',
+    })
+  }
+
+  // Create a new agent
+  const agentName = 'claude-cowork'
+  const rawToken = `lpy_agent_${randomBytes(32).toString('hex')}`
+  const tokenHash = createHash('sha256').update(rawToken).digest('hex')
+
+  const [agent] = await sql<Array<{ id: string }>>`
+    INSERT INTO agent_registry (user_id, org_id, agent_name, token_hash, description)
+    VALUES (${userId}, ${orgId}, ${agentName}, ${tokenHash}, 'Auto-created by onboarding wizard')
+    ON CONFLICT (user_id, agent_name) DO UPDATE SET
+      is_active = true, token_hash = EXCLUDED.token_hash, last_seen_at = NULL
+    RETURNING id
+  `
+
+  return c.json({ token: rawToken, agent_id: agent.id, created: true }, 201)
 })
 
 // ── DELETE /me/agents/:agentId — deactivate (revoke) an agent token ──────────

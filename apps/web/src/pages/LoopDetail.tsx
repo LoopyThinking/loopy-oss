@@ -4,7 +4,10 @@ import { api, getToken } from '../lib/api'
 import { SignalTimeline } from '../components/SignalTimeline'
 import { ConfidenceBadge } from '../components/ConfidenceBadge'
 import { IPLBadge } from '../components/IPLBadge'
+import { GenerateBriefModal } from '../components/GenerateBriefModal'
+import { SponsorAttestationForm } from '../components/SponsorAttestationForm'
 import type { LoopWithSignals } from '../lib/api'
+import { FileDown, ChevronDown, ChevronUp } from 'lucide-react'
 
 // Decode the user ID from the JWT token (sub claim).
 function getCurrentUserId(): string | null {
@@ -27,6 +30,9 @@ export function LoopDetail() {
   const [closing, setClosing] = useState(false)
   const [resolution, setResolution] = useState('')
   const [showCloseForm, setShowCloseForm] = useState(false)
+  const [deleting, setDeleting] = useState(false)
+  const [showBriefModal, setShowBriefModal] = useState(false)
+  const [showAttestation, setShowAttestation] = useState(false)
 
   const currentUserId = getCurrentUserId()
 
@@ -47,6 +53,19 @@ export function LoopDetail() {
       setError(err instanceof Error ? err.message : 'Failed to close loop')
     } finally {
       setClosing(false)
+    }
+  }
+
+  async function handleDelete() {
+    if (!id) return
+    if (!confirm('Delete this loop? This action cannot be undone.')) return
+    setDeleting(true)
+    try {
+      await api.loops.delete(id)
+      navigate('/loops')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to delete loop')
+      setDeleting(false)
     }
   }
 
@@ -122,7 +141,7 @@ export function LoopDetail() {
             </div>
           )}
 
-          {/* Close button — only shown to the loop owner */}
+          {/* Close + Delete actions — only shown to the loop owner */}
           {loop.status === 'open' && !showCloseForm && loop.user_id === currentUserId && (
             <button
               onClick={() => setShowCloseForm(true)}
@@ -130,6 +149,29 @@ export function LoopDetail() {
                          text-secondary hover:bg-hover transition"
             >
               Close loop
+            </button>
+          )}
+
+          {loop.status === 'closed' && loop.user_id === currentUserId && (
+            <button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="w-full rounded-lg border border-red-200 py-2 text-sm font-medium
+                         text-red-600 hover:bg-red-light transition disabled:opacity-50"
+            >
+              {deleting ? 'Deleting…' : 'Delete loop'}
+            </button>
+          )}
+
+          {/* Generate Brief button */}
+          {loop.status === 'open' && loop.user_id === currentUserId && (
+            <button
+              onClick={() => setShowBriefModal(true)}
+              className="w-full rounded-lg bg-accent py-2.5 text-sm font-semibold text-white
+                         hover:bg-accent-hover transition flex items-center justify-center gap-2"
+            >
+              <FileDown size={16} />
+              Generar Brief
             </button>
           )}
 
@@ -174,6 +216,35 @@ export function LoopDetail() {
           )}
         </div>
 
+        {/* Sponsor attestation section */}
+        {loop.status === 'open' && loop.user_id === currentUserId && (
+          <section className="bg-card rounded-2xl border border-edge shadow-sm p-6">
+            <button
+              onClick={() => setShowAttestation(!showAttestation)}
+              className="w-full flex items-center justify-between text-left"
+            >
+              <div>
+                <h2 className="text-sm font-semibold text-muted uppercase tracking-wider">
+                  Atestación del Sponsor
+                </h2>
+                <p className="text-xs text-subtle mt-0.5">
+                  Requerida para generar briefs en modo Hipótesis
+                </p>
+              </div>
+              {showAttestation ? <ChevronUp size={18} className="text-subtle" /> : <ChevronDown size={18} className="text-subtle" />}
+            </button>
+            {showAttestation && (
+              <div className="mt-4 pt-4 border-t border-edge">
+                <SponsorAttestationForm
+                  loopId={loop.id}
+                  isOwner={loop.user_id === currentUserId}
+                  currentUserId={currentUserId}
+                />
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Signal timeline */}
         <section>
           <h2 className="text-sm font-semibold text-muted uppercase tracking-wider mb-4">
@@ -181,6 +252,15 @@ export function LoopDetail() {
           </h2>
           <SignalTimeline signals={loop.signals} />
         </section>
+
+        {/* Generate Brief Modal */}
+        {showBriefModal && (
+          <GenerateBriefModal
+            loopId={loop.id}
+            loopTitle={loop.title}
+            onClose={() => setShowBriefModal(false)}
+          />
+        )}
       </main>
     </div>
   )

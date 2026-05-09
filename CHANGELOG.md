@@ -6,6 +6,77 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.8.0] — Unreleased
+
+### Added
+
+- **Brief Generator (analytics)** — Generate opinionated PDF briefs from analytics to channel high-impact loops to IT or external partners as evidenced project cases.
+  - **Bimodal Project Brief** — Validated mode (loops with measured signals) and Hypothesis mode (loops with potential but pending integration).
+  - **Bimodal IPL** — `ipl_minutes` (Realized, measured from agent signals) and `ipl_projected_minutes` (Projected, declared via sponsor attestation).
+  - **Sponsor attestation** — Structured form for sponsors to declare the manual baseline (frequency, duration, people count, adoption rate) plus at least 3 critical assumptions. Substitutes automated signals as evidence in Hypothesis mode.
+  - **Eligibility gates** — Independent criteria per mode; the "Generate Brief" button shows only the modes the loop qualifies for, with an explicit list of missing requirements.
+  - **PDF output** — Static, dated snapshots with provenance badges on every figure (measured vs. estimated vs. attested). Includes a "Critical assumptions" section in Hypothesis mode.
+  - New tables: `sponsor_attestations`, `brief_generations` (telemetry). New columns on `loops`: `ipl_projected_minutes`, `cognitive_layer`, `owner_id`, `sponsor_id`. See migration `014_brief_generator.sql`.
+- **Artifacts page renamed labels** — Cognitive layers now display friendlier names: "Signals catalog (Perception)", "Hypothesis records (Interpretation)", "Decision log (Decision)", "Playbooks (Action)", "Learning Book (Reflection)".
+- **Second Brain plugin (`packages/cowork-plugin-second-brain`)** — Optional Cowork plugin that connects Loopy loops with Obsidian or any Second Brain vault. Ships three OSS skills and one paid-only skill:
+  - `loopy-kb-pull` — Pull active loops into the vault as structured notes (creates/updates per-loop Markdown files following vault conventions).
+  - `loopy-kb-push` — Detect relevant activity in the vault and emit signals to the corresponding loops in Loopy. Always shows a preview before emitting.
+  - `loopy-kb-enrich` — Enrich an active loop's analysis by injecting context from the vault; presents a combined synthesis of Loopy state + vault knowledge.
+  - `loopy-org-kb` — *(loopythinking.ai paid only)* Distribute team loop insights across individual member vaults.
+- Plugin lives in the monorepo at `packages/cowork-plugin-second-brain` following the same package layout as `packages/cowork-plugin`. Requires the `loopy-oss` plugin to be installed for auth and API communication.
+- `LOOPY_VAULT_PATH` env var — optional path to the Obsidian vault or Second Brain folder. If not set, the skill asks for folder access on first use.
+
+### Notes
+
+- `loopy-org-kb` is spec'd but **not yet fully implemented** — requires API clarification with the loopythinking.ai team (see `packages/cowork-plugin-second-brain/SPEC.md` Section 9).
+- `packages/cowork-plugin-second-brain` is versioned independently starting at `0.1.0`.
+
+---
+
+## [0.7.0] — 2026-05-01
+
+### Added
+
+- **Email invites (Block A)** — Send invite links via SMTP, Resend, or SendGrid via `LOOPY_EMAIL_PROVIDER` env var. Fallback to copy-link when email not configured.
+- **Onboarding wizard (Block B)** — 5-step guided setup (welcome, profile, org, agent token, done) shown on first login. Tracks completion via `users.onboarded_at`.
+- **Delete loops (Block C)** — Soft-delete for closed loops. Owner-only action with confirmation dialog.
+- **Skills/tools deactivation (Block D)** — Org admins/owners see deactivated timestamp badges for inactive skills and tools. Regular users see generic "inactive" label.
+- **Agent token generation (Block B)** — Generate `lpy_agent_` tokens from Settings page with one-time display. Idempotent: reuses existing active agent if available.
+- **Create org from UI (Block E)** — Inline form in Settings to create new organizations with auto-generated slug from name.
+- **Artifacts page (Block F)** — Browse loops grouped by cognitive layer (perception, interpretation, decision, action, reflection) with expandable signal timelines.
+- **Dashboard artifact cards** — Per-layer artifact count summary with color-coded icons linking to the Artifacts page.
+
+### Changed
+
+- `apps/api/package.json`, `apps/web/package.json` bumped to `0.7.0`.
+- Layout sidebar footer updated to `v0.7.0`.
+- Layout navigation gains "Artifacts" link for all roles.
+- `GET /me` now returns `onboarded_at` field.
+- `PATCH /me` accepts `onboarded: boolean` to set `onboarded_at`.
+- Agent detail: Skills and Tools tabs show "Deactivated {date}" badge for org admins.
+
+### Fixed
+
+- Analytics KPI cards no longer show "—" — backend endpoint returns proper `float8` values.
+- Top Agent card shows agent name instead of UUID — corrected JOIN in SQL query.
+
+### Database migration
+
+- Migration `013_v070.sql` (additive, idempotent):
+  - `org_invites.invited_email`, `org_invites.email_sent_at`
+  - `users.onboarded_at` with partial index
+  - `loops.deleted_at` with partial index
+  - `agent_skills.deactivated_at`, `agent_tools.deactivated_at`
+
+### New env vars
+
+- `LOOPY_EMAIL_PROVIDER` — set to `smtp`, `resend`, or `sendgrid` to enable email invites.
+- `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM` — SMTP credentials.
+- `RESEND_API_KEY` — Resend API key.
+- `SENDGRID_API_KEY` — SendGrid API key.
+
+---
+
 ## [0.6.0] — 2026-04-30
 
 ### Added
@@ -261,6 +332,7 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 - `.github/workflows/publish.yml` — npm publish on `v*` tag
 - AGPL v3 license, CONTRIBUTING.md, README.md
 
+[0.7.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.6.0...v0.7.0
 [0.6.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/loopy-thinking/loopy-oss/compare/v0.3.0...v0.4.0

@@ -18,6 +18,10 @@ export interface Loop {
   scope: LoopScope
   confidence_index: number
   ipl_minutes: number
+  ipl_projected_minutes: number
+  cognitive_layer: CognitiveLayer | null
+  owner_id: string | null
+  sponsor_id: string | null
   resolution: string | null
   created_at: string
   updated_at: string
@@ -25,6 +29,40 @@ export interface Loop {
   // Populated from v_team_loops view (admin team queries)
   owner_name?: string | null
   owner_email?: string
+}
+
+export interface SponsorAttestation {
+  id: string
+  loop_id: string
+  sponsor_id: string
+  frequency_per_month: number
+  avg_duration_minutes: number
+  people_count: number
+  adoption_rate_pct: number
+  critical_assumptions: string[]
+  comment: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface BriefGeneration {
+  id: string
+  loop_id: string
+  generated_by: string
+  template_id: 'project_brief' | 'endoso_jefatura'
+  mode: 'validated' | 'hypothesis'
+  context_text: string | null
+  created_at: string
+}
+
+export interface ModeEligibility {
+  eligible: boolean
+  missing: string[]
+}
+
+export interface LoopEligibility {
+  validated_mode: ModeEligibility
+  hypothesis_mode: ModeEligibility
 }
 
 export interface WorkSignal {

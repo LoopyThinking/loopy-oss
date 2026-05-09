@@ -76,6 +76,31 @@ export function getActiveWeights(): Record<string, number> {
  *
  * Called after every new agent signal is persisted (mirrors recalculateConfidence).
  */
+/**
+ * Calculate projected annual IPL from sponsor-declared inputs.
+ *
+ * Formula:
+ *   projected_minutes = frequency_per_month × avg_duration_minutes × people_count
+ *                     × (adoption_rate_pct / 100) × 12 months
+ *
+ * This represents the estimated human-equivalent minutes the loop would liberate
+ * per year if the proposed integration/automation were implemented.
+ */
+export function calculateProjectedIpl(attestation: {
+  frequency_per_month: number
+  avg_duration_minutes: number
+  people_count: number
+  adoption_rate_pct: number
+}): number {
+  const monthlyMinutes =
+    attestation.frequency_per_month *
+    attestation.avg_duration_minutes *
+    attestation.people_count *
+    (attestation.adoption_rate_pct / 100)
+
+  return Math.round(monthlyMinutes * 12)
+}
+
 export async function recalculateIpl(loopId: string): Promise<number> {
   const signals = await sql<Array<{ type: string; estimated_human_minutes: number | null }>>`
     SELECT type, estimated_human_minutes

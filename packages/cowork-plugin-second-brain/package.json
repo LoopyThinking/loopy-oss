@@ -1,0 +1,11 @@
+{
+  "name": "@loopythinking/cowork-plugin-second-brain",
+  "version": "0.1.0",
+  "description": "Cowork plugin to connect Loopy loops with Obsidian or any Second Brain vault",
+  "license": "AGPL-3.0-only",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LoopyThinking/loopy-oss.git",
+    "directory": "packages/cowork-plugin-second-brain"
+  }
+}

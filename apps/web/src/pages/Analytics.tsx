@@ -26,6 +26,13 @@ interface ScheduleInfo {
   last_run_at: string | null; next_run_at: string
 }
 
+interface KpiData {
+  monthlyIpl: { value: number | null; unit: string; trend: number | null }
+  closedLoops: { value: number; period: string }
+  activeUsers: { value: number; period: string }
+  topAgent: { name: string | null; signalCount: number | null; period: string }
+}
+
 // ── Helpers ────────────────────────────────────────────────────────────────────
 
 const CATEGORY_COLORS: Record<string, string> = {
@@ -81,6 +88,11 @@ export function Analytics() {
   const [runLoading, setRunLoading] = useState(false)
   const [runError, setRunError] = useState<string | null>(null)
 
+  // KPI overview data
+  const [kpiData, setKpiData] = useState<KpiData | null>(null)
+  const [kpiLoading, setKpiLoading] = useState(false)
+  const [kpiError, setKpiError] = useState(false)
+
   // Check user role
   useEffect(() => {
     api.me.get().then(prof => {
@@ -118,6 +130,17 @@ export function Analytics() {
   }, [orgId])
 
   useEffect(() => { if (role) loadAll() }, [role, loadAll])
+
+  // Fetch KPI data for the Overview tab
+  useEffect(() => {
+    if (!role) return
+    setKpiLoading(true)
+    setKpiError(false)
+    api.analytics.kpi()
+      .then(data => setKpiData(data))
+      .catch(() => { setKpiError(true); setKpiData(null) })
+      .finally(() => setKpiLoading(false))
+  }, [role])
 
   async function handleRunAnalysis() {
     if (!runTemplate || !orgId) return
@@ -190,10 +213,34 @@ export function Analytics() {
                   Quick panel with the main KPIs of your organization.
                 </p>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                  <KpiCard label="Monthly IPL" value="—" sub="vs previous month" />
-                  <KpiCard label="Closed loops" value="—" sub="this month" />
-                  <KpiCard label="Active users" value="—" sub="this week" />
-                  <KpiCard label="Top agent" value="—" sub="of the month" />
+                  <KpiCard
+                    label="Monthly IPL"
+                    value={kpiData?.monthlyIpl.value != null ? `${kpiData.monthlyIpl.value.toFixed(1)} h` : '—'}
+                    sub="vs previous month"
+                    loading={kpiLoading}
+                    error={kpiError}
+                  />
+                  <KpiCard
+                    label="Closed loops"
+                    value={kpiData?.closedLoops.value != null ? String(kpiData.closedLoops.value) : '—'}
+                    sub="this month"
+                    loading={kpiLoading}
+                    error={kpiError}
+                  />
+                  <KpiCard
+                    label="Active users"
+                    value={kpiData?.activeUsers.value != null ? String(kpiData.activeUsers.value) : '—'}
+                    sub="this week"
+                    loading={kpiLoading}
+                    error={kpiError}
+                  />
+                  <KpiCard
+                    label="Top agent"
+                    value={kpiData?.topAgent.name ?? '—'}
+                    sub={kpiData?.topAgent.name ? `${kpiData.topAgent.signalCount} signals · of the month` : 'of the month'}
+                    loading={kpiLoading}
+                    error={kpiError}
+                  />
                 </div>
 
                 {/* Próximas analíticas programadas */}
@@ -519,11 +566,19 @@ export function Analytics() {
 
 // ── Sub-components ─────────────────────────────────────────────────────────────
 
-function KpiCard({ label, value, sub }: { label: string; value: string; sub: string }) {
+function KpiCard({ label, value, sub, loading, error }: {
+  label: string; value: string; sub: string; loading?: boolean; error?: boolean
+}) {
   return (
     <div className="bg-card border border-edge rounded-xl p-4">
       <p className="text-xs text-muted mb-1">{label}</p>
-      <p className="text-xl font-semibold text-primary">{value}</p>
+      {loading ? (
+        <div className="h-7 w-20 bg-gray-200 animate-pulse rounded" />
+      ) : (
+        <p className="text-xl font-semibold text-primary" title={error ? 'No data yet' : undefined}>
+          {value}
+        </p>
+      )}
       <p className="text-xs text-subtle mt-1">{sub}</p>
     </div>
   )
