@@ -16,6 +16,7 @@ import analytics from './routes/analytics.js'
 import registry from './routes/registry.js'
 import download from './routes/download.js'
 import artifacts from './routes/artifacts.js'
+import attestations from './routes/attestations.js'
 import { startCron } from './cron.js'
 
 const app = new Hono()
@@ -43,6 +44,7 @@ app.use('/artifacts/*', authMiddleware)
 // /invites/:token is public; /invites/accept requires auth (handled inside route)
 
 app.route('/loops', loops)
+app.route('/loops', attestations)   // /loops/:id/attestation
 app.route('/signals', signals)
 app.route('/agents', agents)
 app.route('/agents', capabilities)   // /agents/:agentId/skills + /agents/:agentId/tools

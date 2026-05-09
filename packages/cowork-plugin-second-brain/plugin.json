@@ -1,0 +1,44 @@
+{
+  "name": "loopy-second-brain",
+  "version": "0.1.0",
+  "displayName": "Loopy Second Brain",
+  "description": "Connect your Loopy loops with your personal or team knowledge base (Obsidian, Second Brain). Pull loop insights into your vault, push vault activity as signals, and enrich loop analysis with your KB context.",
+  "author": "LoopyThinking",
+  "license": "AGPL-3.0-only",
+  "requires": [
+    "loopy-oss"
+  ],
+  "skills": [
+    {
+      "name": "loopy-kb-pull",
+      "path": "skills/loopy-kb-pull/SKILL.md",
+      "description": "Pull active loops into your vault as structured notes",
+      "tier": "oss"
+    },
+    {
+      "name": "loopy-kb-push",
+      "path": "skills/loopy-kb-push/SKILL.md",
+      "description": "Emit signals from vault activity to existing loops",
+      "tier": "oss"
+    },
+    {
+      "name": "loopy-kb-enrich",
+      "path": "skills/loopy-kb-enrich/SKILL.md",
+      "description": "Enrich active loop analysis with context from your vault",
+      "tier": "oss"
+    },
+    {
+      "name": "loopy-org-kb",
+      "path": "skills/loopy-org-kb/SKILL.md",
+      "description": "Distribute team loop insights across individual vaults [paid only]",
+      "tier": "paid"
+    }
+  ],
+  "env": {
+    "LOOPY_VAULT_PATH": {
+      "description": "Absolute path to your Obsidian vault or Second Brain folder",
+      "required": false,
+      "note": "If not set, the agent will ask for folder access at first use"
+    }
+  }
+}

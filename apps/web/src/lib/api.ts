@@ -30,6 +30,30 @@ export interface LoopWithSignals extends Loop {
   signals: WorkSignal[]
 }
 
+export interface SponsorAttestation {
+  id: string
+  loop_id: string
+  sponsor_id: string
+  frequency_per_month: number
+  avg_duration_minutes: number
+  people_count: number
+  adoption_rate_pct: number
+  critical_assumptions: string[]
+  comment: string | null
+  created_at: string
+  updated_at: string
+}
+
+export interface ModeEligibility {
+  eligible: boolean
+  missing: string[]
+}
+
+export interface LoopEligibility {
+  validated_mode: ModeEligibility
+  hypothesis_mode: ModeEligibility
+}
+
 export interface WorkSignal {
   id: string
   loop_id: string
@@ -234,6 +258,54 @@ export const api = {
 
     delete: (loopId: string) =>
       request<void>(`/loops/${loopId}`, { method: 'DELETE' }, true),
+
+    getEligibility: (id: string) =>
+      request<LoopEligibility>(`/loops/${id}/eligibility`, {}, true),
+
+    getAttestation: (id: string) =>
+      request<SponsorAttestation>(`/loops/${id}/attestation`, {}, true),
+
+    saveAttestation: (id: string, data: {
+      frequency_per_month: number
+      avg_duration_minutes: number
+      people_count: number
+      adoption_rate_pct: number
+      critical_assumptions?: string[]
+      comment?: string
+    }) => request<SponsorAttestation>(`/loops/${id}/attestation`, {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }, true),
+
+    generateBrief: async (id: string, data: {
+      template_id: 'project_brief' | 'endoso_jefatura'
+      mode: 'validated' | 'hypothesis'
+      context_text?: string
+    }): Promise<{ filename: string; blob: Blob }> => {
+      const token = getToken()
+      const orgId = getCurrentOrgId()
+      const res = await fetch(`${BASE_URL}/loops/${id}/generate-brief`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(token ? { Authorization: `Bearer ${token}` } : {}),
+          ...(orgId ? { 'X-Org-Id': orgId } : {}),
+        },
+        body: JSON.stringify(data),
+      })
+      if (!res.ok) {
+        const body = await res.json().catch(() => ({})) as { message?: string; missing?: string[] }
+        const msg = body.missing?.length
+          ? body.missing.join('; ')
+          : body.message ?? `HTTP ${res.status}`
+        throw new ApiError(res.status, msg)
+      }
+      const disposition = res.headers.get('Content-Disposition') ?? ''
+      const match = disposition.match(/filename="(.+)"/)
+      const filename = match?.[1] ?? 'brief.pdf'
+      const blob = await res.blob()
+      return { filename, blob }
+    },
   },
 
   signals: {

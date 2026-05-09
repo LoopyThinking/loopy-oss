@@ -6,6 +6,33 @@ This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.htm
 
 ---
 
+## [0.8.0] — Unreleased
+
+### Added
+
+- **Brief Generator (analytics)** — Generate opinionated PDF briefs from analytics to channel high-impact loops to IT or external partners as evidenced project cases.
+  - **Bimodal Project Brief** — Validated mode (loops with measured signals) and Hypothesis mode (loops with potential but pending integration).
+  - **Bimodal IPL** — `ipl_minutes` (Realized, measured from agent signals) and `ipl_projected_minutes` (Projected, declared via sponsor attestation).
+  - **Sponsor attestation** — Structured form for sponsors to declare the manual baseline (frequency, duration, people count, adoption rate) plus at least 3 critical assumptions. Substitutes automated signals as evidence in Hypothesis mode.
+  - **Eligibility gates** — Independent criteria per mode; the "Generate Brief" button shows only the modes the loop qualifies for, with an explicit list of missing requirements.
+  - **PDF output** — Static, dated snapshots with provenance badges on every figure (measured vs. estimated vs. attested). Includes a "Critical assumptions" section in Hypothesis mode.
+  - New tables: `sponsor_attestations`, `brief_generations` (telemetry). New columns on `loops`: `ipl_projected_minutes`, `cognitive_layer`, `owner_id`, `sponsor_id`. See migration `014_brief_generator.sql`.
+- **Artifacts page renamed labels** — Cognitive layers now display friendlier names: "Signals catalog (Perception)", "Hypothesis records (Interpretation)", "Decision log (Decision)", "Playbooks (Action)", "Learning Book (Reflection)".
+- **Second Brain plugin (`packages/cowork-plugin-second-brain`)** — Optional Cowork plugin that connects Loopy loops with Obsidian or any Second Brain vault. Ships three OSS skills and one paid-only skill:
+  - `loopy-kb-pull` — Pull active loops into the vault as structured notes (creates/updates per-loop Markdown files following vault conventions).
+  - `loopy-kb-push` — Detect relevant activity in the vault and emit signals to the corresponding loops in Loopy. Always shows a preview before emitting.
+  - `loopy-kb-enrich` — Enrich an active loop's analysis by injecting context from the vault; presents a combined synthesis of Loopy state + vault knowledge.
+  - `loopy-org-kb` — *(loopythinking.ai paid only)* Distribute team loop insights across individual member vaults.
+- Plugin lives in the monorepo at `packages/cowork-plugin-second-brain` following the same package layout as `packages/cowork-plugin`. Requires the `loopy-oss` plugin to be installed for auth and API communication.
+- `LOOPY_VAULT_PATH` env var — optional path to the Obsidian vault or Second Brain folder. If not set, the skill asks for folder access on first use.
+
+### Notes
+
+- `loopy-org-kb` is spec'd but **not yet fully implemented** — requires API clarification with the loopythinking.ai team (see `packages/cowork-plugin-second-brain/SPEC.md` Section 9).
+- `packages/cowork-plugin-second-brain` is versioned independently starting at `0.1.0`.
+
+---
+
 ## [0.7.0] — 2026-05-01
 
 ### Added

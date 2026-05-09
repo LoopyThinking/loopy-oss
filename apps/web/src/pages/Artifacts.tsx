@@ -13,11 +13,11 @@ const COGNITIVE_LAYERS = ['perception', 'interpretation', 'decision', 'action', 
 type CognitiveLayer = (typeof COGNITIVE_LAYERS)[number]
 
 const LAYER_META: Record<CognitiveLayer, { icon: React.ReactNode; color: string; label: string }> = {
-  perception:     { icon: <Eye size={16} />,       color: 'bg-blue-50 text-blue-700 border-blue-100',       label: 'Perception' },
-  interpretation: { icon: <Brain size={16} />,    color: 'bg-purple-50 text-purple-700 border-purple-100', label: 'Interpretation' },
-  decision:       { icon: <MessageSquare size={16} />, color: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Decision' },
-  action:         { icon: <Wrench size={16} />,     color: 'bg-green-50 text-green-700 border-green-100',   label: 'Action' },
-  reflection:     { icon: <RotateCcw size={16} />,  color: 'bg-rose-50 text-rose-700 border-rose-100',      label: 'Reflection' },
+  perception:     { icon: <Eye size={16} />,       color: 'bg-blue-50 text-blue-700 border-blue-100',       label: 'Signals catalog (Perception)' },
+  interpretation: { icon: <Brain size={16} />,    color: 'bg-purple-50 text-purple-700 border-purple-100', label: 'Hypothesis records (Interpretation)' },
+  decision:       { icon: <MessageSquare size={16} />, color: 'bg-amber-50 text-amber-700 border-amber-100', label: 'Decision log (Decision)' },
+  action:         { icon: <Wrench size={16} />,     color: 'bg-green-50 text-green-700 border-green-100',   label: 'Playbooks (Action)' },
+  reflection:     { icon: <RotateCcw size={16} />,  color: 'bg-rose-50 text-rose-700 border-rose-100',      label: 'Learning Book (Reflection)' },
 }
 
 interface ArtifactSignal {
